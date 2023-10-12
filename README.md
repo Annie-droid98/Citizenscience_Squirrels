@@ -20,3 +20,5 @@ The next step is to run script **2a.Script_Sattelitedata_preparation.R** and scr
 Script 2a prepares the CLC 2018 sattelite data of the vegetation of the study area.
 We have decided to combine the original 44 categories into eight new categories for the analysis (line 23-37). Then the information about the vegetation category was extracted fort he studied area and the percentage that each vegetation category makes up per grid cell is calculated.
 The output of this script is Vegetation_europe_squirrels_10km.rds. This is used in the third script to characterise the vegetation of each grid cell where mammals were observed.
+
+Script 2b prepares the data downloaded from Gbif and counts the number of red squirrels, grey squirrels, pine martens and mammalian observation in each gridcell for each year. The output ("Counts.rds") is a data frame containing all counts and the proportion of red squirrels, grey squirrels and pine martens in the total number of Mammmalia observations for each grid cell. To normalise the observation error, the proportion is used instead of the raw counts (see manuscript).
