@@ -7,12 +7,16 @@ library(fasterize)
 library(sf)
 library(dplyr)
 
+Europe10grid <- readRDS("Europe10grid.rds")
+
 #Download the raster: https://land.copernicus.eu/pan-european/corine-land-cover/clc2018?tab=download
 
 
-clc_2018_landcover <- raster("u2018_clc2018_v2020_20u1_raster100m/DATA/U2018_CLC2018_V2020_20u1.tif")
+#clc_2018_landcover <- raster("u2018_clc2018_v2020_20u1_raster100m/DATA/U2018_CLC2018_V2020_20u1.tif")
+# saveRDS(clc_2018_landcover, "Landcover.rds")
 
-
+# read the rds because the tiff is to large for the repository
+clc_2018_landcover <- readRDS("Landcover.rds")
 #clc_2018_landcover <- readAll(clc_2018_landcover)
 
 #Squirrels 
@@ -31,7 +35,6 @@ clc_2018_landcover_squirrels[clc_2018_landcover_squirrels %in% c(12, 13, 14, 15,
 #Forrest 23, 24, 25 stay
 
 
-
 #26-39 other seminatural areas
 clc_2018_landcover_squirrels[clc_2018_landcover_squirrels %in% c(26,27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39)] <- 39
 
@@ -42,7 +45,7 @@ clc_2018_landcover_squirrels[clc_2018_landcover_squirrels %in% c(40, 41, 42, 43,
 writeRaster(clc_2018_landcover_squirrels, "clc_2018_landcover_categories_Squirrels")
 clc_2018_landcover_squirrels <- raster("clc_2018_landcover_categories_Squirrels")
 
-unique(values(clc_2018_landcover_squirrels)) #[1] NA 40 35  1 12 23
+#unique(values(clc_2018_landcover_squirrels)) 
 #extract
 clc_2018_landcover_squirrels <- exact_extract(x = clc_2018_landcover_squirrels, y = Europe10grid)
 clc_2018_landcover_squirrels_2 <- lapply(clc_2018_landcover_squirrels, function(x) x[(names(x) %in% c("value"))])
@@ -78,6 +81,7 @@ for (i in 1:length(clc_2018_landcover_squirrels_2)){
   clc_39_s[i] <- tmp_39_s
   clc_44_s[i] <- tmp_44_s
 }
+rm(clc_2018_landcover_squirrels_2)
 
 # put the vectors into a df
 counts_df_squirrels <- cbind.data.frame(clc_9_s, clc_11_s, clc_22_s,clc_23_s, clc_24_s, clc_25_s, clc_39_s, clc_44_s)
@@ -85,7 +89,7 @@ counts_df_squirrels$CellCode <- Europe10grid$CellCode
 
 
 
-rowSums(counts_df_Ladybug[, -6]) # 10000 pixels in each grid cell
+rowSums(counts_df_squirrels[, -6]) # 10000 pixels in each grid cell
 head(counts_df)
 
 
@@ -93,4 +97,4 @@ head(counts_df)
 prop_table_squirrels <- counts_df_squirrels[,1:8]/10000
 
 Vegetation_europe_squirrels_10km <- cbind(prop_table_squirrels, "CELLCODE"=Europe10grid$CellCode)
-saveRDS(Vegetation_europe_squirrels_10km, "Vegetation_europe_squirrels_10km")
+saveRDS(Vegetation_europe_squirrels_10km, "Vegetation_europe_squirrels_10km.rds")
