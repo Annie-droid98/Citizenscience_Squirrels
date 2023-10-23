@@ -5,16 +5,49 @@ library(raster)
 library(INLA)
 library(spaMM)
 library(tidyr)
-#csv = downloaded from Gbif, doi:doi.org/10.15468/dl.tu6vjj
-Mammalia.GB_2021 <- vroom::vroom("0169558-210914110416597.csv",quote="",show_col_types = FALSE)
+
+
+
+redoGRIDdownload  <- FALSE
+
+if(redoGRIDdownload){
+    source("R/1_DownloadGrids.R")
+} else {
+    grids <- readRDS("intermediate_data/10kmgrids.rds")
+}
+
+
+Grid_ohneduplices <- grids %>% 
+  st_set_crs(3035)
+## Warning message:
+## st_crs<- : replacing crs does not reproject data; use st_transform for that 
+
+
+## csv = download from Gbif, doi:doi.org/10.15468/dl.tu6vjj
+temp <- tempfile()
+download.file("https://api.gbif.org/v1/occurrence/download/request/0169558-210914110416597.zip", temp)
+
+Mammalia.GB_2021 <-vroom::vroom(temp, quote="",show_col_types = FALSE)
+
+## ## we have some problems
+## table(vroom::problems(Mammalia.GB_2021)[, "col"])
+## col
+##    11    25    26    27    28    29    39 
+##  8626 14203    32    32    35    35 24837 
+## > (list "" '(("x" . "")) '("x"))
+## > dim(Mammalia.GB_2021)
+## [1] 1481830      50
+
+## colnames(Mammalia.GB_2021)[c(11, 25, 26, 27, 28, 29, 39)]
+## [1] "infraspecificEpithet" "coordinatePrecision"  "elevation"           
+## [4] "elevationAccuracy"    "depth"                "depthAccuracy"       
+## [7] "catalogNumber"       
+## > 
+
 mammalia.GB_selected_21 <- Mammalia.GB_2021 %>%
   dplyr::select(species, decimalLongitude, decimalLatitude, countryCode,
                 gbifID, family, taxonRank, coordinateUncertaintyInMeters, year,
                 basisOfRecord, institutionCode, taxonKey, class, order, datasetKey)
-
-Grid_ohneduplices <- readRDS("10kmgrids.rds")
-Grid_ohneduplices <- Grid_ohneduplices %>% 
-  st_set_crs(3035)
 
 Mammalia.GB_10km <- mammalia.GB_selected_21 %>% 
   as.data.frame %>%
@@ -27,10 +60,11 @@ Mammalia.GB_10km <- Mammalia.GB_10km%>%
   dplyr::mutate(long = sf::st_coordinates(Mammalia.GB_10km)[,1],
                 lat = sf::st_coordinates(Mammalia.GB_10km)[,2])
 
-#Publisher categorisation
-Mammalia_observations_GB <- vroom::vroom("EichhörnchenPublisheruntil1000obs.csv",
+##Publisher categorisation
+Mammalia_observations_GB <- vroom::vroom("input_data/SquirrelPublisherUntil1000obs.csv",
                                          quote="",show_col_types = FALSE)
-#Filter observation data from citizen science only
+
+##Filter observation data from citizen science only
 Mammalia_citizenscience <-Mammalia_observations_GB%>%
   filter(Observer == "1" & FocusTaxaTorF == "FALSE" )
 
@@ -70,16 +104,6 @@ Mammalia_GB_count_10km_2 <-Mammalia_GB_count_10km%>%
 
 Mammalia_GB_count_10km_2_df <-Mammalia_GB_count_10km_2%>%
   unite('IDYear', CELLCODE:year, remove = FALSE)
-
-#only needed for predictionmaps
-#Mammalia_GB_count_try <- Mammalia_GB_count_10km_2_df%>%
-#arrange(IDYear) %>%
-# group_by(IDYear) %>%
-#fill(c(everything()), .direction = "downup") %>% 
-#ungroup() %>% 
-# distinct(IDYear, .keep_all = T)
-
-#saveRDS(Mammalia_GB_count_try,"10kmwithzeroobs.rds")
 
 Mammalia_GB_count_10km_2_df <- Mammalia_GB_count_10km_2_df%>% 
   arrange(IDYear) %>%
