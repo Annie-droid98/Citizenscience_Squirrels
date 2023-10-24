@@ -16,7 +16,7 @@ if(redoGRIDdownload){
     Britain10grid <- readRDS("intermediate_data/10kmgrids.rds")
 }
 
-Grid_ohneduplices <- st_transform(Britain10grid, 3035)
+Grid_3035 <- st_transform(Britain10grid, 3035)
 
 ## csv = download from Gbif, doi:doi.org/10.15468/dl.tu6vjj
 temp <- tempfile()
@@ -37,22 +37,20 @@ Mammalia_GB <- vroom::vroom(temp, quote="",show_col_types = FALSE) %>%
 ## Publisher categorisation
 Publishers <- vroom::vroom("input_data/SquirrelPublisherBelow1000obs.csv",
                            show_col_types = FALSE)
-                           
+
+### We don't non-categorized publishers here they'll be NA (mege with
+### all=TRUE)
 Mammalia_GB <- merge(Mammalia_GB, Publishers,
-                          by="datasetKey", all=TRUE)
+                     by="datasetKey", all=TRUE)
 
-
-Mammalia_GB_count_10km <- Grid_ohneduplices %>%
+Mammalia_GB_count_10km <- Grid_3035 %>%
     st_join(st_sf(Mammalia_GB)) %>%
-    ## Annie hast to explain what this means to me: Annie!!!  This
-    ## should somehow be now counting observer categories 1, 2 and 3.
-    filter(Observer == "1" & FocusTaxaTorF == "FALSE" |
-           Observer == "2" & FocusTaxaTorF == "FALSE" |
-           Observer == "3" & FocusTaxaTorF == "FALSE") %>%
+    ## First we count Ci 
     transform(isVulgaris = species%in%"Sciurus vulgaris",
               isCarolinensis = species%in%"Sciurus carolinensis",
               isMartes = species%in%"Martes martes")%>%
-    group_by(year, CELLCODE) %>%
+    ### se count seperately for each category of observers
+    group_by(year, CELLCODE, Observer) %>%
     count(isVulgaris, isCarolinensis, isMartes,
           countMammalia = !isVulgaris&!isCarolinensis&!isMartes)%>%
     transform(what = ifelse(isVulgaris,"S.vulgaris",
@@ -67,33 +65,27 @@ Mammalia_GB_count_10km <- Mammalia_GB_count_10km %>%
                   latC = sf::st_coordinates(Mammalia_GB_count_10km$Centergrid)[,2])
 
 Mammalia_GB_count_10km <- Mammalia_GB_count_10km %>%
-  unite('IDYear', CELLCODE:year, remove = FALSE)
+  unite('IDYearObs', CELLCODE:year:Observer, remove = FALSE)
 
 Mammalia_GB_count_10km <- Mammalia_GB_count_10km %>% 
-  arrange(IDYear) %>%
-  group_by(IDYear) %>% fill(c(everything()), .direction = "downup") %>% 
+  arrange(IDYearObs) %>%
+  group_by(IDYearObs) %>% fill(c(everything()), .direction = "downup") %>% 
   ungroup() %>% 
-  distinct(IDYear, .keep_all = T) %>% 
-  filter(!is.na(year))
+  distinct(IDYearObs, .keep_all = T) %>% 
+  filter(!is.na(year)) %>%
+    mutate(
+        across(all_of(c("S.vulgaris", "S.carolinensis",
+                        "M.martes", "countMammalia")), ~replace_na(.x, 0))
+    )
 
+Mammalia_GB_count_10km <- Mammalia_GB_count_10km %>%
+    transform(AllMammalia = countMammalia +
+                  S.vulgaris + M.martes + S.carolinensis) %>%
+    transform(Proportion_carolinensis = S.carolinensis/AllMammalia, 
+              Proportion_vulgaris = S.vulgaris/AllMammalia, 
+              Proportion_marten = M.martes/AllMammalia)
 
-Mammalia_GB_count_10km[is.na(Mammalia_GB_count_10km)] <- 0
+saveRDS(Mammalia_GB_count_10km, "Counts.rds")
 
-Mammalia_GB_count_10km<- transform(Mammalia_GB_count_10km, 
-                                   AllMammalia = countMammalia +
-                                       S.vulgaris + M.martes + S.carolinensis)
-
-Mammalia_GB_count_10km <- transform(Mammalia_GB_count_10km, 
-                                    Proportion_carolinensis = S.carolinensis/AllMammalia)
-
-Mammalia_GB_count_10km <- transform(Mammalia_GB_count_10km,
-                                    Proportion_vulgaris = S.vulgaris/AllMammalia)
-
-Mammalia_GB_count_10km <- transform(Mammalia_GB_count_10km,
-                                    Proportion_marten = M.martes/AllMammalia)
-
-### saveRDS(Mammalia_GB_count_10km, "Counts.rds")
-
-oldCounts <- readRDS("intermediate_data/Counts.rds")
 
 
