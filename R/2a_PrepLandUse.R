@@ -56,15 +56,15 @@ clc_2018_landcover[clc_2018_landcover %in%
 
 ## save to then read as raster!!!
 ## writeRaster(clc_2018_landcover, "clc_2018_landcover_categories")
-## clc_2018_landcover <- raster("clc_2018_landcover_categories_Squirrels")
+## clc_2018_landcover <- raster("clc_2018_landcover_categories")
 
 ## extract
-clc_2018_landcover_squirrels <-
-    exactextractr::exact_extract(x = clc_2018_landcover_squirrels,
+clc_2018_landcover <-
+    exactextractr::exact_extract(x = clc_2018_landcover,
                                  y = Britain10grid)
 
-clc_2018_landcover_squirrels_2 <- lapply(clc_2018_landcover_squirrels,
-                                         function(x) x[(names(x) %in% c("value"))])
+clc_2018_landcover <- lapply(clc_2018_landcover,
+                             function(x) x[(names(x) %in% c("value"))])
 
 ## empty vectors to store the results
 clc_9_s <- vector()
@@ -76,8 +76,8 @@ clc_25_s <- vector()
 clc_39_s <- vector()
 clc_44_s <- vector()
 ## loop along the list
-for (i in 1:length(clc_2018_landcover_squirrels_2)){
-  tmp_s <- clc_2018_landcover_squirrels_2[[i]]
+for (i in 1:length(clc_2018_landcover)){
+  tmp_s <- clc_2018_landcover[[i]]
   ## count each of the values
   tmp_9_s <- sum(tmp_s == 9)
   tmp_11_s <- sum(tmp_s == 11)
@@ -97,24 +97,22 @@ for (i in 1:length(clc_2018_landcover_squirrels_2)){
   clc_39_s[i] <- tmp_39_s
   clc_44_s[i] <- tmp_44_s
 }
-rm(clc_2018_landcover_squirrels_2)
 
-# put the vectors into a df
-counts_df_squirrels <- cbind.data.frame(clc_9_s, clc_11_s, clc_22_s,
-                                        clc_23_s, clc_24_s, clc_25_s,
-                                        clc_39_s, clc_44_s)
-counts_df_squirrels$CELLCODE <- Britain10grid$CELLCODE
+## The code above is so ugly I have to concentrate so hard to not
+## rewrite it with lapply, but instead put the vectors into a df and
+## name them
 
-
-rowSums(counts_df_squirrels[, -9]) # 10000 pixels in each grid cell
-colSums(counts_df_squirrels[, -9]) # 10000 pixels in each grid cell
-sum(counts_df_squirrels[, -9])
-
-### get proportions 
-prop_table <- counts_df_squirrels[,1:8]/10000
-
-## what the heck is this???
-
-Landuse_10km <- cbind(prop_table, "CELLCODE"=Britain10grid$CELLCODE)
+Landuse_10km <- cbind.data.frame(Prop_Grey_urban = clc_9_s,
+                                 Prop_Green_urban = clc_11_s,
+                                 Prop_Agricultural = clc_22_s,
+                                 Prop_Broadleafed_Forest = clc_23_s,
+                                 Prop_Coniferous_Forest = clc_24_s,
+                                 Prop_Mixed_Forest = clc_25_s,
+                                 Prop_Other_seminatural = clc_39_s,
+                                 Prop_Waterbodies = clc_44_s,
+                                 CELLCODE=Britain10grid$CELLCODE) %>%
+    ## get proportions (each cell 10km*10km cell could have 10,000
+    ## entries of 100*100m resolved "pixels")
+    mutate(across(starts_with("Prop_"), ~ .x/10000))
 
 saveRDS(Landuse_10km, "intermediate_data/Landuse_10km.rds")
