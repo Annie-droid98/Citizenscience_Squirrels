@@ -35,25 +35,9 @@ Mammalia_GB <- vroom::vroom(temp, quote="",show_col_types = FALSE) %>%
                   lat = sf::st_coordinates(.)[,"Y"])
 
 ## Publisher categorisation
-Publishers <- vroom::vroom("input_data/SquirrelPublisherUntil1000obs.csv",
+Publishers <- vroom::vroom("input_data/SquirrelPublisherBelow1000obs.csv",
                            show_col_types = FALSE)
                            
-
-Publishers$Observer <- ifelse(Publishers$Observer==1, "Citizen",
-                       ifelse(Publishers$Observer==2, "Mixed",
-                              "Scientific"))
-
-Publishers$Observer[is.na(Publishers$Observer)] <- "Mixed"
-
-## hie
-write.table(Publishers, "input_data/SquirrelPublisherBelow1000obs.csv", row.names=FALSE)
-
-## 1 == citizen
-## 2 == mixed
-## 3 == scientific
-
-## NA == mixed
-
 Mammalia_GB <- merge(Mammalia_GB, Publishers,
                           by="datasetKey", all=TRUE)
 
