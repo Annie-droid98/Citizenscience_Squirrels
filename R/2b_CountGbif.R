@@ -30,9 +30,9 @@ Mammalia_GB <- vroom::vroom(temp, quote="",show_col_types = FALSE) %>%
     filter((! is.na(decimalLatitude))) %>%
     sf::st_as_sf(coords = c(2,3)) %>%
     st_set_crs(4326) %>%
-    st_transform(st_crs(3035))  %>%
-    dplyr::mutate(long = sf::st_coordinates(Mammalia_GB)[,1],
-                  lat = sf::st_coordinates(Mammalia_GB)[,2])
+    st_transform(st_crs(3035))  %>% 
+    dplyr::mutate(lon = sf::st_coordinates(.)[,"X"],
+                  lat = sf::st_coordinates(.)[,"Y"])
 
 ## Publisher categorisation
 Publishers <- vroom::vroom("input_data/SquirrelPublisherUntil1000obs.csv",
@@ -40,12 +40,13 @@ Publishers <- vroom::vroom("input_data/SquirrelPublisherUntil1000obs.csv",
                            
 
 Publishers$Observer <- ifelse(Publishers$Observer==1, "Citizen",
-                       ifelse(Publishers$Observer==2|
-                              is.na(Publishers$Observer), "Mixed",
+                       ifelse(Publishers$Observer==2, "Mixed",
                               "Scientific"))
 
+Publishers$Observer[is.na(Publishers$Observer)] <- "Mixed"
 
-write.table(Publishers, "input_data/SquirrelPublisherUntil1000obs.csv", row.names=FALSE)
+## hie
+write.table(Publishers, "input_data/SquirrelPublisherBelow1000obs.csv", row.names=FALSE)
 
 ## 1 == citizen
 ## 2 == mixed
