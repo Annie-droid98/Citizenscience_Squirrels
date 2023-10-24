@@ -7,13 +7,11 @@ library(dplyr)
 ## do we want to repeate the grid and shapefile download
 redoGRIDdownload  <- FALSE
 
-## if(redoGRIDdownload){
-
-source("R/1_DownloadGrids.R")
-
-## } else {
-##     Britain10grid <- readRDS("intermediate_data/10kmgrids.rds")
-## }
+if(redoGRIDdownload){
+    source("R/1_DownloadGrids.R")
+} else {
+    Britain10grid <- readRDS("intermediate_data/10kmgrids.rds")
+}
 
 
 ### LANDCOVER 
@@ -29,39 +27,36 @@ source("R/1_DownloadGrids.R")
 clc_2018_landcover <- readRDS("input_data/Landcover.rds")
 
 #Squirrels 
-rasterOptions(tmpdir=tempdir())
+rasterOptions(tmpdir=tempdir(), overwrite=TRUE)
 
-
-## here we use the Grids before transfer to sf
-box <- extent(bind(Ireland_10grid, GB_10grid))
-
-clc_2018_landcover_squirrels <- crop(clc_2018_landcover, box)
+## here we crop the land use
+clc_2018_landcover <- crop(clc_2018_landcover, extent(Britain10grid))
 
 ## "grey urban" 
-clc_2018_landcover_squirrels[clc_2018_landcover_squirrels <= 9] <- 9
+clc_2018_landcover[clc_2018_landcover <= 9] <- 9
 
 ## green urban
-clc_2018_landcover_squirrels[clc_2018_landcover_squirrels %in% c(10, 11)] <- 11
+clc_2018_landcover[clc_2018_landcover %in% c(10, 11)] <- 11
 
 ## Agricultural
-clc_2018_landcover_squirrels[clc_2018_landcover_squirrels %in%
+clc_2018_landcover[clc_2018_landcover %in%
                              c(12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22)] <- 22
 
 ## Forrest 23, 24, 25 stay as they are
 
 
 ## 26-39 other seminatural areas
-clc_2018_landcover_squirrels[clc_2018_landcover_squirrels %in%
+clc_2018_landcover[clc_2018_landcover %in%
                              c(26,27, 28, 29, 30, 31, 32,
                                33, 34, 35, 36, 37, 38, 39)] <- 39
 
 ## Waterbodies
-clc_2018_landcover_squirrels[clc_2018_landcover_squirrels %in%
+clc_2018_landcover[clc_2018_landcover %in%
                              c(40, 41, 42, 43, 44)] <- 44
 
 ## save to then read as raster!!!
-writeRaster(clc_2018_landcover_squirrels, "clc_2018_landcover_categories_Squirrels")
-clc_2018_landcover_squirrels <- raster("clc_2018_landcover_categories_Squirrels")
+## writeRaster(clc_2018_landcover, "clc_2018_landcover_categories")
+## clc_2018_landcover <- raster("clc_2018_landcover_categories_Squirrels")
 
 ## extract
 clc_2018_landcover_squirrels <-
@@ -71,7 +66,7 @@ clc_2018_landcover_squirrels <-
 clc_2018_landcover_squirrels_2 <- lapply(clc_2018_landcover_squirrels,
                                          function(x) x[(names(x) %in% c("value"))])
 
-# empty vectors to store the results
+## empty vectors to store the results
 clc_9_s <- vector()
 clc_11_s <- vector()
 clc_22_s <- vector()
@@ -80,10 +75,10 @@ clc_24_s <- vector()
 clc_25_s <- vector()
 clc_39_s <- vector()
 clc_44_s <- vector()
-# loop along the list
+## loop along the list
 for (i in 1:length(clc_2018_landcover_squirrels_2)){
   tmp_s <- clc_2018_landcover_squirrels_2[[i]]
-  # count each of the values
+  ## count each of the values
   tmp_9_s <- sum(tmp_s == 9)
   tmp_11_s <- sum(tmp_s == 11)
   tmp_22_s <- sum(tmp_s == 22)
@@ -116,10 +111,10 @@ colSums(counts_df_squirrels[, -9]) # 10000 pixels in each grid cell
 sum(counts_df_squirrels[, -9])
 
 ### get proportions 
-prop_table_squirrels <- counts_df_squirrels[,1:8]/10000
+prop_table <- counts_df_squirrels[,1:8]/10000
 
 ## what the heck is this???
 
-Landuse_10km <- cbind(prop_table_squirrels, "CELLCODE"=Britain10grid$CELLCODE)
+Landuse_10km <- cbind(prop_table, "CELLCODE"=Britain10grid$CELLCODE)
 
 saveRDS(Landuse_10km, "intermediate_data/Landuse_10km.rds")
