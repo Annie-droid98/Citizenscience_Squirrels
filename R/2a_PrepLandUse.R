@@ -14,6 +14,7 @@ if(redoGRIDdownload){
     Britain10grid <- readRDS("intermediate_data/10kmgrids.rds")
 }
 
+Britain10grid <- st_transform(Britain10grid, 3035)
 
 ### LANDCOVER 
 
@@ -30,7 +31,7 @@ clc_2018_landcover <- readRDS("input_data/Landcover.rds")
 #Squirrels 
 rasterOptions(tmpdir=tempdir(), overwrite=TRUE)
 
-## here we crop the land use
+## here we crop the land use to work on a smaller dataset
 clc_2018_landcover <- crop(clc_2018_landcover, extent(Britain10grid))
 
 ## "grey urban" 
@@ -103,20 +104,27 @@ for (i in 1:length(clc_2018_landcover)){
 ## rewrite it with lapply, but instead put the vectors into a df and
 ## name them
 
-## Let's use "CountL_" for all the landuse counts
+## Let's use "L_" for all the landuse counts
 Landuse_10km <-
-    cbind.data.frame(CountL_Grey_urban = clc_9_s,
-                     CountL_Green_urban = clc_11_s,
-                     CountL_Agricultural = clc_22_s,
-                     CountL_Broadleafed_Forest = clc_23_s,
-                     CountL_Coniferous_Forest = clc_24_s,
-                     CountL_Mixed_Forest = clc_25_s,
-                     CountL_Other_seminatural = clc_39_s,
-                     CountL_Waterbodies = clc_44_s,
+    cbind.data.frame(L_Grey_urban = clc_9_s,
+                     L_Green_urban = clc_11_s,
+                     L_Agricultural = clc_22_s,
+                     L_Broadleafed_Forest = clc_23_s,
+                     L_Coniferous_Forest = clc_24_s,
+                     L_Mixed_Forest = clc_25_s,
+                     L_Other_seminatural = clc_39_s,
+                     L_Waterbodies = clc_44_s,
                      CELLCODE=Britain10grid$CELLCODE) %>%
     ## get proportions (each cell 10km*10km cell could have 10,000
     ## entries of 100*100m resolved "pixels")
     as_tibble() %>%
-    mutate(across(starts_with("CountL_"), ~ .x/10000, .names = "Prop_{.col}"))
+    rowwise %>%
+    mutate(allLand = sum(across(starts_with("L_")))) %>%
+    ## Now discard all Grids without Landuse record (in the Ocean?)
+    filter(allLand>0) %>%
+    mutate(across(starts_with("L_"), ~ .x/allLand, .names = "Prop{.col}")) %>%
+    mutate(allPropL = sum(across(starts_with("PropL_")))) 
 
+
+## write it to the intermediate data
 saveRDS(Landuse_10km, "intermediate_data/Landuse_10km.rds")
