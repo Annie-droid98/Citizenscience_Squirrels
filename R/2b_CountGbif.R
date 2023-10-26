@@ -76,9 +76,10 @@ Mammalia_GB_count_10km <- Grid_3035 %>%
            year_from_2000 = year - 2000,
            ## middlepoint of each grid cell 
            Centergrid = st_centroid(geometry),
-           ## coordinates of these middlepoints
-           lon = st_coordinates(Centergrid)[,"X"],
-           lat = sf::st_coordinates(Centergrid)[,"Y"]
+           ## coordinates of these middlepoints, and make them smaller
+           ## to avoid problems with the model
+           lon = st_coordinates(Centergrid)[,"X"]/1000,
+           lat = st_coordinates(Centergrid)[,"Y"]/1000
            ) 
 
 

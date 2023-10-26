@@ -19,33 +19,6 @@ if(redoCount){
     Mammalia_GB_count_10km <- readRDS("intermediate_data/Counts.rds")
 }
 
-
-## now we maintain the zero mammalia grids 
-table(Mammalia_GB_count_10km$year_from_2000,
-      Mammalia_GB_count_10km$Observer,
-      Mammalia_GB_count_10km$FocusTaxaTorF)
-
-tapply(Mammalia_GB_count_10km$CountT_mammalia,
-       list(Mammalia_GB_count_10km$FocusTaxaTorF,
-            Mammalia_GB_count_10km$Observer,
-            CELL=Mammalia_GB_count_10km$CELLCODE%in%Landuse_10km$CELLCODE),
-       sum       
-       )
-
-tapply(Mammalia_GB_count_10km$CountT_vulgaris,
-       list(Mammalia_GB_count_10km$FocusTaxaTorF,
-            Mammalia_GB_count_10km$Observer,
-            CELL=Mammalia_GB_count_10km$CELLCODE%in%Landuse_10km$CELLCODE),
-       sum       
-       )
-
-length(unique(Mammalia_GB_count_10km$CELLCODE))
-length(unique(Landuse_10km$CELLCODE)) 
-
-length(intersect(unique(Mammalia_GB_count_10km$CELLCODE),
-                 unique(Landuse_10km$CELLCODE))) 
-
-
 CountALL_10km <- merge(Mammalia_GB_count_10km,
                        Landuse_10km,
                        by="CELLCODE")

@@ -2,8 +2,8 @@ library(spaMM)
 library(INLA)
 
 #read in the data you need to reproduce the models
-d <- readRDS("citdata.rds")
-setwd("/localstorage/annie5/Citizenscience_Squirrels/")
+d <- readRDS("intermediate_data/CountALL_10km.rds")
+
 mesh <- INLA::inla.mesh.2d(loc = d[, c("lon", "lat")], max.n = 100, max.edge = c(3, 20))
 
 #list with all the formulas for the likelyhood ratio testing

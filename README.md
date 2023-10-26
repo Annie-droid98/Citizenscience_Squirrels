@@ -45,3 +45,46 @@ counts. The output of this is an sf object stored in
 `intermediate_data/Counts.rds`.
 
 ## 3) Merge counts and landuse, plot and tabulate: R/3_MergePlotPrep.R
+
+This merges the independently reproducible characterization of landues
+(2a) and counting of mammal observations (2b) and writes the resulting
+sf object to `intermediate_data/CountALL_10km.rds`.
+
+This sf object contains the following columnes:
+
+- "CELLCODE": a unique code for each 10x10km grid cell, `character`
+- "geometry": a geocoordinate polygon for each 10x10km grid cell, `sfc_polygon`
+- "Centergrid": the geocoordinate of the centerpoint of the grid cell, `sfc_POINT` 
+- "lon": longitude, `numeric`
+- "lat": latitude, `numeric`
+- "year": calendar year (Gregorian calendar), `numeric`
+- "year_from_2000": year since 2000 `numeric`
+- "Observer": Categroy of observer with levels: "Citizen" "Mixed" and
+  "Scientific", contains NA for uncategorzied publishers `character`
+- "FocusTaxaTorF": Did the publisher's observations focus on a taxon
+  within the mamallia. Observations with a focus can't be normalized
+  and are ommited for modelling, `logical`
+- "CountT_mammalia" , "CountT_vulgaris" , "CountT_carolinensis" ,
+  "CountT_marten": Counts for taxa within respective grids, `numeric`
+- "CountT_mammalia_log": log of the counts for mammalia, `numeric`
+- "PropT_carolinensis" , "PropT_vulgaris" , "PropT_marten":
+  Proportions of counts within mammalia, `numeric`
+- "L_Grey_urban", "L_Green_urban", "L_Agricultural",
+  "L_Broadleafed_Forest", "L_Coniferous_Forest", "L_Mixed_Forest",
+  "L_Other_seminatural", "L_Waterbodies": Number of pixels for each
+  landuse type in sattelite data of each grid `numeric`
+- "allLand": Total number of counted pixels in landuse sattelite data
+  (should be 10000, in complete 10x10km grids with 100x100m
+  resolution), `numeric`
+- "PropL_Grey_urban", "PropL_Green_urban", "PropL_Agricultural",
+  "PropL_Broadleafed_Forest", "PropL_Coniferous_Forest",
+  "PropL_Mixed_Forest", "PropL_Other_seminatural",
+  "PropL_Waterbodies": Proportion of landuse category in overall
+  landuse in the grid. `numeric`
+- "allPropL": sum of all proportions, should be 1, `numeric`
+
+
+
+
+## 4) Model the observations of red and grey squirrels: R/4_Model.R in SPamm
+
