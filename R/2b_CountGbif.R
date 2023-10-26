@@ -46,36 +46,41 @@ Mammalia_GB <- merge(Mammalia_GB, Publishers,
     ## keep only records with species
     filter(!is.na(species))
 
-### merge the grids and the counts to allow counting
-## Mammalia_GB_count_10km <- Grid_3035 %>%
-
 Mammalia_GB_count_10km <- Grid_3035 %>%
+### merge the grids and the counts to allow counting in grids
     st_join(st_sf(Mammalia_GB)) %>%
     ## again drop grids with no species counts
     filter(!is.na(species))  %>%
-    group_by(year, CELLCODE, Observer, FocusTaxaTorF, .drop=FALSE) %>%
+    ## Count seperately by grid, year but also Observer and whether it
+    ## was focussed
+    group_by(CELLCODE, year, Observer, FocusTaxaTorF, .drop=FALSE) %>%
     ## do the actual counting 
     summarize(CountT_mammalia = n(),
               CountT_vulgaris = sum(species%in%"Sciurus vulgaris"),
               CountT_carolinensis = sum(species%in%"Sciurus carolinensis"),
-              CountT_marten = sum(species%in%"Martes martes")) %>%
+              CountT_marten = sum(species%in%"Martes martes"),
+              geometry = unique(geometry)) %>%
+    ungroup() %>%
+    ## fill zeros for non-reported values (no count in a cell)
+    complete(nesting(CELLCODE, geometry), year, Observer, FocusTaxaTorF, 
+             fill = list(CountT_mammalia = 0,
+                         CountT_vulgaris = 0,
+                         CountT_carolinensis = 0,
+                         CountT_marten = 0)) %>%
     mutate(PropT_carolinensis = CountT_carolinensis/CountT_mammalia, 
            PropT_vulgaris = CountT_vulgaris/CountT_mammalia, 
-           PropT_marten = CountT_marten/CountT_mammalia)
+           PropT_marten = CountT_marten/CountT_mammalia,
+           ## not scaling for now
+           ## across(starts_with("PropT"), scale, .names = "{.col}_z")) %>% 
+           CountT_mammalia_log = log(CountT_mammalia),
+           year_from_2000 = year - 2000,
+           ## middlepoint of each grid cell 
+           Centergrid = st_centroid(geometry),
+           ## coordinates of these middlepoints
+           lon = st_coordinates(Centergrid)[,"X"],
+           lat = sf::st_coordinates(Centergrid)[,"Y"]
+           ) 
 
-### Not doing the centergrids for now
-## ## middlepoint of each grid cell as coordinate
-## Mammalia_GB_count_10km$Centergrid <-st_centroid(Mammalia_GB_count_10km$geometry)
-
-## ## middlepoint of each grid cell here citizen science count
-## #Mammalia_GB_count_10km[[1]]$Centergrid <-st_centroid(Mammalia_GB_count_10km[[1]]$geometry)
-## Mammalia_GB_count_10km$Centergrid <-st_centroid(Mammalia_GB_count_10km$geometry)
-## #Mammalia_GB_count_10km_2 <-Mammalia_GB_count_10km[[1]]%>%
-## Mammalia_GB_count_10km_2 <-Mammalia_GB_count_10km%>%
-##   # dplyr::mutate(lon = sf::st_coordinates(Mammalia_GB_count_10km[[1]]$Centergrid)[,1],
-##   #              lat = sf::st_coordinates(Mammalia_GB_count_10km[[1]]$Centergrid)[,2])
-##   dplyr::mutate(lon = sf::st_coordinates(Mammalia_GB_count_10km$Centergrid)[,1],
-##                 lat = sf::st_coordinates(Mammalia_GB_count_10km$Centergrid)[,2])
 
 saveRDS(Mammalia_GB_count_10km, "intermediate_data/Counts.rds")
 
