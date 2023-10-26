@@ -1,24 +1,47 @@
 # Citizenscience_Squirrels
-Reproduzierbarer Code for the manuskript "Citizen science allows detection of effects of invasive grey squirrels on red squirrels".
 
-This readme file describes the preparation of the data and the subsequent analysis using GLMMs.
-For more information on the methods used, see the manuscript text and the R code.
-For a fully reproducible analysis, R scripts must be run in numerical order. Alternatively, All the intermediate data required to run the models only are contained in this repository. 
+Reproducible code for the manuscript "Citizen science allows detection
+of effects of invasive grey squirrels on red squirrels".
 
-## 1)
+This readme file describes the preparation of the data and the
+subsequent analysis using GLMMs.  For more information on the methods
+used, see the manuscript text and the R code. 
 
-The first script to run is **1.Script_Grids_for_counting.R**.
-This script is mainly used to prepare the 10*10 km grids across the UK in which the total number of mammals, red squirrels, grey squirrels and pine martens in each cell will be counted for each year.
-It downloads the needed files from the EAA, combines the shapefiles of Great Britain and Ireland and converts them into an sf object. The main output is the RDS object 10kmgrids.rds.
-The second output is the same object stored as a shapefile which is needed for figure 2 and the third output is Europe10grid.rds which is needed fort he satelite data preparation in the second script.
+For a full reproduction of our analysis, R scripts can be run in
+numerical order. Alternatively, all the intermediate data required to
+run each script on its own are contained in this repository. We follow
+the convention, that your R scripts should run in the root folder of
+the repository directly (not in e.g. `\R`, check using `getwd()`).
+
+## 1) Prepare grids across the British isles: R/1_DownloadGrids.R
+
+This downloads 10*10 km grids across the UK and Ireland from the
+[European environment agency (EAA)](https://www.eea.europa.eu/en), and
+combines them into an sf object. This sf object is stored in
+`intermediate_data/10kmgrids.rds`.
 
 
-## 2)
-
-The next step is to run script **2a.Script_Sattelitedata_preparation.R** and script **2b.counting_Mammalia.R**
+## 2a) Summarise landuse in grids: R/2a_PrepLandUse.R
   
-Script 2a prepares the CLC 2018 sattelite data of the vegetation of the study area.
-We have decided to combine the original 44 categories into eight new categories for the analysis (line 23-37). Then the information about the vegetation category was extracted fort he studied area and the percentage that each vegetation category makes up per grid cell is calculated.
-The output of this script is Vegetation_europe_squirrels_10km.rds. This is used in the third script to characterise the vegetation of each grid cell where mammals were observed.
+This prepares the [Corine landcover (CLC
+2018)](https://land.copernicus.eu/en/products/corine-land-cover)
+satellite data of the landuse in study area. We have decided to
+combine the original 44 categories into eight new categories for the
+analysis (see also Table X). We then estimate the percentage that each
+landuse category makes up per grid cell. The output of this script is
+a `data.frame` object stored in `intermediate_data/Landuse_10km.rds`.
 
-Script 2b prepares the data downloaded from Gbif and counts the number of red squirrels, grey squirrels, pine martens and mammalian observation in each gridcell for each year. The output ("Counts.rds") is a data frame containing all counts and the proportion of red squirrels, grey squirrels and pine martens in the total number of Mammmalia observations for each grid cell. To normalise the observation error, the proportion is used instead of the raw counts (see manuscript).
+## 2b) Count Gbif observations in grids R/2b_CountGbif.R
+
+This downloads and prepares data for mammals in the British isles from
+Gbif. It counts the number of red squirrels, grey squirrels, pine
+martens and overall mammal observation in each grid cell for each
+year. It uses `input_data/SquirrelPublisherBelow1000obs.csv` to
+categorise the observations into "Citizen Science", "mixed" or
+"scientific" and assesses whether the respective Publisher/dataset had
+a focus taxon within mammalia. The latter datasets later can not be
+used, as they can not be used to "normalize" with overall mammal
+counts. The output of this is an sf object stored in
+`intermediate_data/Counts.rds`.
+
+## 3) Merge counts and landuse, plot and tabulate: R/3_MergePlotPrep.R
