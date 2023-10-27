@@ -69,7 +69,8 @@ This sf object contains the following columnes:
 - "CountT_mammalia_log": log of the counts for mammalia, `numeric`
 - "PropT_carolinensis" , "PropT_vulgaris" , "PropT_marten":
   Proportions of counts within mammalia, `numeric`
-- "L_Grey_urban", "L_Green_urban", "L_Agricultural",
+- "L_Grey_urban", "L_
+Green_urban", "L_Agricultural",
   "L_Broadleafed_Forest", "L_Coniferous_Forest", "L_Mixed_Forest",
   "L_Other_seminatural", "L_Waterbodies": Number of pixels for each
   landuse type in sattelite data of each grid `numeric`
@@ -83,8 +84,16 @@ This sf object contains the following columnes:
   landuse in the grid. `numeric`
 - "allPropL": sum of all proportions, should be 1, `numeric`
 
-
+We write this sf object into `intermediate_data/CountALL_10km.rds` it
+is the basis for all further analysis. We visualise basics
+characteristics of this data (*Figures 1 and 2 and table X of the
+manuscript*) with the code in the second part of this script.
 
 
 ## 4) Model the observations of red and grey squirrels: R/4_Model.R in SPamm
 
+This scipts subsets `intermediate_data/CountALL_10km.rds` to obtain
+only data collected by citizen ("citizen science") without a taxonomic
+focus within mammalia. The latter is important as we use the number of
+total observations of mammals within a grid to normalize for
+"observation effort".
