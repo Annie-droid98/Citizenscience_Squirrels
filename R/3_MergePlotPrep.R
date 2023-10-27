@@ -5,7 +5,7 @@ library(dplyr)
 
 ## merge with the prepeared sattelitedata
 redoLanduse <- FALSE
-redoCount <- TRUE
+redoCount <- FALSE
 
 if(redoLanduse){
     source("R/2a_PrepLandUse.R")
