@@ -78,8 +78,8 @@ Mammalia_GB_count_10km <- Grid_3035 %>%
            Centergrid = st_centroid(geometry),
            ## coordinates of these middlepoints, and make them smaller
            ## to avoid problems with the model
-           lon = st_coordinates(Centergrid)[,"X"]/1000,
-           lat = st_coordinates(Centergrid)[,"Y"]/1000
+           lon = st_coordinates(Centergrid)[,"X"]/1e+05,
+           lat = st_coordinates(Centergrid)[,"Y"]/1e+05
            ) 
 
 
