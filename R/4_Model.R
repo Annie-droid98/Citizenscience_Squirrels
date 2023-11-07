@@ -707,11 +707,11 @@ lapply((2:17), function(i){
 cbind(foo, bar) %>%
     as_tibble(.name_repair="universal")%>%
     gt()  %>%
-    tab_spanner(label = md("S. vulgaris"),
+    tab_spanner(label = md("<br><em>S. vulgaris</em>"),
                 columns = c("Estimate...2",
                             "Cond..SE...3","t.value...4", "chi2_LR...5",
                             "df...6","p_value...7"))%>%
-    tab_spanner(label = md("S. carolinensis"),
+    tab_spanner(label = md("<br><em>S. carolinensis</em>"),
                 columns = c("Estimate...9","Cond..SE...10","t.value...11",
                             "chi2_LR...12", "df...13","p_value...14")) %>%
     tab_style(
