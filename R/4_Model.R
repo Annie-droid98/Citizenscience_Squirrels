@@ -5,6 +5,7 @@ library(tidyr)
 library(dplyr)
 library(ggcorrplot)
 library(patchwork)
+library(gt)
 
 ## read in the data you need to reproduce the models
 redoMerge <- FALSE
@@ -344,8 +345,7 @@ result <- mapply(myfunction,
 
 saveRDS(result, "/SAN/Citizenscience_modelle.rds")
 
-############################################ Carolinensismodelle
-#modelle carolinensis
+############################################ Carolinensis models
 diff_glmm_formula_1.25_caro <- list(
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + 
@@ -643,93 +643,69 @@ saveRDS(result_caro, "/SAN/Citizensciencemodelle_caro.rds")
 ## ###### Corrplot and Likelyhoodratio testing
 
 ## S.vulgaris
-## results_citizen <- readRDS("Citizenscience_modelle.rds")
 corr <- vcov(result[[1]])
 cor_test <- cov2cor(corr)
 
-rownames(cor_test) <- gsub("PropT_c", "C. c", rownames(cor_test))
+rownames(cor_test) <- gsub("PropT_c", "S. c", rownames(cor_test))
 rownames(cor_test) <- gsub("PropT_marten", "M. martes", rownames(cor_test))
 rownames(cor_test) <- gsub("PropL_", "", rownames(cor_test))
 
-colnames(cor_test) <- gsub("PropT_c", "C. c", colnames(cor_test))
+colnames(cor_test) <- gsub("PropT_c", "S. c", colnames(cor_test))
 colnames(cor_test) <- gsub("PropT_marten", "M. martes", colnames(cor_test))
 colnames(cor_test) <- gsub("PropL_", "", colnames(cor_test))
 
-
-pdf("figures/FixedEffectCorrs.pdf")
-ggcorrplot(cor_test, hc.order = TRUE,
-           lab = TRUE, lab_size = 2
-           )
-dev.off()
+fixCorPlot <-  ggcorrplot(cor_test, hc.order = TRUE,
+                          lab = TRUE, lab_size = 3.5)
 
 ## Same for the carolinensis model
 corr_caro <- vcov(result_caro[[1]])
 cor_test_caro <- cov2cor(corr_caro)
 
-rownames(cor_test_caro) <- gsub("PropT_v", "C. v", rownames(cor_test_caro))
+rownames(cor_test_caro) <- gsub("PropT_v", "S. v", rownames(cor_test_caro))
 rownames(cor_test_caro) <- gsub("PropT_marten", "M. martes", rownames(cor_test_caro))
 rownames(cor_test_caro) <- gsub("PropL_", "", rownames(cor_test_caro))
 
-colnames(cor_test_caro) <- gsub("PropT_v", "C. v", colnames(cor_test_caro))
+colnames(cor_test_caro) <- gsub("PropT_v", "S. v", colnames(cor_test_caro))
 colnames(cor_test_caro) <- gsub("PropT_marten", "M. martes", colnames(cor_test_caro))
 colnames(cor_test_caro) <- gsub("PropL_", "", colnames(cor_test_caro))
 
+fixCorPlot_Caro <- ggcorrplot(cor_test_caro, hc.order = TRUE,
+                              lab = TRUE, lab_size = 3.5)
 
-pdf("figures/FixedEffectCorrs_Caro.pdf")
-ggcorrplot(cor_test_caro, hc.order = TRUE,
-           lab = TRUE, lab_size = 2
-           )
-dev.off()
+wrap_plots(fixCorPlot,
+           fixCorPlot_Caro, 
+           nrow=2,
+           guides = "collect") +
+    plot_annotation(tag_levels = 'a',
+                    theme = theme(legend.title = element_text(hjust = .5)))
 
+ggsave("figures/FixedEffectCorrsBoth.pdf",
+       width = 10, height = 20, device = cairo_pdf)
 
-## wrap_plots
+lapply((2:17), function(i){
+    anova(result[[1]], result[[i]])[["basicLRT"]]
+}) %>% 
+    do.call(rbind, .) %>%
+    add_row(chi2_LR = NA, df =NA , p_value =NA, .before = 1) %>%
+    cbind(as.data.frame(summary(result[[1]])$beta_table), .) %>%
+    round(digits = 3) %>%
+    ## mutate(p_val_scientific = format(p_value,
+    ##                                  scientific = FALSE, big.mark = ","))
+    tibble::rownames_to_column("Predictor") -> foo
 
-
-## Pvalues_vulgaris <- lapply((2:17), function(i){
-##   anova(results_citizen[[1]], results_citizen[[i]])
-## })
-## p_values_for_vulgaris_2 <- lapply(pValues_vulgaris, "[[", "basicLRT")%>%
-##   do.call(rbind, .)
-## Vulgaris_table <- as.data.frame(summary(results_citizen[[1]])$beta_table)
-
-## p_values_for_vulgaris<- p_values_for_vulgaris_2 %>% 
-##   add_row(chi2_LR = NA, df =NA , p_value =NA, .before = 1)
-## Model_table_vulgaris <- cbind(Vulgaris_table, p_values_for_vulgaris)
-## Model_table_vulgaris_1.1 <- round(Model_table_vulgaris, digits = 3)
-## Model_table_vulgaris_2 <-Model_table_vulgaris_1.1%>%  
-##   mutate(translation = format(Model_table_vulgaris_1.1$p_value, scientific = FALSE, big.mark = ","))
-## colnames(Model_table_vulgaris_2) <-c("Estimate", "Cond.SE","t-value","Chi2_LR", "df","p_valuescientific","p-value")
-## Model_table_vulgaris_2<- tibble::rownames_to_column(Model_table_vulgaris_2, "Predictor")
-## Model_table_vulgaris_3 <- Model_table_vulgaris_2%>%
-##   dplyr::select(-c(p_valuescientific))
-
-## ## S.carolinensis
-## ## results_caro <- readRDS("Citizensciencemodelle_caro.rds")
-
-## corr_caro<- vcov(result_caro[[1]])
-## cor_test_caro <- cov2cor(corr_caro)
-## ggcorrplot(cor_test_caro, hc.order = TRUE,
-##            lab = TRUE, lab_size = 2)
-
-## pValues_carolinensis <- lapply((2:17), function(i){
-##   anova(results_caro[[1]], results_caro[[i]])
-## })
-## p_values_for_carolinensis_2 <- lapply(pValues_carolinensis, "[[", "basicLRT")%>%
-##   do.call(rbind, .)
-## Carolinensis_table <- as.data.frame(summary(results_caro[[1]])$beta_table)
-
-## p_values_for_carolinensis <- p_values_for_carolinensis_2 %>% 
-##   add_row(chi2_LR = NA, df =NA , p_value =NA, .before = 1)
-## Model_table_carolinensis <- cbind(Carolinensis_table, p_values_for_carolinensis)
-## Model_table_carolinensis_1.1 <- round(Model_table_carolinensis, digits = 3)
-## Model_table_carolinensis_2 <-Model_table_carolinensis_1.1%>%  
-##   mutate(translation = format(Model_table_carolinensis_1.1$p_value, scientific = FALSE, big.mark = ","))
-## colnames(Model_table_carolinensis_2) <-c("Estimate", "Cond.SE","t-value","Chi2_LR", "df","p_valuescientific","p-value")
-## Model_table_carolinensis_2<- tibble::rownames_to_column(Model_table_carolinensis_2, "Predictor")
-## Model_table_carolinensis_3 <- Model_table_carolinensis_2%>%
-##   dplyr::select(-c(p_valuescientific))
+lapply((2:17), function(i){
+    anova(result_caro[[1]], result_caro[[i]])[["basicLRT"]]
+}) %>% 
+    do.call(rbind, .) %>%
+    add_row(chi2_LR = NA, df =NA , p_value =NA, .before = 1) %>%
+    cbind(as.data.frame(summary(result_caro[[1]])$beta_table), .) %>%
+    round(digits = 3) %>%
+    ## mutate(p_val_scientific = format(p_value,
+    ##                                  scientific = FALSE, big.mark = ","))
+    tibble::rownames_to_column("Predictor") -> bar
 
 ## ################################ make Tab.1
+
 ## install.packages("gtsummary")
 ## install.packages("gapminder")
 ## install.packages("gt")
@@ -739,25 +715,20 @@ dev.off()
 ## library(tidyverse)
 ## library(gtsummary)
 
+## Model_table_carolinensis_3.1 <-
+## Model_table_carolinensis_3[,-(1),drop=FALSE]
+## Model_table_carolinensis_3.1$`p-value`[Model_table_carolinensis_3.1$`p-value`=="0.000"]
+## <-"0.001"
 
-## Model_table_vulgaris_3
-## Model_table_carolinensis_3
+## colnames(Tabellecaroundvul_2) <-
+## c("Predictor","Estimate","Cond.SE","t-value","Chi2_LR",
+## "df","p-value","Estimate*","Cond.SE*","t-value*","Chi2_LR*",
+## "df*","p-value*")
 
-## Model_table_carolinensis_3.1 <- Model_table_carolinensis_3[,-(1),drop=FALSE] 
-## Model_table_carolinensis_3.1$`p-value`[Model_table_carolinensis_3.1$`p-value`=="0.000"] <-"0.001"
+## Tabelle_fürbeide <-
 
-
-## Model_table_vulgaris_3$Predictor <- c("Intercept", "Year","Grey urban","Green urban", "Agrar",
-##                                       "Other natural", "Proportion marten", "Proportion other squirrel",
-##                                       "Mixed Forest","Broadleafed forest", "Coniferous forest","Proportion marten:Proportion other squirrel", "Grey urban:Proportion other squirrel",
-##                                       "Green urban:Proportion other squirrel", "Mixed forest:Proportion other squirrel","Broadleafed forest:Proportion other squirrel", "Coniferous forest:Proportion other squirrel")
-## Model_table_vulgaris_3$`p-value`[Model_table_vulgaris_3$`p-value`=="0.000"] <-"0.001"
-
-## Tabellecaroundvul_2 <- cbind(Model_table_vulgaris_3,Model_table_carolinensis_3.1)
-## colnames(Tabellecaroundvul_2) <- c("Predictor","Estimate","Cond.SE","t-value","Chi2_LR", "df","p-value","Estimate*","Cond.SE*","t-value*","Chi2_LR*", "df*","p-value*")
-
-## Tabelle_fürbeide <-Tabellecaroundvul_2%>%
-##   gt()%>%
+cbind(foo, bar) %>%
+    gt() ### %>%
 ##   tab_spanner(label = md("*CountT_vulgaris*"), columns = c("Estimate","Cond.SE","t-value","Chi2_LR", "df","p-value"))%>%
 ##   tab_spanner(label = md("*CountT_carolinensis*"), columns = c("Estimate*","Cond.SE*","t-value*","Chi2_LR*", "df*","p-value*"))%>%
 ##   tab_style(
