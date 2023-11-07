@@ -4,6 +4,7 @@ library(sf)
 library(tidyr)
 library(dplyr)
 library(ggcorrplot)
+library(patchwork)
 
 ## read in the data you need to reproduce the models
 redoMerge <- FALSE
@@ -660,6 +661,29 @@ ggcorrplot(cor_test, hc.order = TRUE,
            lab = TRUE, lab_size = 2
            )
 dev.off()
+
+## Same for the carolinensis model
+corr_caro <- vcov(result_caro[[1]])
+cor_test_caro <- cov2cor(corr_caro)
+
+rownames(cor_test_caro) <- gsub("PropT_v", "C. v", rownames(cor_test_caro))
+rownames(cor_test_caro) <- gsub("PropT_marten", "M. martes", rownames(cor_test_caro))
+rownames(cor_test_caro) <- gsub("PropL_", "", rownames(cor_test_caro))
+
+colnames(cor_test_caro) <- gsub("PropT_v", "C. v", colnames(cor_test_caro))
+colnames(cor_test_caro) <- gsub("PropT_marten", "M. martes", colnames(cor_test_caro))
+colnames(cor_test_caro) <- gsub("PropL_", "", colnames(cor_test_caro))
+
+
+pdf("figures/FixedEffectCorrs_Caro.pdf")
+ggcorrplot(cor_test_caro, hc.order = TRUE,
+           lab = TRUE, lab_size = 2
+           )
+dev.off()
+
+
+## wrap_plots
+
 
 ## Pvalues_vulgaris <- lapply((2:17), function(i){
 ##   anova(results_citizen[[1]], results_citizen[[i]])
