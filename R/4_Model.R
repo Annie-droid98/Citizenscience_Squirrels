@@ -704,49 +704,64 @@ lapply((2:17), function(i){
     ##                                  scientific = FALSE, big.mark = ","))
     tibble::rownames_to_column("Predictor") -> bar
 
-## ################################ make Tab.1
-
-## install.packages("gtsummary")
-## install.packages("gapminder")
-## install.packages("gt")
-## library(psych)
-## library(gt)
-## library(gapminder)
-## library(tidyverse)
-## library(gtsummary)
-
-## Model_table_carolinensis_3.1 <-
-## Model_table_carolinensis_3[,-(1),drop=FALSE]
-## Model_table_carolinensis_3.1$`p-value`[Model_table_carolinensis_3.1$`p-value`=="0.000"]
-## <-"0.001"
-
-## colnames(Tabellecaroundvul_2) <-
-## c("Predictor","Estimate","Cond.SE","t-value","Chi2_LR",
-## "df","p-value","Estimate*","Cond.SE*","t-value*","Chi2_LR*",
-## "df*","p-value*")
-
-## Tabelle_fürbeide <-
-
 cbind(foo, bar) %>%
-    gt() ### %>%
-##   tab_spanner(label = md("*CountT_vulgaris*"), columns = c("Estimate","Cond.SE","t-value","Chi2_LR", "df","p-value"))%>%
-##   tab_spanner(label = md("*CountT_carolinensis*"), columns = c("Estimate*","Cond.SE*","t-value*","Chi2_LR*", "df*","p-value*"))%>%
-##   tab_style(
-##     style = list(
-##       cell_text(weight = "bold")
-##     ),
-##     locations = cells_body(
-##       columns = `p-value`,
-##       rows = `p-value`<= 0.05
-##     ))%>%
-##   tab_style(
-##     style = list(
-##       cell_text(weight = "bold")
-##     ),
-##     locations = cells_body(
-##       columns = `p-value*`,
-##       rows = `p-value*`<= 0.05
-##     ))
+    as_tibble(.name_repair="universal")%>%
+    gt()  %>%
+    tab_spanner(label = md("S. vulgaris"),
+                columns = c("Estimate...2",
+                            "Cond..SE...3","t.value...4", "chi2_LR...5",
+                            "df...6","p_value...7"))%>%
+    tab_spanner(label = md("S. carolinensis"),
+                columns = c("Estimate...9","Cond..SE...10","t.value...11",
+                            "chi2_LR...12", "df...13","p_value...14")) %>%
+    tab_style(
+        style = list(
+            cell_text(weight = "bold")
+        ),
+        locations = cells_body(
+            columns = `p_value...7`,
+            rows = `p_value...7`<= 0.05
+    ))%>%
+    tab_style(
+        style = list(
+            cell_text(weight = "bold")
+        ),
+        locations = cells_body(
+            columns = `p_value...14`,
+            rows = `p_value...14`<= 0.05
+        )) %>%
+    cols_label(
+              Predictor...1 = "Predictor",
+              Estimate...2 = "Estimate",
+              Cond..SE...3 =  "Cond SE",
+              t.value...4 = "t value",
+              chi2_LR...5 = "chi^2 LR",
+              df...6 = "DF",
+              p_value...7 = "p value",
+              Predictor...8 = "Predictor",
+              Estimate...9 = "Estimate",
+              Cond..SE...10 = "Cond SE",
+              t.value...11 = "t value",
+              chi2_LR...12 = "chi^2 LR",
+              df...13 = "DF",
+              p_value...14 = "p value"
+    ) %>%
+    text_replace(
+        locations = cells_body(columns = c(Predictor...1, Predictor...8)),
+        pattern = "PropT_(v\\w*|c\\w*)",
+        replacement = "<br><em>S. \\1</em>") %>%
+    text_replace(
+        locations = cells_body(columns = c(Predictor...1, Predictor...8)),
+        pattern = "PropT_marten",
+        replacement = "<br><em>M. martes\\1</em>") %>%
+    text_replace(
+        locations = cells_body(columns = c(Predictor...1, Predictor...8)),
+        pattern = "PropL_",
+        replacement = "") %>%
+    text_replace(
+        locations = cells_body(columns = c(Predictor...1, Predictor...8)),
+        pattern = "_",
+        replacement = " ") %>%
+    sub_zero(zero_text="<0.001") -> out
 
-
-
+gtsave(out, "tables/Table_ModelsLRT.html")
