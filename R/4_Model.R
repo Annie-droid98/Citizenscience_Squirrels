@@ -1,8 +1,9 @@
 library(spaMM)
 library(INLA)
+library(sf)
 library(tidyr)
 library(dplyr)
-
+library(ggcorrplot)
 
 ## read in the data you need to reproduce the models
 redoMerge <- FALSE
@@ -317,7 +318,8 @@ diff_glmm_formula_init <- list(
 myfunction<-function(x, y) {
     fits_1.25_1 <- fitme(x,
                          family = negbin(link = "log"),
-                         init=list(corrPars=list("1"=c(kappa=0.26)),NB_shape=2.9, lambda=10),
+                         init=list(corrPars=list("1"=c(kappa=0.26)),NB_shape=2.9,
+                                   lambda=10),
                          ## control.HLfit=list(LevenbergM=TRUE), # maybe
                          verbose = c(TRACE = TRUE), method="PQL/L", 
                          data = d)
@@ -325,7 +327,8 @@ myfunction<-function(x, y) {
 
     adapted_fit <-
         fitme(y,family = negbin(link = "log"),
-              init=list(corrPars=list("1"=c(alpha=1.25,kappa=inits_1.25$corrPars[[1]][["kappa"]])),
+              init=list(corrPars=list("1"=c(alpha=1.25,
+                                            kappa=inits_1.25$corrPars[[1]][["kappa"]])),
                         NB_shape=inits_1.25$NB_shape, lambda=inits_1.25$lambda),
               verbose = c(TRACE = TRUE), method="PQL/L",
               control.HLfit=list(LevenbergM=TRUE),
@@ -334,12 +337,11 @@ myfunction<-function(x, y) {
 }
 
 
-
 result <- mapply(myfunction,
                  x=diff_glmm_formula_1.25,
-                 y=diff_glmm_formula_init, SIMPLIFY = FALSE )
+                  y=diff_glmm_formula_init, SIMPLIFY = FALSE )
 
-## saveRDS(result, "Citizenscience_modelle.rds")
+saveRDS(result, "/SAN/Citizenscience_modelle.rds")
 
 ############################################ Carolinensismodelle
 #modelle carolinensis
@@ -347,66 +349,66 @@ diff_glmm_formula_1.25_caro <- list(
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + 
             PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest +
-            Proportion_vulgaris_z:PropL_Coniferous_Forest +            
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest +
+            PropT_vulgaris:PropL_Coniferous_Forest +            
             MaternIMRFa(1|lon+lat, mesh=mesh, fixed=c(alpha=1.25))),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + 
             PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest +
-            Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest +
+            PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh, fixed=c(alpha=1.25))),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest + 
-            Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest + 
+            PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh, fixed=c(alpha=1.25))),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest +
-            Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest +
+            PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh, fixed=c(alpha=1.25))),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest + 
-            Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest + 
+            PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh, fixed=c(alpha=1.25))),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest +
-            Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest +
+            PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh, fixed=c(alpha=1.25))),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + 
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest +
-            Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest +
+            PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh, fixed=c(alpha=1.25))),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
@@ -414,143 +416,143 @@ diff_glmm_formula_1.25_caro <- list(
             MaternIMRFa(1|lon+lat, mesh=mesh, fixed=c(alpha=1.25))),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Broadleafed_Forest + Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Broadleafed_Forest + PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh, fixed=c(alpha=1.25))),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest  + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh, fixed=c(alpha=1.25))),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + 
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh, fixed=c(alpha=1.25))),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest + 
-            Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest + 
+            PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh, fixed=c(alpha=1.25))),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest +
-            Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest +
+            PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh, fixed=c(alpha=1.25))),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest + 
-            Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest + 
+            PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh, fixed=c(alpha=1.25))),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Broadleafed_Forest + Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Broadleafed_Forest + PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh, fixed=c(alpha=1.25))),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh, fixed=c(alpha=1.25))),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh, fixed=c(alpha=1.25))))
 
 diff_glmm_formula_init_caro <- list(
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + 
             PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest +
-            Proportion_vulgaris_z:PropL_Coniferous_Forest +            
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest +
+            PropT_vulgaris:PropL_Coniferous_Forest +            
             MaternIMRFa(1|lon+lat, mesh=mesh)),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + 
             PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest +
-            Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest +
+            PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh)),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest + 
-            Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest + 
+            PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh)),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest +
-            Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest +
+            PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh)),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest + 
-            Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest + 
+            PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh)),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest +
-            Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest +
+            PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh)),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + 
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest +
-            Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest +
+            PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh)),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
@@ -558,95 +560,108 @@ diff_glmm_formula_init_caro <- list(
             MaternIMRFa(1|lon+lat, mesh=mesh)),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Broadleafed_Forest + Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Broadleafed_Forest + PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh)),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest  + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh)),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + 
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh)),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest + 
-            Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest + 
+            PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh)),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest +
-            Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest +
+            PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh)),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest + 
-            Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest + 
+            PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh)),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Broadleafed_Forest + Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Broadleafed_Forest + PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh)),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Coniferous_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh)),
   formula(CountT_carolinensis ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
-            Proportion_vulgaris_z +
+            PropT_vulgaris +
             PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            Proportion_vulgaris_z:PropT_marten +
-            Proportion_vulgaris_z:PropL_Grey_urban + Proportion_vulgaris_z:PropL_Green_urban +
-            Proportion_vulgaris_z:PropL_Mixed_Forest + Proportion_vulgaris_z:PropL_Broadleafed_Forest +
+            PropT_vulgaris:PropT_marten +
+            PropT_vulgaris:PropL_Grey_urban + PropT_vulgaris:PropL_Green_urban +
+            PropT_vulgaris:PropL_Mixed_Forest + PropT_vulgaris:PropL_Broadleafed_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh)))
 
 result_caro <- mapply(myfunction,
                       x=diff_glmm_formula_1.25_caro,
                       y=diff_glmm_formula_init_caro, SIMPLIFY = FALSE )
 
-## ## saveRDS(result_caro, "Citizensciencemodelle_caro.rds")
+saveRDS(result_caro, "/SAN/Citizensciencemodelle_caro.rds")
 
 ## ###### Corrplot and Likelyhoodratio testing
 
-## ## S.vulgaris
-## ## results_citizen <- readRDS("Citizenscience_modelle.rds")
-## corr<- vcov(scientific[[1]])
-## cor_test <- cov2cor(corr)
-## ggcorrplot(cor_test, hc.order = TRUE,
-##            lab = TRUE, lab_size = 2)
+## S.vulgaris
+## results_citizen <- readRDS("Citizenscience_modelle.rds")
+corr <- vcov(result[[1]])
+cor_test <- cov2cor(corr)
 
-## pValues_vulgaris <- lapply((2:17), function(i){
+rownames(cor_test) <- gsub("PropT_c", "C. c", rownames(cor_test))
+rownames(cor_test) <- gsub("PropT_marten", "M. martes", rownames(cor_test))
+rownames(cor_test) <- gsub("PropL_", "", rownames(cor_test))
+
+colnames(cor_test) <- gsub("PropT_c", "C. c", colnames(cor_test))
+colnames(cor_test) <- gsub("PropT_marten", "M. martes", colnames(cor_test))
+colnames(cor_test) <- gsub("PropL_", "", colnames(cor_test))
+
+
+pdf("figures/FixedEffectCorrs.pdf")
+ggcorrplot(cor_test, hc.order = TRUE,
+           lab = TRUE, lab_size = 2
+           )
+dev.off()
+
+## Pvalues_vulgaris <- lapply((2:17), function(i){
 ##   anova(results_citizen[[1]], results_citizen[[i]])
 ## })
 ## p_values_for_vulgaris_2 <- lapply(pValues_vulgaris, "[[", "basicLRT")%>%
