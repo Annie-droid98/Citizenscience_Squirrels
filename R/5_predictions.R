@@ -2,70 +2,103 @@ library(dplyr)
 library(sf)
 library(ggmap)
 
-# Figure 4
 
-Values_predictions <- list(0.0,0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,1)
-Values_for_caro <-lapply((Values_predictions), function(i){
-  rep(c(i),times=4)
-})
+## We need the original count data this is in the repository or you
+## could count again!
+reCount <- FALSE
 
-Values_for_caro_2 <- as.data.frame(unlist(Values_for_caro))
-
-Values_for_Greyurban <- as.data.frame(rep(c(0.0, 0.3, 0.6, 0.9),times=11))
-Values_for_Agrar <- as.data.frame(rep(rev(c(0.1, 0.4, 0.7,1)),times=11))
-Predictiondf_1 <- cbind(Values_for_caro_2, Values_for_Greyurban, Values_for_Agrar)
-names(Predictiondf_1) <- c("PropT_carolinensis", "PropL_Grey_urban", "PropL_Agricultural")
-#vulgaris Gebiet
-Predictiondf_2 <- Predictiondf_1%>%
-  mutate(year_from_2000 = 18)%>%
-  mutate(PropL_Green_urban = 0.00)%>%
-  mutate(PropL_Broadleafed_Forest = 0.00)%>%
-  mutate(PropL_Coniferous_Forest = 0.00)%>%
-  mutate(PropL_Mixed_Forest = 0.00)%>%
-  mutate(PropL_Other_seminatural = 0.00)%>%
-  mutate(Waterbodies_z = 0.00)%>%
-  mutate(PropT_marten = 0.00)%>%
-  mutate(lat = 3615)%>%
-  mutate(lon = 3185) %>%
-  mutate(CountT_mammalia_log = log(100))
-
-Pseudodata_new <- Predictiondf_2                                         # Replicate data
-Pseudodata_new$Grey_urban_z2 <- factor(Pseudodata_new$PropL_Grey_urban, 
-                                       labels = c("0% Grey urban", "30% Grey urban", 
-                                                  "60% Grey urban","90% Grey urban"))
-
-#prediction werden noch mit einem einzelnen fit gemacht, da er ein Objekt in der Liste von fits nicht nehmen wollte
-predictionsgrey <- Pseudodata_new %>%
-  transform(predictions=predict(fit_vulgaris_2_try, newdata=Pseudodata_new, type = "response"))
-png(filename= "Predictiondifferentcarolinensisgreyurban.png")
-
-predictionsgrey %>%
-  # transform(predictions=predict(result[[1]], newdata=Pseudodata_new, type = "response")) %>% 
-  ggplot(aes(PropT_carolinensis, predictions, colour =Grey_urban_z2, group = Grey_urban_z2)) +
-  geom_line()+
-  scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0))+
-  # geom_ribbon(aes(ymin=respVar_int.respVar_0.025,ymax=respVar_int.respVar_0.975),alpha=0.3)+
-  # scale_x_continuous(breaks = c(0.00 ,0.20, 0.40, 0.60,0.80,1.00),
-  #labels = c("0", "20", "40", "60","80","100"))+
-  theme_bw()+
-  xlab("Number of S.carolinensis")+
-  ylab("Predicted number of S.vulgaris")+
-  labs(x=expression(paste("Proportion of ",italic("S.carolinensis"))))+
-  labs(y=expression(paste("Predicted number of ",italic("S.vulgaris"))))+
-  labs(colour="Percentage of grey urban area")+
-  theme(axis.line = element_line(colour = "black"),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank(),legend.key.size = unit(2, 'cm'))
+if(reCount) {
+    source("R/2b_CountGbif.R")
+} else {
+    CountALL_10km <- readRDS("intermediate_data/CountALL_10km.rds")
+}
 
 
-#plotpseudonew +  facet_wrap(. ~ Grey_urban_z2,ncol=2)
+## We need the models! These are too large for github storage
+## Do you want to rerun them?
+reRunModels <- FALSE
+
+## If you want to read them from files, that's where they shoudl be:
+modelFile <- "intermediate_data/gh_ignore/Citizenscience_modelle.rds"
+modelFileCaro <- "intermediate_data/gh_ignore/Citizensciencemodelle_caro.rds"
+
+if(!reRunModels) {
+    if(exists("result") & exists("result_caro")) {
+        message("Using models in your current environment")
+    } else {
+        if(file.exists(modelFile) &
+           file.exists(modelFileCaro)){
+            message("Reading models from local files")
+            results <- readRDS(modelFile)
+            results_caro <- readRDS()
+        } else {
+            stop("Download the models from Zenodo ",
+                 "using this link: https://zenodo.org/records/10141957  ",
+                 "to intermediate_data/gh_ignore/ and re-run this code")
+        }
+    }
+} else {
+    message("Re-running models, this will take some time")
+    message("They'll be saved in ", modelFile, " and ", modelFileCaro)
+    source("R/4_Model.R")
+}
+
+Predictiondf <- data.frame(
+    PropT_carolinensis = rep(seq(0, 1, 0.1), each = 4)) %>%
+    mutate(PropL_Grey_urban = rep(c(0.0, 0.3, 0.6, 0.9), times=11),
+           PropL_Agricultural = rep(c(1, 0.7, 0.4, 0.1), times=11),
+           year_from_2000 = 18, 
+           PropL_Green_urban = 0.00, 
+           PropL_Broadleafed_Forest = 0.00, 
+           PropL_Coniferous_Forest = 0.00, 
+           PropL_Mixed_Forest = 0.00, 
+           PropL_Other_seminatural = 0.00, 
+           PropL_Waterbodies = 0.00, ## error in initial code?
+           PropT_marten = 0.00, 
+           lat = 3615,
+           lon = 3185,
+           CountT_mammalia_log = log(100)) %>%
+    mutate(Grey_urban_plot = factor(PropL_Grey_urban, 
+                                    labels = c("0% Grey urban", "30% Grey urban", 
+                                               "60% Grey urban","90% Grey urban")),
+           ## We predict using the first element in the results list
+           ## of models! This is the main model (the following models
+           ## are for/from lrs testing
+           predictions = as.vector(predict(result[[1]],
+                                           newdata=. ,
+                                           type = "response")))
+
+
+Predictiondf %>%
+    ggplot(aes(PropT_carolinensis, predictions,
+               colour = Grey_urban_plot,
+               group = Grey_urban_plot)) +
+    geom_line() +
+    scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0))+
+    ## ## we wanted confidence inervals at some point, but dropped the idea?!
+    ## geom_ribbon(aes(ymin=respVar_int.respVar_0.025,
+    ##                 ymax=respVar_int.respVar_0.975),
+    ##                 alpha=0.3)+
+    ## scale_x_continuous(breaks = c(0.00 ,0.20, 0.40, 0.60,0.80,1.00),
+    ## labels = c("0", "20", "40", "60","80","100"))+
+    theme_bw()+
+    xlab("Number of S.carolinensis")+
+    ylab("Predicted number of S.vulgaris")+
+    labs(x=expression(paste("Proportion of ",italic("S.carolinensis"))))+
+    labs(y=expression(paste("Predicted number of ",italic("S.vulgaris"))))+
+    labs(colour="Percentage of grey urban area")+
+    theme(axis.line = element_line(colour = "black"),
+          panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.background = element_blank(),legend.key.size = unit(2, 'cm'))
+## plotpseudonew +  facet_wrap(. ~ Grey_urban_z2,ncol=2)
+
+ggsave("figures/Predictiondifferentcarolinensisgreyurban.pdf", width=9, height=5)
 dev.off()
 
 
 ### Prediction map
 
-CountALL_10km <- readRDS("CountALL_10km.rds")
 d_2018 <- CountALL_10km %>% filter(Observer%in%"Citizen"&
                                      !FocusTaxaTorF)%>%
   filter(year == 2018)%>%
