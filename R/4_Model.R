@@ -343,7 +343,8 @@ result <- mapply(myfunction,
                  x=diff_glmm_formula_1.25,
                   y=diff_glmm_formula_init, SIMPLIFY = FALSE )
 
-saveRDS(result, "/SAN/Citizenscience_modelle.rds")
+## our local save (not reproducible but saving work in re-computation)
+saveRDS(result, "intermediate_data/gh_ignore/Citizenscience_modelle.rds")
 
 ############################################ Carolinensis models
 diff_glmm_formula_1.25_caro <- list(
@@ -638,7 +639,9 @@ result_caro <- mapply(myfunction,
                       x=diff_glmm_formula_1.25_caro,
                       y=diff_glmm_formula_init_caro, SIMPLIFY = FALSE )
 
-saveRDS(result_caro, "/SAN/Citizensciencemodelle_caro.rds")
+## our local save (not reproducible but saving work in re-computation)
+saveRDS(result_caro, "intermediate_data/gh_ignore/Citizensciencemodelle_caro.rds")
+
 
 ## ###### Corrplot and Likelyhoodratio testing
 
