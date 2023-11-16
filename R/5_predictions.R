@@ -30,7 +30,7 @@ if(!reRunModels) {
            file.exists(modelFileCaro)){
             message("Reading models from local files")
             results <- readRDS(modelFile)
-            results_caro <- readRDS()
+            results_caro <- readRDS(modelFileCaro)
         } else {
             stop("Download the models from Zenodo ",
                  "using this link: https://zenodo.org/records/10141957  ",
