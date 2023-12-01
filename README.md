@@ -90,9 +90,9 @@ characteristics of this data (*Figures 1 and 2 and table X of the
 manuscript*) with the code in the second part of this script.
 
 
-## 4) Model the observations of red and grey squirrels: R/4_Model.R in SPamm
+## 4) Model the observations of red and grey squirrels: R/4_Model.R in spaMM
 
-This scipts subsets `intermediate_data/CountALL_10km.rds` to obtain
+This scripts subsets `intermediate_data/CountALL_10km.rds` to obtain
 only data collected by citizen ("citizen science") without a taxonomic
 focus within mammalia. The latter is important as we use the number of
 total observations of mammals within a grid to normalize for
