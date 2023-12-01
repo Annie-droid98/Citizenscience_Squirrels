@@ -18,7 +18,7 @@ if(redoMerge){
 
 ## subset it to only citizen-science data without focus taxon within
 ## mammalia
-d <- CountALL_10km %>% filter(Observer%in%"Citizen"&
+d <- CountALL_10km |> filter(Observer%in%"Citizen"&
                               !FocusTaxaTorF)
 
 ## test whether we're alright
@@ -687,36 +687,36 @@ ggsave("figures/FixedEffectCorrsBoth.pdf",
 
 lapply((2:17), function(i){
     anova(result[[1]], result[[i]])[["basicLRT"]]
-}) %>% 
-    do.call(rbind, .) %>%
-    add_row(chi2_LR = NA, df =NA , p_value =NA, .before = 1) %>%
-    cbind(as.data.frame(summary(result[[1]])$beta_table), .) %>%
-    round(digits = 3) %>%
+}) |> 
+    do.call(rbind, _) |>
+    add_row(chi2_LR = NA, df =NA , p_value =NA, .before = 1) |>
+    cbind(as.data.frame(summary(result[[1]])$beta_table), .) |>
+    round(digits = 3) |>
     ## mutate(p_val_scientific = format(p_value,
     ##                                  scientific = FALSE, big.mark = ","))
     tibble::rownames_to_column("Predictor") -> foo
 
 lapply((2:17), function(i){
     anova(result_caro[[1]], result_caro[[i]])[["basicLRT"]]
-}) %>% 
-    do.call(rbind, .) %>%
-    add_row(chi2_LR = NA, df =NA , p_value =NA, .before = 1) %>%
-    cbind(as.data.frame(summary(result_caro[[1]])$beta_table), .) %>%
-    round(digits = 3) %>%
+}) |> 
+    do.call(rbind, _) |>
+    add_row(chi2_LR = NA, df =NA , p_value =NA, .before = 1) |>
+    cbind(as.data.frame(summary(result_caro[[1]])$beta_table), _) |>
+    round(digits = 3) |>
     ## mutate(p_val_scientific = format(p_value,
     ##                                  scientific = FALSE, big.mark = ","))
     tibble::rownames_to_column("Predictor") -> bar
 
-cbind(foo, bar) %>%
-    as_tibble(.name_repair="universal")%>%
-    gt()  %>%
+cbind(foo, bar) |>
+    as_tibble(.name_repair="universal")|>
+    gt()  |>
     tab_spanner(label = md("<br><em>S. vulgaris</em>"),
                 columns = c("Estimate...2",
                             "Cond..SE...3","t.value...4", "chi2_LR...5",
-                            "df...6","p_value...7"))%>%
+                            "df...6","p_value...7"))|>
     tab_spanner(label = md("<br><em>S. carolinensis</em>"),
                 columns = c("Estimate...9","Cond..SE...10","t.value...11",
-                            "chi2_LR...12", "df...13","p_value...14")) %>%
+                            "chi2_LR...12", "df...13","p_value...14")) |>
     tab_style(
         style = list(
             cell_text(weight = "bold")
@@ -724,7 +724,7 @@ cbind(foo, bar) %>%
         locations = cells_body(
             columns = `p_value...7`,
             rows = `p_value...7`<= 0.05
-    ))%>%
+    ))|>
     tab_style(
         style = list(
             cell_text(weight = "bold")
@@ -732,7 +732,7 @@ cbind(foo, bar) %>%
         locations = cells_body(
             columns = `p_value...14`,
             rows = `p_value...14`<= 0.05
-        )) %>%
+        )) |>
     cols_label(
               Predictor...1 = "Predictor",
               Estimate...2 = "Estimate",
@@ -748,23 +748,23 @@ cbind(foo, bar) %>%
               chi2_LR...12 = "chi^2 LR",
               df...13 = "DF",
               p_value...14 = "p value"
-    ) %>%
+    ) |>
     text_replace(
         locations = cells_body(columns = c(Predictor...1, Predictor...8)),
         pattern = "PropT_(v\\w*|c\\w*)",
-        replacement = "<br><em>S. \\1</em>") %>%
+        replacement = "<br><em>S. \\1</em>") |>
     text_replace(
         locations = cells_body(columns = c(Predictor...1, Predictor...8)),
         pattern = "PropT_marten",
-        replacement = "<br><em>M. martes\\1</em>") %>%
+        replacement = "<br><em>M. martes\\1</em>") |>
     text_replace(
         locations = cells_body(columns = c(Predictor...1, Predictor...8)),
         pattern = "PropL_",
-        replacement = "") %>%
+        replacement = "") |>
     text_replace(
         locations = cells_body(columns = c(Predictor...1, Predictor...8)),
         pattern = "_",
-        replacement = " ") %>%
+        replacement = " ") |>
     sub_zero(zero_text="<0.001") -> out
 
 gtsave(out, "tables/Table_ModelsLRT.html")

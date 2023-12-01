@@ -114,15 +114,15 @@ Landuse_10km <-
                      L_Mixed_Forest = clc_25_s,
                      L_Other_seminatural = clc_39_s,
                      L_Waterbodies = clc_44_s,
-                     CELLCODE=Britain10grid$CELLCODE) %>%
+                     CELLCODE=Britain10grid$CELLCODE) |>
     ## get proportions (each cell 10km*10km cell could have 10,000
     ## entries of 100*100m resolved "pixels")
-    as_tibble() %>%
-    rowwise %>%
-    mutate(allLand = sum(across(starts_with("L_")))) %>%
+    as_tibble() |>
+    rowwise |>
+    mutate(allLand = sum(across(starts_with("L_")))) |>
     ## Now discard all Grids without Landuse record (in the Ocean?)
-    filter(allLand>0) %>%
-    mutate(across(starts_with("L_"), ~ .x/allLand, .names = "Prop{.col}")) %>%
+    filter(allLand>0) |>
+    mutate(across(starts_with("L_"), ~ .x/allLand, .names = "Prop{.col}")) |>
     mutate(allPropL = sum(across(starts_with("PropL_")))) 
 
 

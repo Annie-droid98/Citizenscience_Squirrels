@@ -21,10 +21,10 @@ unzip(zipfile = file.path(tempdir(), "Great_Britain_shapefile"), exdir = tempdir
 
 GB_10grid <- shapefile(file.path(tempdir(), "gb_10km.shp"))
 
-GB_and_IE_grid_10km <- bind(Ireland_10grid, GB_10grid )%>%
+GB_and_IE_grid_10km <- bind(Ireland_10grid, GB_10grid ) |>
     st_as_sf()
 
-Britain10grid <- GB_and_IE_grid_10km %>%
+Britain10grid <- GB_and_IE_grid_10km |>
     distinct()
 
 saveRDS(Britain10grid, "intermediate_data/10kmgrids.rds")
