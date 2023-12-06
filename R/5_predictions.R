@@ -45,7 +45,7 @@ if(!reRunModels) {
 
 Predictiondf <- data.frame(
     ## predict for variable proportions of invasive squirrels
-    PropT_carolinensis = rep(seq(0, 1, 0.1), each = 4)) %>%
+    PropT_carolinensis = rep(seq(0, 1, 0.1), each = 4)) |>
     ## predict for variable proportions of grey urban land use
     mutate(PropL_Grey_urban = rep(c(0.0, 0.3, 0.6, 0.9), times=11),
            ## balance this variation with agricultural area
@@ -64,7 +64,7 @@ Predictiondf <- data.frame(
            lon = 3185,
            ## and 100 mammalia counted (to have percent output
            ## basically)
-           CountT_mammalia_log = log(100)) %>%
+           CountT_mammalia_log = log(100)) |>
     mutate(Grey_urban_plot = factor(PropL_Grey_urban, 
                                     labels = c("0% Grey urban", "30% Grey urban", 
                                                "60% Grey urban","90% Grey urban")),
@@ -72,11 +72,11 @@ Predictiondf <- data.frame(
            ## of models! This is the main model (the following models
            ## are for/from likelihood ratio testing)
            predictions = as.vector(predict(result[[1]],
-                                           newdata=. ,
+                                           newdata=_,
                                            type = "response")))
 
 
-Predictiondf %>%
+Predictiondf |>
     ggplot(aes(PropT_carolinensis, predictions,
                colour = Grey_urban_plot,
                group = Grey_urban_plot)) +
@@ -104,36 +104,36 @@ ggsave("figures/Predictiondifferentcarolinensisgreyurban.pdf", width=9, height=5
 
 
 ### Prediction map
-Predictions_map <- CountALL_10km %>%
+Predictions_map <- CountALL_10km |>
     ## Citizen science and no focus taxon
     filter(Observer%in%"Citizen"&
-           !FocusTaxaTorF)%>%
+           !FocusTaxaTorF)|>
     ## predict for 2018
-    filter(year == 2018)%>%
+    filter(year == 2018)|>
     ## 100 observations
-    mutate(CountT_mammalia_log = log(100)) %>%
-    replace(is.na(.), 0) %>%
+    mutate(CountT_mammalia_log = log(100)) |>
+    replace(is.na(_), 0) |>
     ## We predict using the first element in the results list
     ## of models! This is the main model (the following models
     ## are for/from likelihood ratio testing)
     mutate(predictions_vulgaris =predict(result[[1]],
-                                         newdata = .,
+                                         newdata =_,
                                          type = "response"), 
            predictions_caro=predict(result_caro[[1]],
-                                    newdata= .,
-                                    type = "response")) # %>%
+                                    newdata= _,
+                                    type = "response")) # |>
 
 ## ## transform the coordinates back to plot the map ??  not doing this
 ## ## right now as it likely needs to be changed for plotting anyways.
 
 ## ## I played around with it a bit maybe som of it is useful... 
 ## mutate(lon10k = lon*1e+05,
-##        lat10k = lat*1e+05)%>%
-##     sf::st_as_sf(coords = c("lon10k","lat10k"))%>%
-##     st_set_crs(3035)%>%
-##     st_transform(4326) %>%
-##     mutate(lonTrans = sf::st_coordinates(.)[,1],
-##            latTrans = sf::st_coordinates(.)[,2])
+##        lat10k = lat*1e+05)|>
+##     sf::st_as_sf(coords = c("lon10k","lat10k"))|>
+##     st_set_crs(3035)|>
+##     st_transform(4326) |>
+##     mutate(lonTrans = sf::st_coordinates(_)[,1],
+##            latTrans = sf::st_coordinates(_)[,2])
 
 ## Handing over to you Alex! We probably should explore this
 ## prediction map a bit, in addition to/while plotting it

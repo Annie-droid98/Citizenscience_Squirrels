@@ -13,6 +13,9 @@ run each script on its own are contained in this repository. We follow
 the convention, that your R scripts should run in the root folder of
 the repository directly (not in e.g. `\R`, check using `getwd()`).
 
+You will also need to have installed the following R packages before
+running the code: `dplyr`, `ggplot2`, `sf`, `spaMM` and `stars`.
+
 ## 1) Prepare grids across the British isles: R/1_DownloadGrids.R
 
 This downloads 10*10 km grids across the UK and Ireland from the
@@ -90,9 +93,9 @@ characteristics of this data (*Figures 1 and 2 and table X of the
 manuscript*) with the code in the second part of this script.
 
 
-## 4) Model the observations of red and grey squirrels: R/4_Model.R in SPamm
+## 4) Model the observations of red and grey squirrels: R/4_Model.R in spaMM
 
-This scipts subsets `intermediate_data/CountALL_10km.rds` to obtain
+This scripts subsets `intermediate_data/CountALL_10km.rds` to obtain
 only data collected by citizen ("citizen science") without a taxonomic
 focus within mammalia. The latter is important as we use the number of
 total observations of mammals within a grid to normalize for
