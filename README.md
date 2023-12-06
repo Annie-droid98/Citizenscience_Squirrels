@@ -13,6 +13,9 @@ run each script on its own are contained in this repository. We follow
 the convention, that your R scripts should run in the root folder of
 the repository directly (not in e.g. `\R`, check using `getwd()`).
 
+You will also need to have installed the following R packages before
+running the code: `dplyr`, `ggplot2`, `sf`, `spaMM` and `stars`.
+
 ## 1) Prepare grids across the British isles: R/1_DownloadGrids.R
 
 This downloads 10*10 km grids across the UK and Ireland from the
