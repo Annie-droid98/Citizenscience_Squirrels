@@ -1,130 +1,93 @@
-library(exactextractr)
-library(raster)
-library(fasterize)
-library(sf)
 library(dplyr)
-library(tidyr)
+library(sf)
+library(stars)
 
-## do we want to repeate the grid and shapefile download
+## do we want to repeat the grid download?
 redoGRIDdownload  <- FALSE
 
-if(redoGRIDdownload){
+if (redoGRIDdownload) {
     source("R/1_DownloadGrids.R")
 } else {
-    Britain10grid <- readRDS("intermediate_data/10kmgrids.rds")
+    Britain10grid <- read_sf("intermediate_data/10kmgrids.shp")
 }
 
-Britain10grid <- st_transform(Britain10grid, 3035)
+
+## do we want to plot things as we got (for checking purposes)
+draw_plot <- TRUE
+
+if (draw_plot) {
+  library(ggplot2)
+  }
 
 ### LANDCOVER 
 
-## ## Download the raster at (requires login)
+## ## We downloaded the file from (requires login)
 ## ## https://land.copernicus.eu/pan-european/corine-land-cover/clc2018?tab=download
+## ## selecting:
+## ##  - CORINE Land Cover 2018 (vector/raster 100 m), Europe, 6-yearly - Geotiff (NUTS: United Kingdom)
+## ##  - CORINE Land Cover 2018 (vector/raster 100 m), Europe, 6-yearly - Geotiff (NUTS: Éire/Ireland) 
 
-## ## Then execute
-## clc_2018_landcover <- raster("whereever/you/downloaded")
-## saveRDS(clc_2018_landcover, "input_data/Landcover.rds")
+## read the tiff
+clc_2018_landcover <- read_stars("input_data/U2018_CLC2018_V2020_20u1.tif")
 
-## ## read the rds because the tiff is to large for the repository
-clc_2018_landcover <- readRDS("input_data/Landcover.rds")
+## make CRS the same for the two spatial object that will be combined
+clc_2018_landcover <- st_transform(clc_2018_landcover, st_crs(Britain10grid))
 
-#Squirrels 
-rasterOptions(tmpdir=tempdir(), overwrite=TRUE)
+## rename layer
+names(clc_2018_landcover) <- "landcover"
 
-## here we crop the land use to work on a smaller dataset
-clc_2018_landcover <- crop(clc_2018_landcover, extent(Britain10grid))
+## recode landcover values into a single qualitative layer and 
+## into one binary layer per category (slowish, but under 1 min)
+clc_2018_landcover |> 
+  mutate(landcover_cat = case_when(landcover %in% c(01:09) ~ "Grey urban",
+                                   landcover %in% c(10:11) ~ "Green urban",
+                                   landcover %in% c(12:22) ~ "Aggricultural",
+                                   landcover == 23         ~ "Broad-leaved forest",
+                                   landcover == 24 ~ "Coniferous forest",
+                                   landcover == 25 ~ "Mixed forest",
+                                   landcover %in% c(26:39) ~ "Semi natural areas",
+                                   landcover %in% c(40:44) ~ "Waterbodies",
+                                   TRUE ~ NA
+                                   )) |>
+  mutate(grey = landcover_cat == "Grey urban",
+         green = landcover_cat == "Green urban",
+         aggri = landcover_cat == "Aggricultural",
+         brdlvforest = landcover_cat == "Broad-leaved forest",
+         conifforest = landcover_cat == "Coniferous forest",
+         mixedforest = landcover_cat == "Mixed forest",
+         seminat = landcover_cat == "Semi natural areas",
+         water = landcover_cat == "Waterbodies") -> clc_2018_landcover
 
-## "grey urban" 
-clc_2018_landcover[clc_2018_landcover <= 9] <- 9
+clc_2018_landcover
 
-## green urban
-clc_2018_landcover[clc_2018_landcover %in% c(10, 11)] <- 11
-
-## Agricultural
-clc_2018_landcover[clc_2018_landcover %in%
-                             c(12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22)] <- 22
-
-## Forrest 23, 24, 25 stay as they are
-
-
-## 26-39 other seminatural areas
-clc_2018_landcover[clc_2018_landcover %in%
-                             c(26,27, 28, 29, 30, 31, 32,
-                               33, 34, 35, 36, 37, 38, 39)] <- 39
-
-## Waterbodies
-clc_2018_landcover[clc_2018_landcover %in%
-                             c(40, 41, 42, 43, 44)] <- 44
-
-## save to then read as raster!!!
-## writeRaster(clc_2018_landcover, "clc_2018_landcover_categories")
-## clc_2018_landcover <- raster("clc_2018_landcover_categories")
-
-## extract
-clc_2018_landcover <-
-    exactextractr::exact_extract(x = clc_2018_landcover,
-                                 y = Britain10grid)
-
-clc_2018_landcover <- lapply(clc_2018_landcover,
-                             function(x) x[(names(x) %in% c("value"))])
-
-## empty vectors to store the results
-clc_9_s <- vector()
-clc_11_s <- vector()
-clc_22_s <- vector()
-clc_23_s <- vector()
-clc_24_s <- vector()
-clc_25_s <- vector()
-clc_39_s <- vector()
-clc_44_s <- vector()
-## loop along the list
-for (i in 1:length(clc_2018_landcover)){
-  tmp_s <- clc_2018_landcover[[i]]
-  ## count each of the values
-  tmp_9_s <- sum(tmp_s == 9)
-  tmp_11_s <- sum(tmp_s == 11)
-  tmp_22_s <- sum(tmp_s == 22)
-  tmp_23_s <- sum(tmp_s == 23)
-  tmp_24_s <- sum(tmp_s == 24)
-  tmp_25_s <- sum(tmp_s == 25)
-  tmp_39_s <- sum(tmp_s == 39)
-  tmp_44_s <- sum(tmp_s == 44)
-  # add the counts to a vector following the same order as the grids
-  clc_9_s[i] <- tmp_9_s
-  clc_11_s[i] <- tmp_11_s
-  clc_22_s[i] <- tmp_22_s
-  clc_23_s[i] <- tmp_23_s
-  clc_24_s[i] <- tmp_24_s
-  clc_25_s[i] <- tmp_25_s
-  clc_39_s[i] <- tmp_39_s
-  clc_44_s[i] <- tmp_44_s
+## quick visualization for checking things
+if (draw_plot) {
+  ggplot() + geom_stars(data = clc_2018_landcover["landcover_cat"], downsample = 20)
+  ggplot() + geom_stars(data = clc_2018_landcover["grey"], downsample = 20)
 }
 
-## The code above is so ugly I have to concentrate so hard to not
-## rewrite it with lapply, but instead put the vectors into a df and
-## name them
+## compute proportion of coverage for each landcover type within each grid cell polygon defined by `Britain10grid`
+## for this we compute, for each binary layer, the mean per grid cell polygon since that directly provide the proportion
+## (very slow: takes a 6 hours or so)
+clc_2018_landcover |> 
+  #st_downsample(1000) |> ## downsampling, for trials only!!!
+  select(-landcover, -landcover_cat) |>  ## select all layers but `landcover` and `landcover_cat`
+  aggregate(by = Britain10grid, FUN = mean) -> Landuse_10k_stars ## compute mean per grid cell in `Britain10grid`
 
-## Let's use "L_" for all the landuse counts
-Landuse_10km <-
-    cbind.data.frame(L_Grey_urban = clc_9_s,
-                     L_Green_urban = clc_11_s,
-                     L_Agricultural = clc_22_s,
-                     L_Broadleafed_Forest = clc_23_s,
-                     L_Coniferous_Forest = clc_24_s,
-                     L_Mixed_Forest = clc_25_s,
-                     L_Other_seminatural = clc_39_s,
-                     L_Waterbodies = clc_44_s,
-                     CELLCODE=Britain10grid$CELLCODE) |>
-    ## get proportions (each cell 10km*10km cell could have 10,000
-    ## entries of 100*100m resolved "pixels")
-    as_tibble() |>
-    rowwise |>
-    mutate(allLand = sum(across(starts_with("L_")))) |>
-    ## Now discard all Grids without Landuse record (in the Ocean?)
-    filter(allLand>0) |>
-    mutate(across(starts_with("L_"), ~ .x/allLand, .names = "Prop{.col}")) |>
-    mutate(allPropL = sum(across(starts_with("PropL_")))) 
+## turn rasters into simple feature collection with all info from `Britain10grid`
+Landuse_10k_stars |>
+  st_as_sf() |> 
+  filter(!is.na(grey)) |> 
+  st_join(Britain10grid) -> Landuse_10k_sfc
 
+## write outcome to the intermediate data
+st_write(Landuse_10k_sfc, "intermediate_data/Landuse_10km.shp", append = FALSE)
 
-## write it to the intermediate data
-saveRDS(Landuse_10km, "intermediate_data/Landuse_10km.rds")
+## quick visualization for checking things
+if (draw_plot) {
+  Landuse_10k_sfc |> select(grey:water) -> Landuse_10k_sfc_for_plot
+  plot(Landuse_10k_sfc_for_plot) ## basic plot of all layers
+  ggplot() + geom_sf(aes(fill = green), data = Landuse_10k_sfc_for_plot) ## plot sf object
+  ggplot() + geom_stars(data = Landuse_10k_stars["green"]) ## plot stars object
+}
+
