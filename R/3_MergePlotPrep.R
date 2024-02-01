@@ -24,6 +24,7 @@ if (redoCount) {
 #Figure 1
 
 Mammalia_GB_count_10km |>
+  as_tibble() |>
   summarize(Sum_Mammalia = sum(CountT_mammalia),
             Sum_S.vulgaris = sum(CountT_vulgaris),
             Sum_S.carolinensis = sum(CountT_carolinensis),

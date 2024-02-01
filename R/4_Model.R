@@ -28,6 +28,25 @@ if(!all(table(d$year)==4409)){
 
 mesh <- INLA::inla.mesh.2d(loc = d[, c("lon", "lat")], max.n = 100, max.edge = c(3, 20))
 
+full_formula <- formula(CountT_vulgaris ~ offset(CountT_mammalia_log) + year_from_2000 +
+                        PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + 
+                        PropT_marten+
+                        PropT_carolinensis +
+                        PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
+                        PropT_carolinensis:PropT_marten +
+                        PropT_carolinensis:PropL_Grey_urban + PropT_carolinensis:PropL_Green_urban +
+                        PropT_carolinensis:PropL_Mixed_Forest + PropT_carolinensis:PropL_Broadleafed_Forest +
+                        PropT_carolinensis:PropL_Coniferous_Forest +            
+                        MaternIMRFa(1|lon+lat, mesh=mesh, fixed=c(alpha=1.25)))
+
+diff_glmm_formula_1.25 <- list(full = full_formula,
+                               no_year = update(full_formula, . ~ . - year_from_2000),
+                               no_grey_urban = update(full_formula, . ~ . - PropL_Grey_urban - PropL_Grey_urban:PropT_carolinensis))
+
+
+
+
+
 #list with all the formulas for the likelyhood ratio testing
 diff_glmm_formula_1.25 <- list(
   formula(CountT_vulgaris ~ offset(CountT_mammalia_log) + year_from_2000 +
@@ -39,16 +58,6 @@ diff_glmm_formula_1.25 <- list(
             PropT_carolinensis:PropL_Grey_urban + PropT_carolinensis:PropL_Green_urban +
             PropT_carolinensis:PropL_Mixed_Forest + PropT_carolinensis:PropL_Broadleafed_Forest +
             PropT_carolinensis:PropL_Coniferous_Forest +            
-            MaternIMRFa(1|lon+lat, mesh=mesh, fixed=c(alpha=1.25))),
-  formula(CountT_vulgaris ~ offset(CountT_mammalia_log) +
-            PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + 
-            PropT_marten+
-            PropT_carolinensis +
-            PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
-            PropT_carolinensis:PropT_marten +
-            PropT_carolinensis:PropL_Grey_urban + PropT_carolinensis:PropL_Green_urban +
-            PropT_carolinensis:PropL_Mixed_Forest + PropT_carolinensis:PropL_Broadleafed_Forest +
-            PropT_carolinensis:PropL_Coniferous_Forest +
             MaternIMRFa(1|lon+lat, mesh=mesh, fixed=c(alpha=1.25))),
   formula(CountT_vulgaris ~ offset(CountT_mammalia_log) + year_from_2000 +
             PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + PropT_marten+
