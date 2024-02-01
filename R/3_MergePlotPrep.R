@@ -7,111 +7,102 @@ library(dplyr)
 redoLanduse <- FALSE
 redoCount <- FALSE
 
-if(redoLanduse){
-    source("R/2a_PrepLandUse.R")
-} else {
-    Landuse_10km <- readRDS("intermediate_data/Landuse_10km.rds")
-}
+# if(redoLanduse){
+#     source("R/2a_PrepLandUse.R")
+# } else {
+#     Landuse_10km <- readRDS("intermediate_data/Landuse_10km.rds")
+# }
 
-if(redoCount){
+if (redoCount) {
     source("R/2b_CountGbif.R")
 } else{
     Mammalia_GB_count_10km <- readRDS("intermediate_data/Counts.rds")
 }
 
-CountALL_10km <- merge(Mammalia_GB_count_10km,
-                       Landuse_10km,
-                       by="CELLCODE")
-
-saveRDS(CountALL_10km, "intermediate_data/CountALL_10km.rds")
-
 ###################### Figure 1 and 2
 
 #Figure 1
 
-CountALL_10km |> as_tibble() |>
-    group_by(Observer, FocusTaxaTorF) |>
-    summarize(Sum_Mammalia = sum(CountT_mammalia),
-              Sum_S.vulgaris = sum(CountT_vulgaris),
-              Sum_S.carolinensis = sum(CountT_carolinensis),
-              Sum_M.martes = sum(CountT_marten),
-              Cells_Mammalia = sum(CountT_mammalia>0),
-              Cells_S.vulgaris = sum(CountT_vulgaris>0),
-              Cells_S.carolinensis = sum(CountT_carolinensis>0),
-              Cells_M.martes = sum(CountT_marten>0)) |>
-    drop_na() |>
-    ggplot(aes(fill=FocusTaxaTorF, y=Sum_Mammalia, x=Observer)) + 
-    geom_bar(position="stack", stat="identity",width = 0.5)+
-    scale_fill_viridis(discrete = TRUE)+
-    coord_flip()+
-    ## scale_x_discrete(
-    ##     labels=c("Citizen science", "Mixed", "Scientific")
-    ## ) +
-    theme_minimal() +
-    xlab("")+
-    ylab("Number of Observations")+
-    guides(fill=guide_legend(title="Has focus taxon"))+
-    annotate("rect", xmin = 0.5, xmax = 1.5, ymin = 1.48e+05, ymax = 5.8e+05,
-             alpha = 0, color= "red") +
-    theme(
-        legend.position = c(0.8, 0.8),  #  position within the plot
+Mammalia_GB_count_10km |>
+  summarize(Sum_Mammalia = sum(CountT_mammalia),
+            Sum_S.vulgaris = sum(CountT_vulgaris),
+            Sum_S.carolinensis = sum(CountT_carolinensis),
+            Sum_M.martes = sum(CountT_marten),
+            Cells_Mammalia = sum(CountT_mammalia > 0),
+            Cells_S.vulgaris = sum(CountT_vulgaris > 0),
+            Cells_S.carolinensis = sum(CountT_carolinensis > 0),
+            Cells_M.martes = sum(CountT_marten > 0),
+            .by = c("Observer", "FocusTaxaTorF")) |>
+  drop_na() |>
+  ggplot(aes(fill = FocusTaxaTorF, y = Sum_Mammalia, x = Observer)) + 
+  geom_bar(position = "stack", stat = "identity", width = 0.5) +
+  scale_fill_viridis(discrete = TRUE) +
+  coord_flip() +
+  ## scale_x_discrete(
+  ##     labels=c("Citizen science", "Mixed", "Scientific")
+  ## ) +
+  theme_minimal() +
+  xlab("") +
+  ylab("Number of Observations") +
+  guides(fill = guide_legend(title = "Has focus taxon")) +
+  annotate("rect", xmin = 0.5, xmax = 1.5, ymin = 1.48e+05, ymax = 5.8e+05,
+           alpha = 0, color = "red") +
+  theme(legend.position = c(0.8, 0.8),  #  position within the plot
         legend.background = element_rect(color = "black", fill = "white"),
-        legend.text = element_text(size=18),
-        legend.title = element_text(size=20),
-        axis.text=element_text(size=18),
-        axis.title = element_text(size = 20)
-    ) -> Fig1a
+        legend.text = element_text(size = 18),
+        legend.title = element_text(size = 20),
+        axis.text = element_text(size = 18),
+        axis.title = element_text(size = 20)) -> Fig1a
 
-CountALL_10km |> as_tibble() |>
-    group_by(Observer, FocusTaxaTorF, year) |>
-    summarize(Sum_Mammalia = sum(CountT_mammalia),
-              Sum_S.vulgaris = sum(CountT_vulgaris),
-              Sum_S.carolinensis = sum(CountT_carolinensis),
-              Sum_M.martes = sum(CountT_marten),
-              ## not using htese for now but might be interesting to
-              ## look at
-              Cells_Mammalia = sum(CountT_mammalia>0),
-              Cells_S.vulgaris = sum(CountT_vulgaris>0),
-              Cells_S.carolinensis = sum(CountT_carolinensis>0),
-              Cells_M.martes = sum(CountT_marten>0)) |>
-    pivot_longer(cols = Sum_Mammalia:Cells_M.martes, 
-                 names_to = c("measure", "Taxon"),
-                 names_sep = "_", 
-                 values_to = "Observations") |>
-    ## I hate this mess for plotting ;-)
-    ## the spaces after the \\. are too much for now :-)
-    mutate(Taxon = gsub("(M\\.martes|S\\.carolinensis|S\\.vulgaris)", 
-                        "italic(\'\\1\')", Taxon)) |>
-    ## to drop the few observations with NA, in taxon focus
-    drop_na() |>
-    ## not the numbr of cells with counts for now but might be
-    ## interestin to look at?!
-    filter(measure %in% "Sum") |>
-    ggplot(aes(x = year, y = Observations, color = Observer,
-               linetype = FocusTaxaTorF)) +
-    geom_line()+
-    ## scale_y_log10(labels = comma_format(big.mark = ".",
-    ##                                     decimal.mark = ",")) +
-    facet_wrap(~Taxon, scales = "free_y", labeller=label_parsed) + 
-    ylab("Number of observations") +
-    guides(linetype=guide_legend(title="Has focus taxon"))+
-    theme_minimal() +
-    theme(
-        legend.position = c(0.15, 0.3),  #  position within the plot
+CountALL_10km |>
+  as_tibble() |>
+  group_by(Observer, FocusTaxaTorF, year) |>
+  summarize(Sum_Mammalia = sum(CountT_mammalia),
+            Sum_S.vulgaris = sum(CountT_vulgaris),
+            Sum_S.carolinensis = sum(CountT_carolinensis),
+            Sum_M.martes = sum(CountT_marten),
+            ## not using htese for now but might be interesting to
+            ## look at
+            Cells_Mammalia = sum(CountT_mammalia > 0),
+            Cells_S.vulgaris = sum(CountT_vulgaris > 0),
+            Cells_S.carolinensis = sum(CountT_carolinensis > 0),
+            Cells_M.martes = sum(CountT_marten > 0)) |>
+  pivot_longer(cols = Sum_Mammalia:Cells_M.martes, 
+               names_to = c("measure", "Taxon"),
+               names_sep = "_", 
+               values_to = "Observations") |>
+  ## I hate this mess for plotting ;-)
+  ## the spaces after the \\. are too much for now :-)
+  mutate(Taxon = gsub("(M\\.martes|S\\.carolinensis|S\\.vulgaris)", 
+                      "italic(\'\\1\')", Taxon)) |>
+  ## to drop the few observations with NA, in taxon focus
+  drop_na() |>
+  ## not the numbr of cells with counts for now but might be
+  ## interestin to look at?!
+  filter(measure %in% "Sum") |>
+  ggplot(aes(x = year, y = Observations, color = Observer,
+             linetype = FocusTaxaTorF)) +
+  geom_line() +
+  ## scale_y_log10(labels = comma_format(big.mark = ".",
+  ##                                     decimal.mark = ",")) +
+  facet_wrap(~Taxon, scales = "free_y", labeller = label_parsed) + 
+  ylab("Number of observations") +
+  guides(linetype = guide_legend(title = "Has focus taxon")) +
+  theme_minimal() +
+  theme(legend.position = c(0.15, 0.3),  #  position within the plot
         legend.background = element_rect(color = "black", fill = "white"),
-        legend.text = element_text(size=18),
-        legend.title = element_text(size=20),
-        axis.text=element_text(size=18),
+        legend.text = element_text(size = 18),
+        legend.title = element_text(size = 20),
+        axis.text = element_text(size = 18),
         axis.title = element_text(size = 20),
-        strip.text = element_text(size = 18)
-    ) -> Fig1b
+        strip.text = element_text(size = 18)) -> Fig1b
     
 
 ggpubr::ggarrange(Fig1a, Fig1b,
                   labels = c("A", "B"),
                   ncol = 2, nrow = 1)
 
-ggsave("figures/Fig1.png", width= 18, height=8)
+ggsave("figures/Fig1.png", width = 18, height = 8)
 
 
 ## ##Figure 2
