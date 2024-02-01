@@ -7,111 +7,103 @@ library(dplyr)
 redoLanduse <- FALSE
 redoCount <- FALSE
 
-if(redoLanduse){
-    source("R/2a_PrepLandUse.R")
-} else {
-    Landuse_10km <- readRDS("intermediate_data/Landuse_10km.rds")
-}
+# if(redoLanduse){
+#     source("R/2a_PrepLandUse.R")
+# } else {
+#     Landuse_10km <- readRDS("intermediate_data/Landuse_10km.rds")
+# }
 
-if(redoCount){
+if (redoCount) {
     source("R/2b_CountGbif.R")
 } else{
     Mammalia_GB_count_10km <- readRDS("intermediate_data/Counts.rds")
 }
 
-CountALL_10km <- merge(Mammalia_GB_count_10km,
-                       Landuse_10km,
-                       by="CELLCODE")
-
-saveRDS(CountALL_10km, "intermediate_data/CountALL_10km.rds")
-
 ###################### Figure 1 and 2
 
 #Figure 1
 
-CountALL_10km %>% as_tibble() %>%
-    group_by(Observer, FocusTaxaTorF) %>%
-    summarize(Sum_Mammalia = sum(CountT_mammalia),
-              Sum_S.vulgaris = sum(CountT_vulgaris),
-              Sum_S.carolinensis = sum(CountT_carolinensis),
-              Sum_M.martes = sum(CountT_marten),
-              Cells_Mammalia = sum(CountT_mammalia>0),
-              Cells_S.vulgaris = sum(CountT_vulgaris>0),
-              Cells_S.carolinensis = sum(CountT_carolinensis>0),
-              Cells_M.martes = sum(CountT_marten>0)) %>%
-    drop_na() %>%
-    ggplot(aes(fill=FocusTaxaTorF, y=Sum_Mammalia, x=Observer)) + 
-    geom_bar(position="stack", stat="identity",width = 0.5)+
-    scale_fill_viridis(discrete = TRUE)+
-    coord_flip()+
-    ## scale_x_discrete(
-    ##     labels=c("Citizen science", "Mixed", "Scientific")
-    ## ) +
-    theme_minimal() +
-    xlab("")+
-    ylab("Number of Observations")+
-    guides(fill=guide_legend(title="Has focus taxon"))+
-    annotate("rect", xmin = 0.5, xmax = 1.5, ymin = 1.48e+05, ymax = 5.8e+05,
-             alpha = 0, color= "red") +
-    theme(
-        legend.position = c(0.8, 0.8),  #  position within the plot
+Mammalia_GB_count_10km |>
+  as_tibble() |>
+  summarize(Sum_Mammalia = sum(CountT_mammalia),
+            Sum_S.vulgaris = sum(CountT_vulgaris),
+            Sum_S.carolinensis = sum(CountT_carolinensis),
+            Sum_M.martes = sum(CountT_marten),
+            Cells_Mammalia = sum(CountT_mammalia > 0),
+            Cells_S.vulgaris = sum(CountT_vulgaris > 0),
+            Cells_S.carolinensis = sum(CountT_carolinensis > 0),
+            Cells_M.martes = sum(CountT_marten > 0),
+            .by = c("Observer", "FocusTaxaTorF")) |>
+  drop_na() |>
+  ggplot(aes(fill = FocusTaxaTorF, y = Sum_Mammalia, x = Observer)) + 
+  geom_bar(position = "stack", stat = "identity", width = 0.5) +
+  scale_fill_viridis(discrete = TRUE) +
+  coord_flip() +
+  ## scale_x_discrete(
+  ##     labels=c("Citizen science", "Mixed", "Scientific")
+  ## ) +
+  theme_minimal() +
+  xlab("") +
+  ylab("Number of Observations") +
+  guides(fill = guide_legend(title = "Has focus taxon")) +
+  annotate("rect", xmin = 0.5, xmax = 1.5, ymin = 1.48e+05, ymax = 5.8e+05,
+           alpha = 0, color = "red") +
+  theme(legend.position = c(0.8, 0.8),  #  position within the plot
         legend.background = element_rect(color = "black", fill = "white"),
-        legend.text = element_text(size=18),
-        legend.title = element_text(size=20),
-        axis.text=element_text(size=18),
-        axis.title = element_text(size = 20)
-    ) -> Fig1a
+        legend.text = element_text(size = 18),
+        legend.title = element_text(size = 20),
+        axis.text = element_text(size = 18),
+        axis.title = element_text(size = 20)) -> Fig1a
 
-CountALL_10km %>% as_tibble() %>%
-    group_by(Observer, FocusTaxaTorF, year) %>%
-    summarize(Sum_Mammalia = sum(CountT_mammalia),
-              Sum_S.vulgaris = sum(CountT_vulgaris),
-              Sum_S.carolinensis = sum(CountT_carolinensis),
-              Sum_M.martes = sum(CountT_marten),
-              ## not using htese for now but might be interesting to
-              ## look at
-              Cells_Mammalia = sum(CountT_mammalia>0),
-              Cells_S.vulgaris = sum(CountT_vulgaris>0),
-              Cells_S.carolinensis = sum(CountT_carolinensis>0),
-              Cells_M.martes = sum(CountT_marten>0)) %>%
-    pivot_longer(cols = Sum_Mammalia:Cells_M.martes, 
-                 names_to = c("measure", "Taxon"),
-                 names_sep = "_", 
-                 values_to = "Observations") %>%
-    ## I hate this mess for plotting ;-)
-    ## the spaces after the \\. are too much for now :-)
-    mutate(Taxon = gsub("(M\\.martes|S\\.carolinensis|S\\.vulgaris)", 
-                        "italic(\'\\1\')", Taxon)) %>%
-    ## to drop the few observations with NA, in taxon focus
-    drop_na() %>%
-    ## not the numbr of cells with counts for now but might be
-    ## interestin to look at?!
-    filter(measure %in% "Sum") %>%
-    ggplot(aes(x = year, y = Observations, color = Observer,
-               linetype = FocusTaxaTorF)) +
-    geom_line()+
-    ## scale_y_log10(labels = comma_format(big.mark = ".",
-    ##                                     decimal.mark = ",")) +
-    facet_wrap(~Taxon, scales = "free_y", labeller=label_parsed) + 
-    ylab("Number of observations") +
-    guides(linetype=guide_legend(title="Has focus taxon"))+
-    theme_minimal() +
-    theme(
-        legend.position = c(0.15, 0.3),  #  position within the plot
+CountALL_10km |>
+  as_tibble() |>
+  group_by(Observer, FocusTaxaTorF, year) |>
+  summarize(Sum_Mammalia = sum(CountT_mammalia),
+            Sum_S.vulgaris = sum(CountT_vulgaris),
+            Sum_S.carolinensis = sum(CountT_carolinensis),
+            Sum_M.martes = sum(CountT_marten),
+            ## not using htese for now but might be interesting to
+            ## look at
+            Cells_Mammalia = sum(CountT_mammalia > 0),
+            Cells_S.vulgaris = sum(CountT_vulgaris > 0),
+            Cells_S.carolinensis = sum(CountT_carolinensis > 0),
+            Cells_M.martes = sum(CountT_marten > 0)) |>
+  pivot_longer(cols = Sum_Mammalia:Cells_M.martes, 
+               names_to = c("measure", "Taxon"),
+               names_sep = "_", 
+               values_to = "Observations") |>
+  ## I hate this mess for plotting ;-)
+  ## the spaces after the \\. are too much for now :-)
+  mutate(Taxon = gsub("(M\\.martes|S\\.carolinensis|S\\.vulgaris)", 
+                      "italic(\'\\1\')", Taxon)) |>
+  ## to drop the few observations with NA, in taxon focus
+  drop_na() |>
+  ## not the numbr of cells with counts for now but might be
+  ## interestin to look at?!
+  filter(measure %in% "Sum") |>
+  ggplot(aes(x = year, y = Observations, color = Observer,
+             linetype = FocusTaxaTorF)) +
+  geom_line() +
+  ## scale_y_log10(labels = comma_format(big.mark = ".",
+  ##                                     decimal.mark = ",")) +
+  facet_wrap(~Taxon, scales = "free_y", labeller = label_parsed) + 
+  ylab("Number of observations") +
+  guides(linetype = guide_legend(title = "Has focus taxon")) +
+  theme_minimal() +
+  theme(legend.position = c(0.15, 0.3),  #  position within the plot
         legend.background = element_rect(color = "black", fill = "white"),
-        legend.text = element_text(size=18),
-        legend.title = element_text(size=20),
-        axis.text=element_text(size=18),
+        legend.text = element_text(size = 18),
+        legend.title = element_text(size = 20),
+        axis.text = element_text(size = 18),
         axis.title = element_text(size = 20),
-        strip.text = element_text(size = 18)
-    ) -> Fig1b
+        strip.text = element_text(size = 18)) -> Fig1b
     
 
 ggpubr::ggarrange(Fig1a, Fig1b,
                   labels = c("A", "B"),
                   ncol = 2, nrow = 1)
 
-ggsave("figures/Fig1.png", width= 18, height=8)
+ggsave("figures/Fig1.png", width = 18, height = 8)
 
 
 ## ##Figure 2
@@ -126,10 +118,10 @@ ggsave("figures/Fig1.png", width= 18, height=8)
 
 ## crop_Grid_Ausschnitt <- st_crop(x = df_Mammalia_GB_count, Ausschnitt_GB)
 
-## crop_Grid_Ausschnitt_2018 <- crop_Grid_Ausschnitt%>%
+## crop_Grid_Ausschnitt_2018 <- crop_Grid_Ausschnitt|>
 ##   filter(year == 2018)
 
-## crop_Grid_Ausschnitt_2018_try <- crop_Grid_Ausschnitt_2018%>%
+## crop_Grid_Ausschnitt_2018_try <- crop_Grid_Ausschnitt_2018|>
 ##   filter(lat < 3220000 & lat> 3140000 & lon < 3660000)
 ## cuts_s=c(1,9,11,22,23,24,25,39,44)
 ## crop_GB_and_IE_grid_10km_shp <- crop(x = GB_and_IE_grid_10km_shp, Ausschnitt_GB)
@@ -144,10 +136,10 @@ ggsave("figures/Fig1.png", width= 18, height=8)
 ## crop_vegetationsquirrel_Ausschnitt_Ed <- crop(x = clc_2018_landcover_squirrels, Ausschnit_Ed)
 
 ## crop_Grid_Ausschnitt_Ed <- st_crop(x = Mammaliacount_10km, Ausschnit_Ed)
-## crop_Grid_Ausschnitt_Ed_2018 <- crop_Grid_Ausschnitt_Ed%>%
+## crop_Grid_Ausschnitt_Ed_2018 <- crop_Grid_Ausschnitt_Ed|>
 ##   filter(year == 2018)
 
-## crop_Grid_Ausschnitt_2018_try_Ed <- crop_Grid_Ausschnitt_Ed_2018 %>%
+## crop_Grid_Ausschnitt_2018_try_Ed <- crop_Grid_Ausschnitt_Ed_2018 |>
 ##   filter(lat < 3765000 & lat> 3675000 & long < 3525000 & long > 3395000)
 
 ## crop_GB_and_IE_grid_10km_shp_Ed <- crop(x = GB_and_IE_grid_10km_shp, Ausschnit_Ed)
@@ -157,26 +149,26 @@ ggsave("figures/Fig1.png", width= 18, height=8)
 ## df_counted_Mammalia <- readRDS("Counts.rds")
 
 
-## df_counted_Mammalia_try <- df_counted_Mammalia%>%
+## df_counted_Mammalia_try <- df_counted_Mammalia|>
 ##   dplyr::select(CELLCODE, Grey_urban,green_urban, Agrar,Broadleafed_Forest,Coniferous_Forest, Mixed_Forest,Other_seminatural, Waterbodies)
 
 ## df_counted_Mammalia_try_2 <- unique(df_counted_Mammalia_try)
-## df_counted_Mammalia_try_2 <- colMeans(df_counted_Mammalia_try_2[2:9])%>%
+## df_counted_Mammalia_try_2 <- colMeans(df_counted_Mammalia_try_2[2:9])|>
 ##   as.data.frame()
 
 ## df_counted_Mammalia_try_2<-tibble::rownames_to_column(df_counted_Mammalia_try_2, "Vegetationtype")
 ## colnames(df_counted_Mammalia_try_2)<- c("Landcover","Proportion")
-## df_counted_Mammalia_try_2 <- df_counted_Mammalia_try_2%>% 
+## df_counted_Mammalia_try_2 <- df_counted_Mammalia_try_2|> 
 ##   mutate(Year = "of total area")
-## df_counted_Mammalia_try_2 <- df_counted_Mammalia_try_2%>% 
+## df_counted_Mammalia_try_2 <- df_counted_Mammalia_try_2|> 
 ##   mutate_at(vars(Proportion),
 ##             .funs = funs(. * 100))
-## df_counted_Mammalia_try_3 <- df_counted_Mammalia_try_2%>%
+## df_counted_Mammalia_try_3 <- df_counted_Mammalia_try_2|>
 ##   mutate_at(vars(Proportion),
 ##             funs(round(., 1)))
 
-## Mammalia_in_GB <- Mammalia_citizenscience%>%
-##   dplyr:: select(species, year, long, lat)%>%
+## Mammalia_in_GB <- Mammalia_citizenscience|>
+##   dplyr:: select(species, year, long, lat)|>
 ##   as.data.frame()
 ## #Observations in each landcover type
 ## Mammalia_in_Gb_2 <- SpatialPointsDataFrame(coords = Mammalia_in_GB[,3:4], data =Mammalia_in_GB)
@@ -184,20 +176,20 @@ ggsave("figures/Fig1.png", width= 18, height=8)
 ## Values_Mammalia <- cbind(Mammalia_in_Gb_2,extract_Mammalia)
 ## Values_Mammalia_df <- as.data.frame(Values_Mammalia)
 ## Values_Mammalia_df$Vegetation <-Values_Mammalia_df$c.39..44..11..9..22..9..22..9..22..9..9..9..39..9..22..9..11.. 
-## Vegetation_of_each_obs <- Values_Mammalia_df%>%
+## Vegetation_of_each_obs <- Values_Mammalia_df|>
 ##   count(Vegetation,  sort = F)            
 ## Percentage_obs_inVeg <-transform(Vegetation_of_each_obs, Percentage_Mamm = Vegetation_of_each_obs[2]/colSums(Vegetation_of_each_obs[2]))
-## Percentage_obs_inVeg<- Percentage_obs_inVeg[-c(9),]%>%
-##   mutate(Year = "of observations")%>%
+## Percentage_obs_inVeg<- Percentage_obs_inVeg[-c(9),]|>
+##   mutate(Year = "of observations")|>
 ##   mutate_at(vars(n.1),
-##             .funs = funs(. * 100))%>%
+##             .funs = funs(. * 100))|>
 ##   mutate_at(vars(n.1),
 ##             funs(round(., 1)))
 ## Percentage_obs_inVeg$Landcover <- c("Grey_urban", "green_urban", "Agrar", "Broadleafed_Forest", "Coniferous_Forest", "Mixed_Forest","Other_seminatural","Waterbodies")
 
-## Percentage_obs_inVeg_try<-Percentage_obs_inVeg%>%
+## Percentage_obs_inVeg_try<-Percentage_obs_inVeg|>
 ##   dplyr::select(Landcover,n.1, Year)
-## Percentage_obs_inVeg_try<- Percentage_obs_inVeg_try%>%
+## Percentage_obs_inVeg_try<- Percentage_obs_inVeg_try|>
 ##   rename(Proportion = n.1)
 ## perc_try <-rbind(df_counted_Mammalia_try_3,Percentage_obs_inVeg_try)
 ## perc_try_3 <-perc_try
