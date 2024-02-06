@@ -53,6 +53,11 @@ if (draw_plot) {
   ggplot() + geom_stars(data = clc_2018_landcover["grey"], downsample = 20)
 }
 
+## demand a recent version of stars
+if (packageVersion("stars") < "0.6.4"){
+    stop("downsampling with functions is only available from vesion 0.6.4 of stars . On older versions it would silently leave us with binary data for landcover percentages")
+}
+
 ## gridding landcover information
 st_downsample(clc_2018_landcover |>
               select(-landcover, -landcover_cat), n = 99, FUN = mean) |>
