@@ -9,7 +9,7 @@ library(tidyr)
 draw_plot <- FALSE
 ## do we want to remove intermediate objects to save memory or keep
 ## them for inspection (trouble shooting)?
-rm_intermediate <- TRUE
+rm_intermediate <- FALSE
 
 ### LANDCOVER 
 
@@ -31,7 +31,7 @@ clc_2018_landcover_raw |>
   mutate(landcover_cat = case_match(landcover,
                                     c(01:09) ~ "Grey urban",
                                     c(10:11) ~ "Green urban",
-                                    c(12:22) ~ "Aggricultural",
+                                    c(12:22) ~ "Agricultural",
                                     23       ~ "Broad-leaved forest",
                                     24       ~ "Coniferous forest",
                                     25       ~ "Mixed forest",
@@ -39,14 +39,14 @@ clc_2018_landcover_raw |>
                                     c(40:44) ~ "Waterbodies",
                                     .default = NA
                                     )) |>
-  mutate(grey = landcover_cat == "Grey urban",
-         green = landcover_cat == "Green urban",
-         aggri = landcover_cat == "Aggricultural",
-         brdlvforest = landcover_cat == "Broad-leaved forest",
-         conifforest = landcover_cat == "Coniferous forest",
-         mixedforest = landcover_cat == "Mixed forest",
-         seminat = landcover_cat == "Semi natural areas",
-         water = landcover_cat == "Waterbodies") -> clc_2018_landcover
+  mutate(PropL_Grey_urban = landcover_cat == "Grey urban",
+         PropL_Green_urban = landcover_cat == "Green urban",
+         PropL_Agricultural = landcover_cat == "Agricultural",
+         PropL_Broadleafed_Forest = landcover_cat == "Broad-leaved forest",
+         PropL_Coniferous_Forest = landcover_cat == "Coniferous forest",
+         PropL_Mixed_Forest = landcover_cat == "Mixed forest",
+         PropL_Other_seminatural = landcover_cat == "Semi natural areas",
+         PropL_Water = landcover_cat == "Waterbodies") -> clc_2018_landcover
 
 if(rm_intermediate) rm(clc_2018_landcover_raw) 
 
@@ -65,7 +65,7 @@ if (packageVersion("stars") < "0.6.4"){
 st_downsample(clc_2018_landcover |>
               select(-landcover, -landcover_cat), n = 99, FUN = mean, na.rm = TRUE) |>
   st_as_sf() |> 
-  filter(!is.na(grey)) |> 
+  filter(!is.na(PropL_Grey_urban)) |> 
   st_transform(3035) -> Landuse_10k_sfc
 
 ## quick visualization for checking things
@@ -120,7 +120,8 @@ Landuse_10k_sfc |> ## used to retain the geometry
             CountT_vulgaris = sum(species == "Sciurus vulgaris"),
             CountT_carolinensis = sum(species == "Sciurus carolinensis"),
             CountT_marten = sum(species == "Martes martes"),
-            .by = c("geometry", "year", "Observer", "FocusTaxaTorF")) |> 
+            .by = c("geometry", "year", "Observer", "FocusTaxaTorF")) |>
+  filter(!is.na(year)) |>
   complete(geometry, year, Observer, FocusTaxaTorF, 
            fill = list(CountT_mammalia = 0,
                        CountT_vulgaris = 0,
@@ -131,12 +132,14 @@ Landuse_10k_sfc |> ## used to retain the geometry
   mutate(PropT_carolinensis = CountT_carolinensis/CountT_mammalia, 
          PropT_vulgaris = CountT_vulgaris/CountT_mammalia, 
          PropT_marten = CountT_marten/CountT_mammalia,
-         ## across(starts_with("PropT"), scale, .names = "{.col}_z")) |> 
          CountT_mammalia_log = log(CountT_mammalia),
          year_from_2000 = year - 2000,
          Centergrid = st_centroid(geometry), ## middlepoint of each grid cell 
          lon = st_coordinates(Centergrid)[,"X"]/1e+05, ## coordinates of these middlepoints, and make them smaller to avoid problems with the model
-         lat = st_coordinates(Centergrid)[,"Y"]/1e+05) -> Mammalia_GB_count_10km
+         lat = st_coordinates(Centergrid)[,"Y"]/1e+05) |>
+  mutate(
+      across(starts_with("PropT"), ~replace_na(.x, 0))) ->
+      Mammalia_GB_count_10km
 
 if(rm_intermediate) rm(Mammalia_GB_Pub, Landuse_10k_sfc)
 
