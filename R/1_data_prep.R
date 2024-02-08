@@ -6,7 +6,10 @@ library(vroom)
 library(tidyr)
 
 ## do we want to plot things as we got (for checking purposes)
-draw_plot <- TRUE
+draw_plot <- FALSE
+## do we want to remove intermediate objects to save memory or keep
+## them for inspection (trouble shooting)?
+rm_intermediate <- TRUE
 
 ### LANDCOVER 
 
@@ -17,14 +20,14 @@ draw_plot <- TRUE
 ## ##  - CORINE Land Cover 2018 (vector/raster 100 m), Europe, 6-yearly - Geotiff (NUTS: Éire/Ireland) 
 
 ## read the tiff
-clc_2018_landcover <- read_stars("input_data/U2018_CLC2018_V2020_20u1.tif")
+clc_2018_landcover_raw <- read_stars("input_data/U2018_CLC2018_V2020_20u1.tif")
 
 ## rename layer
-names(clc_2018_landcover) <- "landcover"
+names(clc_2018_landcover_raw) <- "landcover"
 
 ## recode landcover values into a single qualitative layer and 
 ## into one binary layer per category (slowish, but under 1 min)
-clc_2018_landcover |> 
+clc_2018_landcover_raw |> 
   mutate(landcover_cat = case_match(landcover,
                                     c(01:09) ~ "Grey urban",
                                     c(10:11) ~ "Green urban",
@@ -45,7 +48,7 @@ clc_2018_landcover |>
          seminat = landcover_cat == "Semi natural areas",
          water = landcover_cat == "Waterbodies") -> clc_2018_landcover
 
-clc_2018_landcover
+if(rm_intermediate) rm(clc_2018_landcover_raw) 
 
 ## quick visualization for checking things
 if (draw_plot) {
@@ -60,7 +63,7 @@ if (packageVersion("stars") < "0.6.4"){
 
 ## gridding landcover information
 st_downsample(clc_2018_landcover |>
-              select(-landcover, -landcover_cat), n = 99, FUN = mean) |>
+              select(-landcover, -landcover_cat), n = 99, FUN = mean, na.rm = TRUE) |>
   st_as_sf() |> 
   filter(!is.na(grey)) |> 
   st_transform(3035) -> Landuse_10k_sfc
@@ -70,6 +73,7 @@ if (draw_plot) {
   ggplot() + geom_sf(aes(fill = green), data = Landuse_10k_sfc)
 }
 
+if(rm_intermediate) rm(clc_2018_landcover) 
 
 ## download the GBIF data
 ## csv = download from Gbif, doi:doi.org/10.15468/dl.tu6vjj
@@ -92,7 +96,13 @@ data_GB |>
   ## project into the coordinate system needed (that of the landuse data)
   st_transform(3035) -> Mammalia_GB
 
-rm(data_GB) ## remove object no longer needed
+if(rm_intermediate) rm(data_GB)  
+
+
+if(draw_plot) {
+Mammalia_GB %>% filter(species%in%"Sciurus vulgaris") %>%
+    ggplot() + geom_sf()
+}
 
 ## Publisher categorisation
 Publishers <- vroom("input_data/SquirrelPublisherBelow1000obs.csv", show_col_types = FALSE)
@@ -102,7 +112,7 @@ full_join(Mammalia_GB, Publishers, by = "datasetKey", relationship = "many-to-ma
   ## keep only records with species
   filter(!is.na(species)) -> Mammalia_GB_Pub
 
-rm(Mammalia_GB)
+if(rm_intermediate) rm(Mammalia_GB) 
 
 Landuse_10k_sfc |> ## used to retain the geometry
   st_join(Mammalia_GB_Pub) |> 
@@ -117,7 +127,7 @@ Landuse_10k_sfc |> ## used to retain the geometry
                        CountT_carolinensis = 0,
                        CountT_marten = 0)) |> 
   st_as_sf() |> 
-  st_join(Landuse_10k_sfc) |> ## to add landcover columns
+  st_join(Landuse_10k_sfc, join=st_equals) |> ## to add landcover columns
   mutate(PropT_carolinensis = CountT_carolinensis/CountT_mammalia, 
          PropT_vulgaris = CountT_vulgaris/CountT_mammalia, 
          PropT_marten = CountT_marten/CountT_mammalia,
@@ -128,9 +138,18 @@ Landuse_10k_sfc |> ## used to retain the geometry
          lon = st_coordinates(Centergrid)[,"X"]/1e+05, ## coordinates of these middlepoints, and make them smaller to avoid problems with the model
          lat = st_coordinates(Centergrid)[,"Y"]/1e+05) -> Mammalia_GB_count_10km
 
-rm(Mammalia_GB_Pub)
+if(rm_intermediate) rm(Mammalia_GB_Pub, Landuse_10k_sfc)
+
+if(draw_plot){
+Mammalia_GB_count_10km |>
+  filter(year==2020 & Observer == "Citizen" & FocusTaxaTorF) |>
+  ggplot() + geom_sf(aes(fill = log(CountT_mammalia+1)))
+}
+
+## FIXME? We are losing 22418 observations when joining them on the grid
+## see Landuse_10k_sfc |> st_join(Mammalia_GB_Pub) ## in l 117
+if(!rm_intermediate) sum(Mammalia_GB_count_10km$CountT_mammalia) - nrow(Mammalia_GB_Pub)
 
 saveRDS(Mammalia_GB_count_10km, "intermediate_data/Counts.rds")
-
 
 
