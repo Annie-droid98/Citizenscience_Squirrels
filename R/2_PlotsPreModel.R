@@ -2,29 +2,26 @@ library(ggplot2)
 library(ggtext)
 library(tidyr)
 library(dplyr)
+library(viridis)
 
-## merge with the prepeared sattelitedata
-redoLanduse <- FALSE
-redoCount <- FALSE
+## prepare the data from scratch
+redoDataPrep <- TRUE
 
-# if(redoLanduse){
-#     source("R/2a_PrepLandUse.R")
-# } else {
-#     Landuse_10km <- readRDS("intermediate_data/Landuse_10km.rds")
-# }
-
-if (redoCount) {
-    source("R/2b_CountGbif.R")
+if (redoDataPrep) {
+    source("R/1_data_prep.R")
 } else{
     Mammalia_GB_count_10km <- readRDS("intermediate_data/Counts.rds")
 }
 
 ###################### Figure 1 and 2
 
+
 #Figure 1
 
 Mammalia_GB_count_10km |>
   as_tibble() |>
+  ## to drop the few observations with NA, in taxon focus
+  drop_na() |>
   summarize(Sum_Mammalia = sum(CountT_mammalia),
             Sum_S.vulgaris = sum(CountT_vulgaris),
             Sum_S.carolinensis = sum(CountT_carolinensis),
@@ -34,7 +31,7 @@ Mammalia_GB_count_10km |>
             Cells_S.carolinensis = sum(CountT_carolinensis > 0),
             Cells_M.martes = sum(CountT_marten > 0),
             .by = c("Observer", "FocusTaxaTorF")) |>
-  drop_na() |>
+  drop_na()|> 
   ggplot(aes(fill = FocusTaxaTorF, y = Sum_Mammalia, x = Observer)) + 
   geom_bar(position = "stack", stat = "identity", width = 0.5) +
   scale_fill_viridis(discrete = TRUE) +
@@ -55,14 +52,14 @@ Mammalia_GB_count_10km |>
         axis.text = element_text(size = 18),
         axis.title = element_text(size = 20)) -> Fig1a
 
-CountALL_10km |>
+Mammalia_GB_count_10km |>
   as_tibble() |>
   group_by(Observer, FocusTaxaTorF, year) |>
   summarize(Sum_Mammalia = sum(CountT_mammalia),
             Sum_S.vulgaris = sum(CountT_vulgaris),
             Sum_S.carolinensis = sum(CountT_carolinensis),
             Sum_M.martes = sum(CountT_marten),
-            ## not using htese for now but might be interesting to
+            ## not using these for now but might be interesting to
             ## look at
             Cells_Mammalia = sum(CountT_mammalia > 0),
             Cells_S.vulgaris = sum(CountT_vulgaris > 0),
@@ -76,9 +73,7 @@ CountALL_10km |>
   ## the spaces after the \\. are too much for now :-)
   mutate(Taxon = gsub("(M\\.martes|S\\.carolinensis|S\\.vulgaris)", 
                       "italic(\'\\1\')", Taxon)) |>
-  ## to drop the few observations with NA, in taxon focus
-  drop_na() |>
-  ## not the numbr of cells with counts for now but might be
+  ## not the number of cells with counts for now but might be
   ## interestin to look at?!
   filter(measure %in% "Sum") |>
   ggplot(aes(x = year, y = Observations, color = Observer,
@@ -99,11 +94,11 @@ CountALL_10km |>
         strip.text = element_text(size = 18)) -> Fig1b
     
 
-ggpubr::ggarrange(Fig1a, Fig1b,
+Fig1 <- ggpubr::ggarrange(Fig1a, Fig1b,
                   labels = c("A", "B"),
                   ncol = 2, nrow = 1)
 
-ggsave("figures/Fig1.png", width = 18, height = 8)
+ggsave("figures/Fig1.png", Fig1, width = 22, height = 11, bg="white")
 
 
 ## ##Figure 2
