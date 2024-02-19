@@ -342,7 +342,7 @@ complex_map <- cowplot::plot_grid(map_UK, legend_bars, inserts,
                                   ncol = 3, rel_widths = c(1, 0.3, 1),
                                   align = "h", axis = "t")
 
-ggsave("figures/ALL_UK.png", complex_map, width = 600,
+ggsave("figures/Fig2.png", complex_map, width = 600,
        height = 300, unit = "mm")
 
 
