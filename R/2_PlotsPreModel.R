@@ -26,7 +26,6 @@ if (redoDataPrep) {
 Mammalia_GB_count_10km |>
   as_tibble() |>
   ## to drop the few observations with NA, in taxon focus
-  drop_na() |>
   summarize(Sum_Mammalia = sum(CountT_mammalia),
             Sum_S.vulgaris = sum(CountT_vulgaris),
             Sum_S.carolinensis = sum(CountT_carolinensis),
@@ -39,23 +38,23 @@ Mammalia_GB_count_10km |>
   drop_na()|> 
   ggplot(aes(fill = FocusTaxaTorF, y = Sum_Mammalia, x = Observer)) + 
   geom_bar(position = "stack", stat = "identity", width = 0.5) +
-  scale_fill_viridis(discrete = TRUE) +
+  scale_fill_viridis(discrete = TRUE,
+                     labels= c("W/O focus taxon", "With focus taxon")) +
   coord_flip() +
-  ## scale_x_discrete(
-  ##     labels=c("Citizen science", "Mixed", "Scientific")
-  ## ) +
   theme_minimal() +
   xlab("") +
   ylab("Number of Observations") +
-  guides(fill = guide_legend(title = "Has focus taxon")) +
+  guides(fill = guide_legend(title = "")) +
   annotate("rect", xmin = 0.5, xmax = 1.5, ymin = 1.48e+05, ymax = 5.8e+05,
            alpha = 0, color = "red") +
+  annotate("text", x = 1.54, y = 2.1e+05, color = "black",
+            label = "Used in this study", size=5) +
   theme(legend.position = c(0.8, 0.8),  #  position within the plot
-        legend.background = element_rect(color = "black", fill = "white"),
-        legend.text = element_text(size = 18),
-        legend.title = element_text(size = 20),
-        axis.text = element_text(size = 18),
-        axis.title = element_text(size = 20)) -> Fig1a
+        legend.background = element_rect(color = NA, fill = "white"),
+        legend.text = element_text(size = 14),
+        legend.title = element_text(size = 16),
+        axis.text = element_text(size = 16),
+        axis.title = element_text(size = 14)) -> Fig1a
 
 Mammalia_GB_count_10km |>
   as_tibble() |>
@@ -81,6 +80,7 @@ Mammalia_GB_count_10km |>
   ## not the number of cells with counts for now but might be
   ## interestin to look at?!
   filter(measure %in% "Sum") |>
+  drop_na()|> 
   ggplot(aes(x = year, y = Observations, color = Observer,
              linetype = FocusTaxaTorF)) +
   geom_line() +
@@ -88,26 +88,26 @@ Mammalia_GB_count_10km |>
   ##                                     decimal.mark = ",")) +
   facet_wrap(~Taxon, scales = "free_y", labeller = label_parsed) + 
   ylab("Number of observations") +
-  guides(linetype = guide_legend(title = "Has focus taxon")) +
+  guides(linetype = guide_legend(title = "")) +
+  scale_linetype_discrete(labels = c("W/O focus taxon", "With focus taxon")) +
   theme_minimal() +
   theme(legend.position = c(0.15, 0.3),  #  position within the plot
-        legend.background = element_rect(color = "black", fill = "white"),
-        legend.text = element_text(size = 18),
-        legend.title = element_text(size = 20),
-        axis.text = element_text(size = 18),
-        axis.title = element_text(size = 20),
-        strip.text = element_text(size = 18)) -> Fig1b
+        legend.background = element_rect(color = NA, fill = "white"),
+        legend.text = element_text(size = 14),
+        legend.title = element_text(size = 16),
+        axis.text = element_text(size = 14),
+        axis.title = element_text(size = 16),
+        strip.text = element_text(size = 14)) -> Fig1b
     
 
 Fig1 <- ggpubr::ggarrange(Fig1a, Fig1b,
-                  labels = c("A", "B"),
+                  labels = c("a", "b"),
                   ncol = 2, nrow = 1)
 
 ggsave("figures/Fig1.png", Fig1, width = 22, height = 11, bg="white")
 
 
 ## ##Figure 2
-
 
 ## Create a palette for our landscape categories
 reds <- brewer.pal(n = 9, name = "YlOrRd")[c(6, 8)]
