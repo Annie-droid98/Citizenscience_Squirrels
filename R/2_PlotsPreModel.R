@@ -3,6 +3,11 @@ library(ggtext)
 library(tidyr)
 library(dplyr)
 library(viridis)
+library(cowplot)
+library(patchwork)
+library(ggalluvial)
+library(RColorBrewer)
+
 
 ## prepare the data from scratch
 redoDataPrep <- TRUE
@@ -103,131 +108,261 @@ ggsave("figures/Fig1.png", Fig1, width = 22, height = 11, bg="white")
 
 ## ##Figure 2
 
-## writeRaster(clc_2018_landcover_squirrels, "clc_2018_landcover_categories_Squirrels")
-## clc_2018_landcover_squirrels <- raster("clc_2018_landcover_categories_Squirrels")
 
-## df_Mammalia_GB_count<- readRDS("CountforFigure2.rds")
-
-## Ausschnitt_GB <-extent(3542199, 3660000, 3140000, 3220000)
-## crop_vegetationsquirrel_Ausschnitt <- crop(x = clc_2018_landcover_squirrels, Ausschnitt_GB)
-
-## crop_Grid_Ausschnitt <- st_crop(x = df_Mammalia_GB_count, Ausschnitt_GB)
-
-## crop_Grid_Ausschnitt_2018 <- crop_Grid_Ausschnitt|>
-##   filter(year == 2018)
-
-## crop_Grid_Ausschnitt_2018_try <- crop_Grid_Ausschnitt_2018|>
-##   filter(lat < 3220000 & lat> 3140000 & lon < 3660000)
-## cuts_s=c(1,9,11,22,23,24,25,39,44)
-## crop_GB_and_IE_grid_10km_shp <- crop(x = GB_and_IE_grid_10km_shp, Ausschnitt_GB)
-
-## GB_Maße <- raster::extent(2800000,3930000,2880000,4300000)
-## r <- raster()
-## extent(r) <- GB_Maße
-
-## Squirrels_map_GB_crop <- crop(x = clc_2018_landcover_squirrels, y = GB_Maße)
-
-## Ausschnit_Ed <- extent(3400000,3520000,3680000,3760000)
-## crop_vegetationsquirrel_Ausschnitt_Ed <- crop(x = clc_2018_landcover_squirrels, Ausschnit_Ed)
-
-## crop_Grid_Ausschnitt_Ed <- st_crop(x = Mammaliacount_10km, Ausschnit_Ed)
-## crop_Grid_Ausschnitt_Ed_2018 <- crop_Grid_Ausschnitt_Ed|>
-##   filter(year == 2018)
-
-## crop_Grid_Ausschnitt_2018_try_Ed <- crop_Grid_Ausschnitt_Ed_2018 |>
-##   filter(lat < 3765000 & lat> 3675000 & long < 3525000 & long > 3395000)
-
-## crop_GB_and_IE_grid_10km_shp_Ed <- crop(x = GB_and_IE_grid_10km_shp, Ausschnit_Ed)
+## Create a palette for our landscape categories
+reds <- brewer.pal(n = 9, name = "YlOrRd")[c(6, 8)]
+greens <- brewer.pal(n=9, name="Greens")[c(5, 7, 9)]
+browns <- brewer.pal(n = 9, name = "BrBG")[c(2, 4)]
+blue <- brewer.pal(n = 9, name = "Blues")[c(6, 3)]
 
 
-## #average grid based on citizen science observations
-## df_counted_Mammalia <- readRDS("Counts.rds")
+mypal <- c(reds, greens, browns, blue)
+mypal <- mypal[c(2, 1, 7, 6, 3, 4, 5, 8, 9)]
+
+clc_2018_landcover$landcover_cat[is.na(clc_2018_landcover$landcover_cat)] <- "Ocean"
+
+clc_2018_landcover$landcover_cat <-
+    factor(clc_2018_landcover$landcover_cat,
+           levels = c("Grey urban", "Green urban",
+                      "Agricultural", "Semi natural areas",
+                      "Broad-leaved forest", "Mixed forest", "Coniferous forest",
+                      "Waterbodies", "Ocean"))
+
+## Mammal counts for each grid overall for years
+Ma_counts <- Mammalia_GB_count_10km |>
+  filter(Observer == "Citizen" & FocusTaxaTorF) |>
+  summarise(All_mammalia = sum(CountT_mammalia),
+            .by = "geometry") |>
+  st_transform(crs=st_crs(clc_2018_landcover)) 
+
+## manually setting the box around Edinburgh and Glasgow to match the
+## grid in this area
+bb_scot  <-  st_bbox(c(xmin = 3355000,
+                       ymin = 3679800, 
+                       xmax = 3524000,
+                       ymax = 3759200),
+                     crs = st_crs(clc_2018_landcover))
+
+clc_scot <- st_crop(clc_2018_landcover, bb_scot, as_points=FALSE)
+Ma_counts_scot <- st_crop(Ma_counts, bb_scot)
+
+map_scot <- ggplot() +
+    geom_stars(data = clc_scot["landcover_cat"], downsample = 0) +
+    scale_fill_manual(values = mypal,
+                      guide = "none"
+                      ) +
+    scale_y_continuous("") +
+    scale_x_continuous("") + 
+    theme_minimal() +
+    theme(legend.position = "none") + 
+    geom_sf(data = Ma_counts_scot, alpha=0) + ## for the grid
+    geom_sf_label(data = Ma_counts_scot, aes(label = All_mammalia)) +
+    ggspatial::annotation_scale(
+                   location = 'br', text_family = "Open Sans", text_cex = 1.2,
+                   pad_x = unit(1.05, "cm"),
+                   pad_y = unit(0.07, "cm")
+               ) +
+    ggspatial::annotation_north_arrow(location = "bl",
+                                      rotation = 348) 
+
+map_scot_tmp <- ggplot() +
+    geom_stars(data = clc_scot["landcover_cat"], downsample = 0) +
+    scale_fill_manual(values = mypal,
+                      name = "Landuse:"
+                      ) +
+    theme(legend.background = element_rect(color = NA))
+
+fill_legend <- cowplot::get_legend(map_scot_tmp)
+
+## manually setting the box around London to match the
+## grid in this area
+bb_lond  <-  st_bbox(c(xmin = 3534800,
+                       ymin = 3159800, 
+                       xmax = 3704000,
+                       ymax = 3239200),
+                     crs = st_crs(clc_2018_landcover))
+
+clc_lond <- st_crop(clc_2018_landcover, bb_lond, as_points=FALSE)
+Ma_counts_lond <- st_crop(Ma_counts, bb_lond)
 
 
-## df_counted_Mammalia_try <- df_counted_Mammalia|>
-##   dplyr::select(CELLCODE, Grey_urban,green_urban, Agrar,Broadleafed_Forest,Coniferous_Forest, Mixed_Forest,Other_seminatural, Waterbodies)
+map_lond <- ggplot() +
+    geom_stars(data = clc_lond["landcover_cat"], downsample = 0) +
+    scale_fill_manual(values = mypal,
+                      guide = "none"
+                      ) +
+    scale_y_continuous("") +
+    scale_x_continuous("") + 
+    theme_minimal() +
+    theme(legend.position = "none") + 
+    geom_sf(data=Ma_counts_lond, alpha=0) + ## for the grid
+    geom_sf_label(data = Ma_counts_lond, aes(label=All_mammalia)) +
+    ggspatial::annotation_scale(
+                   location = 'br', text_family = "Open Sans", text_cex = 1.2,
+                   pad_x = unit(1.05, "cm"),
+                   pad_y = unit(0.07, "cm")
+               ) +
+    ggspatial::annotation_north_arrow(location = "bl",
+                                      rotation = 348) 
 
-## df_counted_Mammalia_try_2 <- unique(df_counted_Mammalia_try)
-## df_counted_Mammalia_try_2 <- colMeans(df_counted_Mammalia_try_2[2:9])|>
-##   as.data.frame()
+All_UK <- ggplot() +
+    geom_stars(data = clc_2018_landcover["landcover_cat"], downsample = 0) +
+    scale_fill_manual(values = mypal,
+                      guide = "none"
+                      ) +
+    scale_y_continuous("") +
+    scale_x_continuous("") +
+    geom_sf(data = st_as_sfc(bb_scot), aes(fill = NULL),
+            color = "black", alpha = 0, linewidth = 1, show.legend = FALSE) +
+    geom_text(aes(x = bb_scot["xmin"],y = bb_scot["ymin"],
+                  label = "c) Scotland (part)"),
+              vjust = "outward", hjust = "outward",
+              nudge_x = 2000, nudge_y = 5000) + 
+    geom_sf(data = st_as_sfc(bb_lond), aes(fill = NULL),
+            color = "black", alpha = 0, linewidth = 1, show.legend = FALSE) +
+    geom_text(aes(x = bb_lond["xmin"],y = bb_lond["ymin"],
+                  label = "d) London"),
+              vjust = "inward", hjust = "outward",
+              nudge_x = 5000, nudge_y = 5000) + 
+    ggspatial::annotation_scale(
+                   location = 'br', text_family = "Open Sans", text_cex = 1.2
+               ) +
+    ggspatial::annotation_north_arrow(location = "bl",
+                                      rotation = 348) +
+    theme_minimal() 
 
-## df_counted_Mammalia_try_2<-tibble::rownames_to_column(df_counted_Mammalia_try_2, "Vegetationtype")
-## colnames(df_counted_Mammalia_try_2)<- c("Landcover","Proportion")
-## df_counted_Mammalia_try_2 <- df_counted_Mammalia_try_2|> 
-##   mutate(Year = "of total area")
-## df_counted_Mammalia_try_2 <- df_counted_Mammalia_try_2|> 
-##   mutate_at(vars(Proportion),
-##             .funs = funs(. * 100))
-## df_counted_Mammalia_try_3 <- df_counted_Mammalia_try_2|>
-##   mutate_at(vars(Proportion),
-##             funs(round(., 1)))
+## overview map
+sf_world <- 
+  st_as_sf(rworldmap::getMap(resolution = "low")) %>% 
+    st_transform(crs = st_crs(clc_2018_landcover)) %>% 
+    st_buffer(dist = 0) %>% 
+    dplyr::select(ISO_A2, SOVEREIGNT, LON, continent) %>% 
+  mutate(area = st_area(.))
 
-## Mammalia_in_GB <- Mammalia_citizenscience|>
-##   dplyr:: select(species, year, long, lat)|>
-##   as.data.frame()
-## #Observations in each landcover type
-## Mammalia_in_Gb_2 <- SpatialPointsDataFrame(coords = Mammalia_in_GB[,3:4], data =Mammalia_in_GB)
-## extract_Mammalia <- raster:: extract(clc_2018_landcover_squirrels ,Mammalia_in_Gb_2 )
-## Values_Mammalia <- cbind(Mammalia_in_Gb_2,extract_Mammalia)
-## Values_Mammalia_df <- as.data.frame(Values_Mammalia)
-## Values_Mammalia_df$Vegetation <-Values_Mammalia_df$c.39..44..11..9..22..9..22..9..22..9..9..9..39..9..22..9..11.. 
-## Vegetation_of_each_obs <- Values_Mammalia_df|>
-##   count(Vegetation,  sort = F)            
-## Percentage_obs_inVeg <-transform(Vegetation_of_each_obs, Percentage_Mamm = Vegetation_of_each_obs[2]/colSums(Vegetation_of_each_obs[2]))
-## Percentage_obs_inVeg<- Percentage_obs_inVeg[-c(9),]|>
-##   mutate(Year = "of observations")|>
-##   mutate_at(vars(n.1),
-##             .funs = funs(. * 100))|>
-##   mutate_at(vars(n.1),
-##             funs(round(., 1)))
-## Percentage_obs_inVeg$Landcover <- c("Grey_urban", "green_urban", "Agrar", "Broadleafed_Forest", "Coniferous_Forest", "Mixed_Forest","Other_seminatural","Waterbodies")
+## seems convoluted... easiere way?
+xmin_UK <- min(st_get_dimension_values(clc_2018_landcover, "x", where = "start"))
+xmax_UK <- max(st_get_dimension_values(clc_2018_landcover, "x", where = "end"))
+ymin_UK <- min(st_get_dimension_values(clc_2018_landcover, "y", where = "start"))
+ymax_UK <- max(st_get_dimension_values(clc_2018_landcover, "y", where = "end"))
 
-## Percentage_obs_inVeg_try<-Percentage_obs_inVeg|>
-##   dplyr::select(Landcover,n.1, Year)
-## Percentage_obs_inVeg_try<- Percentage_obs_inVeg_try|>
-##   rename(Proportion = n.1)
-## perc_try <-rbind(df_counted_Mammalia_try_3,Percentage_obs_inVeg_try)
-## perc_try_3 <-perc_try
-## perc_try_3$Year <-factor(perc_try_3$Year, levels = c("of total area", "of observations"))
-## perc_try_4 <- transform(perc_try_3, Year_num = ifelse(Year == "of observations",
-##                                                       as.numeric(factor(Year)) - .25,
-##                                                       as.numeric(factor(Year)) + .25) )
-## pdf("EineMap_Inseln.pdf", width= 11, height=14)
-## plot(crop_vegetationsquirrel_Ausschnitt,  legend = FALSE, breaks=cuts_s, col= c("#737373","#addd8e","#fec44f","#005a32","#8c2d04","#88419d","#dd3497","#0c2c84"),xaxt = "n", yaxt = "n")
-## #axis(1, at = c(3540000, 3570000, 3600000, 3630000, 3660000))
-## #axis(2, at = c(3125000, 3150000, 31750000, 3200000, 3225000))
-## text(x = crop_Grid_Ausschnitt_2018_try$lon,
-##      y = crop_Grid_Ausschnitt_2018_try$lat,
-##      labels = crop_Grid_Ausschnitt_2018_try$AllMammalia, col = "black", font = 2, cex=2.5)
-## plot(crop_GB_and_IE_grid_10km_shp , add=T)
+map_europe <- 
+  ggplot(sf_world) +
+  geom_sf(fill = "grey80", color = "grey96", lwd = .1) +
+  geom_rect(
+      xmin = xmin_UK, xmax = xmax_UK, ymin = ymin_UK, ymax = ymax_UK,
+      color = "#212121", size = .7, fill = NA,
+  ) +
+  geom_sf_text(
+      data = filter(sf_world, ISO_A2 %in% c("FR", "ES", "GB", "PT", "NL", "IE", 
+                                            "NL", "BE", "LU"
+    )),
+    aes(label = ISO_A2),
+    family = "Open Sans", color = "grey40", fontface = "bold", size = 4.5,
+    nudge_x = 20000, nudge_y = -10000
+  ) +
+  ggspatial::annotation_scale(
+    location = 'br', text_family = "Open Sans", text_cex = 1.2
+  ) +
+  coord_sf(xlim = c(2650000, 4150000), ylim = c(1750000, 4400000)) +
+  scale_x_continuous(expand = c(0, 0), breaks = seq(-10, 30, by = 10)) +
+  labs(x = NULL, y = NULL) +
+  theme_map() +
+  theme(panel.ontop = FALSE,
+        panel.grid.major = element_line(color = "grey75", linetype = "15", linewidth = .3))
 
-## plot(Squirrels_map_GB_crop,  legend = FALSE, breaks=cuts_s, col= c("#737373","#addd8e","#fec44f","#005a32","#8c2d04","#88419d","#dd3497","#0c2c84"),xaxt = "n", yaxt = "n")
-## #xlim=c(2900000,4500000), ylim=c(3000000,4300000)
-## plot(crop_vegetationsquirrel_Ausschnitt_Ed,  legend = FALSE, breaks=cuts_s, col= c("#737373","#addd8e","#fec44f","#005a32","#8c2d04","#88419d","#dd3497","#0c2c84"), xaxt = "n", yaxt = "n") # ann
-## #xlim=c(3380000,3520000),ylim=c(3680000,3760000)
-## text(x = crop_Grid_Ausschnitt_2018_try_Ed$lon,
-##      y = crop_Grid_Ausschnitt_2018_try_Ed$lat,
-##      labels = crop_Grid_Ausschnitt_2018_try_Ed$AllMammalia, col = "black", font = 2, cex=2.5)
-## plot(crop_GB_and_IE_grid_10km_shp_Ed, add=T)
+map_globe <- d6berlin::globe(col_earth = "grey80", col_water = "grey96",
+                             bg = TRUE, center = c(0.0, 52))
 
-## dev.off()
+map_UK <- All_UK +
+    inset_element(map_globe,  .0, .8, .42, .95, align_to = "plot") + 
+    inset_element(map_europe, .01, .55, .42, .82, align_to = "plot")
 
-## pdf("Barplot_Inseln.pdf", width= 7, height=5.5)
-## ggplot(perc_try_4, aes(x = Year, y = Proportion, fill = Landcover)) + 
-##   geom_bar(width = 0.5,stat = "identity") +
-##   # scale_x_discrete(limits = c("of total area", "of observations")) +
-##   geom_line( aes(x = Year_num), 
-##              position = position_stack())+
-##   geom_text(aes(label = paste0(Proportion, "%")),
-##             position = position_stack(vjust = 0.5), size = 7) +
-##   scale_fill_manual(values = c("#fec44f","#005a32","#8c2d04","#addd8e","#737373","#88419d","#dd3497","#0c2c84"),
-##                     labels = c("Agricultural", "Broadleafed forest","Coniferous forest","Green urban",
-##                                "Grey urban","Mixed forest","Other seminatural", "Waterbodies"))+
-##   # scale_fill_brewer(palette = "Set1") +
-##   theme_minimal(base_size = 16) +
-##   ylab("Percentage") +
-##   xlab(NULL)+
-##   theme(plot.title = element_text(size = rel(2.4),face ='bold'))
 
-## dev.off()
+## The proportions of area and counts
+
+Proportions_lu <- Mammalia_GB_count_10km |>
+  as_tibble()|> ## to get rid of the geometry
+  filter(Observer == "Citizen" & FocusTaxaTorF) |>
+  summarise(across(starts_with("PropL_"), ~ mean(.x, na.rm = TRUE)))
+
+Proportions_co <- Mammalia_GB_count_10km |>
+  as_tibble()|> ## to get rid of the geometry
+  filter(Observer == "Citizen" & FocusTaxaTorF) |>
+  summarise(across(starts_with("PropL_"),
+                   ~ weighted.mean(.x, CountT_mammalia, na.rm = TRUE)))
+
+Proportions <- data.frame("Area" = t(Proportions_lu),
+                          "Counts" = t(Proportions_co)) %>%
+    as_tibble(rownames="Landuse") %>%
+    mutate(Landuse = case_match(Landuse, 
+                                "PropL_Grey_urban" ~ "Grey urban", 
+                                "PropL_Green_urban" ~ "Green urban",
+                                "PropL_Agricultural" ~ "Agricultural",
+                                "PropL_Broadleafed_Forest" ~ "Broad-leaved forest", 
+                                "PropL_Coniferous_Forest" ~ "Coniferous forest", 
+                                "PropL_Mixed_Forest" ~ "Mixed forest", 
+                                "PropL_Other_seminatural" ~ "Semi natural areas", 
+                                "PropL_Water" ~ "Waterbodies")) %>%
+    mutate(Landuse =
+               factor(Landuse, 
+                      levels = c("Grey urban", "Green urban",
+                                 "Agricultural", "Semi natural areas",
+                                 "Broad-leaved forest", "Mixed forest",
+                                 "Coniferous forest", "Waterbodies"))) %>%
+    pivot_longer(!Landuse, names_to = "Class", values_to = "Value") 
+
+
+Proportions_plot <-
+    Proportions %>%
+    ggplot(aes(x = Class, y = Value, fill = Landuse)) +
+    geom_flow(aes(alluvium = Landuse), alpha= .5, color = "white",
+              curve_type = "linear",
+              width = .5) +
+    geom_col(width = .5, color = "white") +
+    scale_fill_manual(values = mypal[-length(mypal)],
+                      guide = "none") +
+    scale_y_continuous("Percent (%)", labels = c(0, 25, 50, 75, 100)) +
+    scale_x_discrete("", labels = c("of the area", "of counts\n(in area)")) + 
+    theme(legend.position = "none") + 
+    theme_minimal()
+
+
+### Putting it togehter
+inserts <- cowplot::plot_grid(map_scot, map_lond,
+                              labels = c("c", "d"),
+                              nrow = 2)
+
+legend_bars <- cowplot::plot_grid(fill_legend, Proportions_plot,
+                                  labels = c("", "b"),
+                                  nrow = 2)
+                                  
+
+complex_map <- cowplot::plot_grid(map_UK, legend_bars, inserts,
+                                  labels = c("a", "", "", "", ""),
+                                  ncol = 3, rel_widths = c(1, 0.3, 1),
+                                  align = "h", axis = "t")
+
+ggsave("figures/ALL_UK.png", complex_map, width = 600,
+       height = 300, unit = "mm")
+
+
+## Instead of proportions counting directly in which kind of landcover
+## an observation was made
+
+## Mammalia_relevant <- Mammalia_GB_Pub |>
+##     filter(Observer == "Citizen" & FocusTaxaTorF)
+
+## landcover_relevant <- clc_2018_landcover %>%
+##     st_as_sf() %>%
+##     filter(!is.na(landcover_cat)) %>%
+##     st_transform(3035)
+
+
+## counts_landcover <- st_join(landcover_relevant, Mammalia_relevant)
+
+## ## what
+##     summarize(Value = mean()) %>%
+    
+    
+
 

@@ -8,7 +8,7 @@ library(patchwork)
 library(gt)
 
 
-redoDataPrep <- TRUE
+redoDataPrep <- FALSE
 
 ## read in the data you need to reproduce the models
 if (redoDataPrep) {
@@ -24,8 +24,9 @@ d <- as_tibble(Mammalia_GB_count_10km) |>
           !FocusTaxaTorF)
 
 ## test whether we're alright
-if(!all(table(d$year)==4409)){
-    stop("Each year should have 4409 grid cells accessed")
+if(!all(table(d$year)==3782)){ ## previously this was
+                               ## !all(table(d$year)==4409)
+    stop("Each year should have 3782 grid cells accessed")
 }
 
 mesh <- INLA::inla.mesh.2d(loc = d[, c("lon", "lat")], max.n = 100, max.edge = c(3, 20))
@@ -280,3 +281,4 @@ cbind(pval_table_vulgaris, pval_table_carolinensis) |>
     sub_zero(zero_text="<0.001") -> out
 
 gtsave(out, "tables/Table_ModelsLRT.html")
+#

@@ -53,7 +53,7 @@ if(rm_intermediate) rm(clc_2018_landcover_raw)
 ## quick visualization for checking things
 if (draw_plot) {
   ggplot() + geom_stars(data = clc_2018_landcover["landcover_cat"], downsample = 20)
-  ggplot() + geom_stars(data = clc_2018_landcover["grey"], downsample = 20)
+  ggplot() + geom_stars(data = clc_2018_landcover["PropL_Grey_urban"], downsample = 20)
 }
 
 ## demand a recent version of stars
