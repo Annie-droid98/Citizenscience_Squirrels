@@ -8,7 +8,7 @@ library(patchwork)
 library(gt)
 
 
-redoDataPrep <- FALSE
+redoDataPrep <- TRUE
 
 ## read in the data you need to reproduce the models
 if (redoDataPrep) {
@@ -32,14 +32,14 @@ if(!all(table(d$year)==3782)){ ## previously this was
 mesh <- INLA::inla.mesh.2d(loc = d[, c("lon", "lat")], max.n = 100, max.edge = c(3, 20))
 
 full_formula <- formula(CountT_vulgaris ~ offset(CountT_mammalia_log) + year_from_2000 +
-                        PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Other_seminatural + 
+                        PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Semi_natural_areas + 
                         PropT_marten+
                         PropT_carolinensis +
-                        PropL_Mixed_Forest + PropL_Broadleafed_Forest + PropL_Coniferous_Forest +
+                        PropL_Mixed_forest + PropL_Broadleaf_forest + PropL_Coniferous_forest +
                         PropT_carolinensis:PropT_marten +
                         PropT_carolinensis:PropL_Grey_urban + PropT_carolinensis:PropL_Green_urban +
-                        PropT_carolinensis:PropL_Mixed_Forest + PropT_carolinensis:PropL_Broadleafed_Forest +
-                        PropT_carolinensis:PropL_Coniferous_Forest)
+                        PropT_carolinensis:PropL_Mixed_forest + PropT_carolinensis:PropL_Broadleaf_forest +
+                        PropT_carolinensis:PropL_Coniferous_forest)
 
 
 formulas_vulgaris <-
@@ -54,7 +54,7 @@ formulas_vulgaris <-
          no_agri = update(full_formula, 
                           . ~ . - PropL_Agricultural),
          no_semi = update(full_formula,
-                          . ~ . - PropL_Other_seminatural),
+                          . ~ . - PropL_Semi_natural_areas),
          no_marten = update(full_formula, 
                             . ~ . - PropT_marten -
                                 PropT_carolinensis:PropT_marten),
@@ -63,18 +63,18 @@ formulas_vulgaris <-
                                       PropT_carolinensis:PropT_marten -
                                       PropT_carolinensis:PropL_Grey_urban -
                                       PropT_carolinensis:PropL_Green_urban -
-                                      PropT_carolinensis:PropL_Mixed_Forest -
-                                      PropT_carolinensis:PropL_Broadleafed_Forest -
-                                      PropT_carolinensis:PropL_Coniferous_Forest),
+                                      PropT_carolinensis:PropL_Mixed_forest -
+                                      PropT_carolinensis:PropL_Broadleaf_forest -
+                                      PropT_carolinensis:PropL_Coniferous_forest),
          no_mixed = update(full_formula,
-                           . ~ . -  PropL_Mixed_Forest -
-                               PropT_carolinensis:PropL_Mixed_Forest),
+                           . ~ . -  PropL_Mixed_forest -
+                               PropT_carolinensis:PropL_Mixed_forest),
          no_brlf = update(full_formula,
-                          . ~ . - PropL_Broadleafed_Forest -
-                              PropT_carolinensis:PropL_Broadleafed_Forest),
+                          . ~ . - PropL_Broadleaf_forest -
+                              PropT_carolinensis:PropL_Broadleaf_forest),
          no_conif = update(full_formula,
-                           . ~ . - PropL_Coniferous_Forest -
-                               PropT_carolinensis:PropL_Coniferous_Forest),
+                           . ~ . - PropL_Coniferous_forest -
+                               PropT_carolinensis:PropL_Coniferous_forest),
          no_caro_marten = update(full_formula,
                                  . ~ . - PropT_carolinensis:PropT_marten),
          no_caro_grey = update(full_formula,
@@ -82,11 +82,11 @@ formulas_vulgaris <-
          no_caro_green = update(full_formula,
                                 . ~ . - PropT_carolinensis:PropL_Green_urban),
          no_caro_mixed = update(full_formula,
-                                . ~ . - PropT_carolinensis:PropL_Mixed_Forest), 
+                                . ~ . - PropT_carolinensis:PropL_Mixed_forest), 
          no_caro_brlf = update(full_formula,
-                               . ~ . - PropT_carolinensis:PropL_Broadleafed_Forest),
+                               . ~ . - PropT_carolinensis:PropL_Broadleaf_forest),
          no_caro_conif = update(full_formula,
-                                . ~ . - PropT_carolinensis:PropL_Coniferous_Forest)
+                                . ~ . - PropT_carolinensis:PropL_Coniferous_forest)
          )
 
 ##

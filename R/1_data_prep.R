@@ -32,20 +32,20 @@ clc_2018_landcover_raw |>
                                     c(01:09) ~ "Grey urban",
                                     c(10:11) ~ "Green urban",
                                     c(12:22) ~ "Agricultural",
-                                    23       ~ "Broad-leaved forest",
+                                    23       ~ "Broadleaf forest",
                                     24       ~ "Coniferous forest",
                                     25       ~ "Mixed forest",
-                                    c(26:39) ~ "Semi natural areas",
+                                    c(26:39) ~ "Semi-natural areas",
                                     c(40:44) ~ "Waterbodies",
                                     .default = NA
                                     )) |>
   mutate(PropL_Grey_urban = landcover_cat == "Grey urban",
          PropL_Green_urban = landcover_cat == "Green urban",
          PropL_Agricultural = landcover_cat == "Agricultural",
-         PropL_Broadleafed_Forest = landcover_cat == "Broad-leaved forest",
-         PropL_Coniferous_Forest = landcover_cat == "Coniferous forest",
-         PropL_Mixed_Forest = landcover_cat == "Mixed forest",
-         PropL_Other_seminatural = landcover_cat == "Semi natural areas",
+         PropL_Broadleaf_forest = landcover_cat == "Broadleaf forest",
+         PropL_Coniferous_forest = landcover_cat == "Coniferous forest",
+         PropL_Mixed_forest = landcover_cat == "Mixed forest",
+         PropL_Semi_natural_areas = landcover_cat == "Semi-natural areas",
          PropL_Water = landcover_cat == "Waterbodies") -> clc_2018_landcover
 
 if(rm_intermediate) rm(clc_2018_landcover_raw) 

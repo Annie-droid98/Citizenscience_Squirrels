@@ -124,8 +124,8 @@ clc_2018_landcover$landcover_cat[is.na(clc_2018_landcover$landcover_cat)] <- "Oc
 clc_2018_landcover$landcover_cat <-
     factor(clc_2018_landcover$landcover_cat,
            levels = c("Grey urban", "Green urban",
-                      "Agricultural", "Semi natural areas",
-                      "Broad-leaved forest", "Mixed forest", "Coniferous forest",
+                      "Agricultural", "Semi-natural areas",
+                      "Broadleaf forest", "Mixed forest", "Coniferous forest",
                       "Waterbodies", "Ocean"))
 
 ## Mammal counts for each grid overall for years
@@ -298,16 +298,16 @@ Proportions <- data.frame("Area" = t(Proportions_lu),
                                 "PropL_Grey_urban" ~ "Grey urban", 
                                 "PropL_Green_urban" ~ "Green urban",
                                 "PropL_Agricultural" ~ "Agricultural",
-                                "PropL_Broadleafed_Forest" ~ "Broad-leaved forest", 
-                                "PropL_Coniferous_Forest" ~ "Coniferous forest", 
-                                "PropL_Mixed_Forest" ~ "Mixed forest", 
-                                "PropL_Other_seminatural" ~ "Semi natural areas", 
+                                "PropL_Broadleaf_forest" ~ "Broadleaf forest", 
+                                "PropL_Coniferous_forest" ~ "Coniferous forest", 
+                                "PropL_Mixed_forest" ~ "Mixed forest", 
+                                "PropL_Semi_natural_areas" ~ "Semi-natural areas", 
                                 "PropL_Water" ~ "Waterbodies")) %>%
     mutate(Landuse =
                factor(Landuse, 
                       levels = c("Grey urban", "Green urban",
-                                 "Agricultural", "Semi natural areas",
-                                 "Broad-leaved forest", "Mixed forest",
+                                 "Agricultural", "Semi-natural areas",
+                                 "Broadleaf forest", "Mixed forest",
                                  "Coniferous forest", "Waterbodies"))) %>%
     pivot_longer(!Landuse, names_to = "Class", values_to = "Value") 
 
