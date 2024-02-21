@@ -75,16 +75,17 @@ if (draw_plot) {
 
 if(rm_intermediate) rm(clc_2018_landcover) 
 
-## download the GBIF data
-## csv = download from Gbif, doi:doi.org/10.15468/dl.tu6vjj
-temp <- tempfile()
-download.file("https://api.gbif.org/v1/occurrence/download/request/0169558-210914110416597.zip", temp)
 
-## read in the GBIF data
+
+## download the GBIF data FOR ALL VERTEBRATA
+## csv = download from Gbif,
+## GBIF.org (11 March 2022) GBIF Occurrence Download https://doi.org/10.15468/dl.aphjfg
+temp <- tempfile()
+
+download.file("https://api.gbif.org/v1/occurrence/download/request/0179718-210914110416597.zip" , temp)
+
 data_GB <- vroom(temp, quote = "", show_col_types = FALSE)
 
-## check for issues
-## note: here columns with issues are not relevant for this analysis
 colnames(data_GB)[unique(problems(data_GB)$col)]
 
 ## format GBIF data
@@ -94,28 +95,72 @@ data_GB |>
   st_as_sf(coords = c(2, 3)) |>
   st_set_crs(4326) |> ## set the coordinate system as it is
   ## project into the coordinate system needed (that of the landuse data)
-  st_transform(3035) -> Mammalia_GB
+  st_transform(3035) -> Taxa_GB
 
 if(rm_intermediate) rm(data_GB)  
 
-
 if(draw_plot) {
-Mammalia_GB %>% filter(species%in%"Sciurus vulgaris") %>%
+Taxa_GB %>% filter(species%in%"Sciurus vulgaris") %>%
     ggplot() + geom_sf()
 }
 
 ## Publisher categorisation
 Publishers <- vroom("input_data/SquirrelPublisherBelow1000obs.csv", show_col_types = FALSE)
 
-### Merge the two datasets
-full_join(Mammalia_GB, Publishers, by = "datasetKey", relationship = "many-to-many") |> 
-  ## keep only records with species
-  filter(!is.na(species)) -> Mammalia_GB_Pub
+Publishers2 <- vroom("input_data/SquirrelPublisherBelow1000obsVertebrata.csv",
+                     show_col_types = FALSE)
 
-if(rm_intermediate) rm(Mammalia_GB) 
+
+foo <- merge(Publishers,
+             Publishers2, by.x="datasetKey", by.y="Datasetkey",
+             all=TRUE)
+
+colnames(foo) <- gsub("\\.x", "_Mam", colnames(foo))
+colnames(foo) <- gsub("\\.y", "_Ver", colnames(foo))
+
+table(Mam=foo$Observer_Mam, Ver=foo$Observer_Ver, useNA="ifany")
+
+foo$Observer <- ifelse(foo$Observer_Mam %in% "Citizen" | foo$Observer_Ver %in% "1",
+                       "Citizen", 
+                ifelse(foo$Observer_Mam %in% "Mixed" | foo$Observer_Ver %in% "2",
+                       "Mixed", 
+                ifelse(foo$Observer_Mam %in% "Scientific" | foo$Observer_Ver %in% "3",
+                       "Scientific", NA)))
+
+table(foo$Observer, useNA="ifany")
+
+length(foo$datasetKey)
+length(unique(foo$datasetKey))
+
+dupes <- foo$datasetKey[duplicated(foo$datasetKey)]
+
+foo[foo$datasetKey%in%dupes, ]
+## can be dropped, just an issue in the  naming
+
+foo <- foo[!duplicated(foo$datasetKey), ]
+
+### Now the focus
+table(Mam=foo$FocusTaxaTorF_Mam, useNA="ifany")
+
+table(Ver=foo$FocusTaxaTorF_Ver, useNA="ifany")
+
+table(Mam=foo$FocusTaxaTorF_Mam, Ver=foo$FocusTaxaTorF_Ver, useNA="ifany")
+
+foo$HasFocusVert <- ifelse(foo$FocusTaxaTorF_Mam, TRUE, foo$FocusTaxaTorF_Ver)
+
+foo$HasFocusMam <-  foo$FocusTaxaTorF_Mam
+
+write.csv(foo, "intermediate_data/Focus_cleanup.csv")
+
+### Merge the two datasets
+full_join(Taxa_GB, Publishers, by = "datasetKey", relationship = "many-to-many") |> 
+  ## keep only records with species
+  filter(!is.na(species)) -> Taxa_GB_Pub
+
+if(rm_intermediate) rm(Taxa_GB) 
 
 Landuse_10k_sfc |> ## used to retain the geometry
-  st_join(Mammalia_GB_Pub) |> 
+  st_join(Taxa_GB_Pub) |> 
   summarise(CountT_mammalia = n(),
             CountT_vulgaris = sum(species == "Sciurus vulgaris"),
             CountT_carolinensis = sum(species == "Sciurus carolinensis"),
@@ -139,20 +184,22 @@ Landuse_10k_sfc |> ## used to retain the geometry
          lat = st_coordinates(Centergrid)[,"Y"]/1e+05) |>
   mutate(
       across(starts_with("PropT"), ~replace_na(.x, 0))) ->
-      Mammalia_GB_count_10km
+      Taxa_GB_count_10km
 
-if(rm_intermediate) rm(Mammalia_GB_Pub, Landuse_10k_sfc)
+if(rm_intermediate) rm(Taxa_GB_Pub, Landuse_10k_sfc)
 
 if(draw_plot){
-Mammalia_GB_count_10km |>
+Taxa_GB_count_10km |>
   filter(year==2020 & Observer == "Citizen" & FocusTaxaTorF) |>
   ggplot() + geom_sf(aes(fill = log(CountT_mammalia+1)))
 }
 
 ## FIXME? We are losing 22418 observations when joining them on the grid
-## see Landuse_10k_sfc |> st_join(Mammalia_GB_Pub) ## in l 117
-if(!rm_intermediate) sum(Mammalia_GB_count_10km$CountT_mammalia) - nrow(Mammalia_GB_Pub)
+## see Landuse_10k_sfc |> st_join(Taxa_GB_Pub) ## in l 117
+if(!rm_intermediate) sum(Taxa_GB_count_10km$CountT_mammalia) - nrow(Taxa_GB_Pub)
+}
 
-saveRDS(Mammalia_GB_count_10km, "intermediate_data/Counts.rds")
+
+saveRDS(Taxa_GB_count_10km, "intermediate_data/Counts.rds")
 
 
