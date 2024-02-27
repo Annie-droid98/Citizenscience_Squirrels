@@ -45,9 +45,9 @@ Taxa_GB_count_10km |>
   xlab("") +
   ylab("Number of Observations") +
   guides(fill = guide_legend(title = "")) +
-  annotate("rect", xmin = 0.5, xmax = 1.5, ymin = 1.48e+05, ymax = 5.8e+05,
+  annotate("rect", xmin = 0.5, xmax = 1.5, ymin = 1.695e+05, ymax = 6.8e+05,
            alpha = 0, color = "red") +
-  annotate("text", x = 1.54, y = 2.1e+05, color = "black",
+  annotate("text", x = 1.54, y = 2.4e+05, color = "black",
             label = "Used in this study", size=5) +
   theme(legend.position = c(0.8, 0.8),  #  position within the plot
         legend.background = element_rect(color = NA, fill = "white"),
