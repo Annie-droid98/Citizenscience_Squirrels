@@ -77,22 +77,28 @@ if(rm_intermediate) rm(clc_2018_landcover)
 
 
 
-## download the GBIF data FOR ALL VERTEBRATA
-## csv = download from Gbif,
-## GBIF.org (11 March 2022) GBIF Occurrence Download https://doi.org/10.15468/dl.aphjfg
-temp <- tempfile()
+## download the GBIF data FOR ALL VERTEBRATA csv = download from Gbif,
+## GBIF.org (21 February 2024) GBIF Occurrence Download
+## https://doi.org/10.15468/dl.7h9n3a this needs 32GB in the tmp
+## directory... chose wisely (hard code to something on your system
+## with the necessary space)!
+temp <- tempfile(tmpdir="/SAN/Annies_BA/")
 
-download.file("https://api.gbif.org/v1/occurrence/download/request/0179718-210914110416597.zip" , temp)
+download.file("https://api.gbif.org/v1/occurrence/download/request/0008421-240216155721649.zip", temp)
 
-data_GB <- vroom(temp, quote = "", show_col_types = FALSE)
+## select columns already during import in vroom
+data_GB <- vroom(temp, quote = "",
+                 col_select = c(species, class, decimalLongitude,
+                                 decimalLatitude, year, datasetKey),
+                 show_col_types = FALSE)
 
-colnames(data_GB)[unique(problems(data_GB)$col)]
+probs <- problems(data_GB)
+## No problmes in these selected columns!
 
 ## format GBIF data
 data_GB |>
-  select(species, decimalLongitude, decimalLatitude, year, datasetKey) |>
-  filter(!is.na(decimalLatitude)) |>
-  st_as_sf(coords = c(2, 3)) |>
+  filter(!is.na(species)) |>
+  st_as_sf(coords = c(3, 4)) |>
   st_set_crs(4326) |> ## set the coordinate system as it is
   ## project into the coordinate system needed (that of the landuse data)
   st_transform(3035) -> Taxa_GB
@@ -104,53 +110,7 @@ Taxa_GB %>% filter(species%in%"Sciurus vulgaris") %>%
     ggplot() + geom_sf()
 }
 
-## Publisher categorisation
-Publishers <- vroom("input_data/SquirrelPublisherBelow1000obs.csv", show_col_types = FALSE)
-
-Publishers2 <- vroom("input_data/SquirrelPublisherBelow1000obsVertebrata.csv",
-                     show_col_types = FALSE)
-
-
-foo <- merge(Publishers,
-             Publishers2, by.x="datasetKey", by.y="Datasetkey",
-             all=TRUE)
-
-colnames(foo) <- gsub("\\.x", "_Mam", colnames(foo))
-colnames(foo) <- gsub("\\.y", "_Ver", colnames(foo))
-
-table(Mam=foo$Observer_Mam, Ver=foo$Observer_Ver, useNA="ifany")
-
-foo$Observer <- ifelse(foo$Observer_Mam %in% "Citizen" | foo$Observer_Ver %in% "1",
-                       "Citizen", 
-                ifelse(foo$Observer_Mam %in% "Mixed" | foo$Observer_Ver %in% "2",
-                       "Mixed", 
-                ifelse(foo$Observer_Mam %in% "Scientific" | foo$Observer_Ver %in% "3",
-                       "Scientific", NA)))
-
-table(foo$Observer, useNA="ifany")
-
-length(foo$datasetKey)
-length(unique(foo$datasetKey))
-
-dupes <- foo$datasetKey[duplicated(foo$datasetKey)]
-
-foo[foo$datasetKey%in%dupes, ]
-## can be dropped, just an issue in the  naming
-
-foo <- foo[!duplicated(foo$datasetKey), ]
-
-### Now the focus
-table(Mam=foo$FocusTaxaTorF_Mam, useNA="ifany")
-
-table(Ver=foo$FocusTaxaTorF_Ver, useNA="ifany")
-
-table(Mam=foo$FocusTaxaTorF_Mam, Ver=foo$FocusTaxaTorF_Ver, useNA="ifany")
-
-foo$HasFocusVert <- ifelse(foo$FocusTaxaTorF_Mam, TRUE, foo$FocusTaxaTorF_Ver)
-
-foo$HasFocusMam <-  foo$FocusTaxaTorF_Mam
-
-write.csv(foo, "intermediate_data/Focus_cleanup.csv")
+Publishers <- read.csv("input_data/SquirrelPublisherBelow1000obs.csv", sep = " ")
 
 ### Merge the two datasets
 full_join(Taxa_GB, Publishers, by = "datasetKey", relationship = "many-to-many") |> 
@@ -161,29 +121,37 @@ if(rm_intermediate) rm(Taxa_GB)
 
 Landuse_10k_sfc |> ## used to retain the geometry
   st_join(Taxa_GB_Pub) |> 
-  summarise(CountT_mammalia = n(),
+  summarise(CountT_vertebrata = n(), 
+            CountT_mammalia = sum(class == "Mammalia"),
             CountT_vulgaris = sum(species == "Sciurus vulgaris"),
             CountT_carolinensis = sum(species == "Sciurus carolinensis"),
             CountT_marten = sum(species == "Martes martes"),
             .by = c("geometry", "year", "Observer", "FocusTaxaTorF")) |>
   filter(!is.na(year)) |>
   complete(geometry, year, Observer, FocusTaxaTorF, 
-           fill = list(CountT_mammalia = 0,
+           fill = list(CountT_vertebrata = 0,
+                       CountT_mammalia = 0,
                        CountT_vulgaris = 0,
                        CountT_carolinensis = 0,
                        CountT_marten = 0)) |> 
   st_as_sf() |> 
   st_join(Landuse_10k_sfc, join=st_equals) |> ## to add landcover columns
-  mutate(PropT_carolinensis = CountT_carolinensis/CountT_mammalia, 
-         PropT_vulgaris = CountT_vulgaris/CountT_mammalia, 
-         PropT_marten = CountT_marten/CountT_mammalia,
-         CountT_mammalia_log = log(CountT_mammalia),
-         year_from_2000 = year - 2000,
-         Centergrid = st_centroid(geometry), ## middlepoint of each grid cell 
-         lon = st_coordinates(Centergrid)[,"X"]/1e+05, ## coordinates of these middlepoints, and make them smaller to avoid problems with the model
+  mutate(### Proportions within vertebrata
+      PropV_carolinensis = CountT_carolinensis/CountT_vertebrata, 
+      PropV_vulgaris = CountT_vulgaris/CountT_vertebrata, 
+      PropV_marten = CountT_marten/CountT_vertebrata,
+      ### Proportions within Mammalia
+      PropM_carolinensis = CountT_carolinensis/CountT_mammalia, 
+      PropM_vulgaris = CountT_vulgaris/CountT_mammalia, 
+      PropM_marten = CountT_marten/CountT_mammalia,
+      CountT_mammalia_log = log(CountT_mammalia),
+      CountT_vertebrata_log = log(CountT_vertebrata),
+      year_from_2000 = year - 2000,
+      Centergrid = st_centroid(geometry), ## middlepoint of each grid cell 
+      lon = st_coordinates(Centergrid)[,"X"]/1e+05, ## coordinates of these middlepoints, and make them smaller to avoid problems with the model
          lat = st_coordinates(Centergrid)[,"Y"]/1e+05) |>
   mutate(
-      across(starts_with("PropT"), ~replace_na(.x, 0))) ->
+      across(starts_with("Prop"), ~replace_na(.x, 0))) ->
       Taxa_GB_count_10km
 
 if(rm_intermediate) rm(Taxa_GB_Pub, Landuse_10k_sfc)
@@ -198,7 +166,6 @@ Taxa_GB_count_10km |>
 ## see Landuse_10k_sfc |> st_join(Taxa_GB_Pub) ## in l 117
 if(!rm_intermediate) sum(Taxa_GB_count_10km$CountT_mammalia) - nrow(Taxa_GB_Pub)
 }
-
 
 saveRDS(Taxa_GB_count_10km, "intermediate_data/Counts.rds")
 
