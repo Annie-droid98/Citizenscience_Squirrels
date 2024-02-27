@@ -15,7 +15,7 @@ redoDataPrep <- TRUE
 if (redoDataPrep) {
     source("R/1_data_prep.R")
 } else{
-    Mammalia_GB_count_10km <- readRDS("intermediate_data/Counts.rds")
+    Taxa_GB_count_10km <- readRDS("intermediate_data/Counts.rds")
 }
 
 ###################### Figure 1 and 2
@@ -23,7 +23,7 @@ if (redoDataPrep) {
 
 #Figure 1
 
-Mammalia_GB_count_10km |>
+Taxa_GB_count_10km |>
   as_tibble() |>
   ## to drop the few observations with NA, in taxon focus
   summarize(Sum_Mammalia = sum(CountT_mammalia),
@@ -56,7 +56,7 @@ Mammalia_GB_count_10km |>
         axis.text = element_text(size = 16),
         axis.title = element_text(size = 14)) -> Fig1a
 
-Mammalia_GB_count_10km |>
+Taxa_GB_count_10km |>
   as_tibble() |>
   group_by(Observer, FocusTaxaTorF, year) |>
   summarize(Sum_Mammalia = sum(CountT_mammalia),
@@ -129,7 +129,7 @@ clc_2018_landcover$landcover_cat <-
                       "Waterbodies", "Ocean"))
 
 ## Mammal counts for each grid overall for years
-Ma_counts <- Mammalia_GB_count_10km |>
+Ma_counts <- Taxa_GB_count_10km |>
   filter(Observer == "Citizen" & FocusTaxaTorF) |>
   summarise(All_mammalia = sum(CountT_mammalia),
             .by = "geometry") |>
@@ -250,7 +250,7 @@ map_europe <-
   geom_sf(fill = "grey80", color = "grey96", lwd = .1) +
   geom_rect(
       xmin = xmin_UK, xmax = xmax_UK, ymin = ymin_UK, ymax = ymax_UK,
-      color = "#212121", size = .7, fill = NA,
+      color = "#212121", linewidth = .7, fill = NA,
   ) +
   geom_sf_text(
       data = filter(sf_world, ISO_A2 %in% c("FR", "ES", "GB", "PT", "NL", "IE", 
@@ -280,12 +280,12 @@ map_UK <- All_UK +
 
 ## The proportions of area and counts
 
-Proportions_lu <- Mammalia_GB_count_10km |>
+Proportions_lu <- Taxa_GB_count_10km |>
   as_tibble()|> ## to get rid of the geometry
   filter(Observer == "Citizen" & FocusTaxaTorF) |>
   summarise(across(starts_with("PropL_"), ~ mean(.x, na.rm = TRUE)))
 
-Proportions_co <- Mammalia_GB_count_10km |>
+Proportions_co <- Taxa_GB_count_10km |>
   as_tibble()|> ## to get rid of the geometry
   filter(Observer == "Citizen" & FocusTaxaTorF) |>
   summarise(across(starts_with("PropL_"),
@@ -349,7 +349,7 @@ ggsave("figures/Fig2.png", complex_map, width = 600,
 ## Instead of proportions counting directly in which kind of landcover
 ## an observation was made
 
-## Mammalia_relevant <- Mammalia_GB_Pub |>
+## Mammalia_relevant <- Taxa_GB_Pub |>
 ##     filter(Observer == "Citizen" & FocusTaxaTorF)
 
 ## landcover_relevant <- clc_2018_landcover %>%
