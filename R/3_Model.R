@@ -8,38 +8,44 @@ library(patchwork)
 library(gt)
 
 
-redoDataPrep <- TRUE
+redoDataPrep <- FALSE
 
 ## read in the data you need to reproduce the models
 if (redoDataPrep) {
     source("R/1_data_prep.R")
 } else{
-    Mammalia_GB_count_10km <- readRDS("intermediate_data/Counts.rds")
+    Taxa_GB_count_10km <- readRDS("intermediate_data/Counts.rds")
 }
 
 ## subset it to only citizen-science data without focus taxon within
 ## mammalia
-d <- as_tibble(Mammalia_GB_count_10km) |>
-   filter(Observer%in%"Citizen"&
-          !FocusTaxaTorF)
+d <- as_tibble(Taxa_GB_count_10km) |>
+   filter(Observer%in%"Citizen" &
+          !FocusTaxaTorF &
+          ## also need to remove grid cells which didn't have mammalia
+          ## counted
+          CountT_mammalia_log > 0
+          )
 
-## test whether we're alright
-if(!all(table(d$year)==3782)){ ## previously this was
-                               ## !all(table(d$year)==4409)
-    stop("Each year should have 3782 grid cells accessed")
-}
+## We now have uneven numbers of grid cells per year. But it has to be
+## like that...  Otherwise we'd not be able to normalize by log
+## (higher level taxa) numbers.  
+
+## if(!all(table(d$year)==3787)){ ## previously this was ##
+## !all(table(d$year)==4409) stop("Each year should have 3787 grid
+## cells accessed") }
 
 mesh <- INLA::inla.mesh.2d(loc = d[, c("lon", "lat")], max.n = 100, max.edge = c(3, 20))
 
 full_formula <- formula(CountT_vulgaris ~ offset(CountT_mammalia_log) + year_from_2000 +
                         PropL_Grey_urban + PropL_Green_urban + PropL_Agricultural + PropL_Semi_natural_areas + 
-                        PropT_marten+
-                        PropT_carolinensis +
+                        PropM_marten+
+                        PropM_carolinensis +
                         PropL_Mixed_forest + PropL_Broadleaf_forest + PropL_Coniferous_forest +
-                        PropT_carolinensis:PropT_marten +
-                        PropT_carolinensis:PropL_Grey_urban + PropT_carolinensis:PropL_Green_urban +
-                        PropT_carolinensis:PropL_Mixed_forest + PropT_carolinensis:PropL_Broadleaf_forest +
-                        PropT_carolinensis:PropL_Coniferous_forest)
+                        PropM_carolinensis:PropM_marten +
+                        PropM_carolinensis:PropL_Grey_urban + PropM_carolinensis:PropL_Green_urban +
+                        PropM_carolinensis:PropL_Mixed_forest + PropM_carolinensis:PropL_Broadleaf_forest +
+                        PropM_carolinensis:PropL_Coniferous_forest)
 
 
 formulas_vulgaris <-
@@ -47,46 +53,46 @@ formulas_vulgaris <-
          no_year = update(full_formula, . ~ . - year_from_2000),
          no_grey_urban = update(full_formula,
                                 . ~ . - PropL_Grey_urban -
-                                    PropL_Grey_urban:PropT_carolinensis),
+                                    PropL_Grey_urban:PropM_carolinensis),
          no_green_urban = update(full_formula, 
                                  . ~ . - PropL_Green_urban - 
-                                     PropL_Green_urban:PropT_carolinensis),
+                                     PropL_Green_urban:PropM_carolinensis),
          no_agri = update(full_formula, 
                           . ~ . - PropL_Agricultural),
          no_semi = update(full_formula,
                           . ~ . - PropL_Semi_natural_areas),
          no_marten = update(full_formula, 
-                            . ~ . - PropT_marten -
-                                PropT_carolinensis:PropT_marten),
+                            . ~ . - PropM_marten -
+                                PropM_carolinensis:PropM_marten),
          no_carolinensis = update(full_formula,
-                                  . ~ . - PropT_carolinensis -
-                                      PropT_carolinensis:PropT_marten -
-                                      PropT_carolinensis:PropL_Grey_urban -
-                                      PropT_carolinensis:PropL_Green_urban -
-                                      PropT_carolinensis:PropL_Mixed_forest -
-                                      PropT_carolinensis:PropL_Broadleaf_forest -
-                                      PropT_carolinensis:PropL_Coniferous_forest),
+                                  . ~ . - PropM_carolinensis -
+                                      PropM_carolinensis:PropM_marten -
+                                      PropM_carolinensis:PropL_Grey_urban -
+                                      PropM_carolinensis:PropL_Green_urban -
+                                      PropM_carolinensis:PropL_Mixed_forest -
+                                      PropM_carolinensis:PropL_Broadleaf_forest -
+                                      PropM_carolinensis:PropL_Coniferous_forest),
          no_mixed = update(full_formula,
                            . ~ . -  PropL_Mixed_forest -
-                               PropT_carolinensis:PropL_Mixed_forest),
+                               PropM_carolinensis:PropL_Mixed_forest),
          no_brlf = update(full_formula,
                           . ~ . - PropL_Broadleaf_forest -
-                              PropT_carolinensis:PropL_Broadleaf_forest),
+                              PropM_carolinensis:PropL_Broadleaf_forest),
          no_conif = update(full_formula,
                            . ~ . - PropL_Coniferous_forest -
-                               PropT_carolinensis:PropL_Coniferous_forest),
+                               PropM_carolinensis:PropL_Coniferous_forest),
          no_caro_marten = update(full_formula,
-                                 . ~ . - PropT_carolinensis:PropT_marten),
+                                 . ~ . - PropM_carolinensis:PropM_marten),
          no_caro_grey = update(full_formula,
-                                . ~ . - PropT_carolinensis:PropL_Grey_urban),
+                                . ~ . - PropM_carolinensis:PropL_Grey_urban),
          no_caro_green = update(full_formula,
-                                . ~ . - PropT_carolinensis:PropL_Green_urban),
+                                . ~ . - PropM_carolinensis:PropL_Green_urban),
          no_caro_mixed = update(full_formula,
-                                . ~ . - PropT_carolinensis:PropL_Mixed_forest), 
+                                . ~ . - PropM_carolinensis:PropL_Mixed_forest), 
          no_caro_brlf = update(full_formula,
-                               . ~ . - PropT_carolinensis:PropL_Broadleaf_forest),
+                               . ~ . - PropM_carolinensis:PropL_Broadleaf_forest),
          no_caro_conif = update(full_formula,
-                                . ~ . - PropT_carolinensis:PropL_Coniferous_forest)
+                                . ~ . - PropM_carolinensis:PropL_Coniferous_forest)
          )
 
 ##
@@ -120,6 +126,19 @@ get_init_and_fit <-function(x, y) {
               data = d)
     adapted_fit
 }
+
+## ## try the first fit in case of problmes
+## foo_fit <- fitme(formulas_fixed_vulgaris[[1]],
+##                  family = negbin(link = "log"),
+##                  init=list(corrPars=list("1"=c(kappa=0.26)),NB_shape=2.9,
+##                            lambda=10),
+##                  ## control.HLfit=list(LevenbergM=TRUE), # maybe
+##                  verbose = c(TRACE = TRUE), method="PQL/L", 
+##                  data = d)
+
+## ## try the first fit optimization in case of problems bar_fit <-
+## get_init_and_fit(formulas_fixed_vulgaris[[1]],
+## formulas_init_vulgaris[[1]])
 
 result_vulgaris <- mapply(get_init_and_fit,
                           x = formulas_fixed_vulgaris,
@@ -162,12 +181,12 @@ saveRDS(result_carolinensis, "intermediate_data/gh_ignore/Modelle_carolinensis.r
 corr_vulgaris <- vcov(result_vulgaris[[1]])
 corr_test_vulgaris <- cov2cor(corr_vulgaris)
 
-rownames(corr_test_vulgaris) <- gsub("PropT_c", "S. c", rownames(corr_test_vulgaris))
-rownames(corr_test_vulgaris) <- gsub("PropT_marten", "M. martes", rownames(corr_test_vulgaris))
+rownames(corr_test_vulgaris) <- gsub("PropM_c", "S. c", rownames(corr_test_vulgaris))
+rownames(corr_test_vulgaris) <- gsub("PropM_marten", "M. martes", rownames(corr_test_vulgaris))
 rownames(corr_test_vulgaris) <- gsub("PropL_", "", rownames(corr_test_vulgaris))
 
-colnames(corr_test_vulgaris) <- gsub("PropT_c", "S. c", colnames(corr_test_vulgaris))
-colnames(corr_test_vulgaris) <- gsub("PropT_marten", "M. martes", colnames(corr_test_vulgaris))
+colnames(corr_test_vulgaris) <- gsub("PropM_c", "S. c", colnames(corr_test_vulgaris))
+colnames(corr_test_vulgaris) <- gsub("PropM_marten", "M. martes", colnames(corr_test_vulgaris))
 colnames(corr_test_vulgaris) <- gsub("PropL_", "", colnames(corr_test_vulgaris))
 
 fixCorPlot_vulgaris <-  ggcorrplot(corr_test_vulgaris, hc.order = TRUE,
@@ -177,12 +196,12 @@ fixCorPlot_vulgaris <-  ggcorrplot(corr_test_vulgaris, hc.order = TRUE,
 corr_caro <- vcov(result_carolinensis[[1]])
 corr_test_caro <- cov2cor(corr_caro)
 
-rownames(corr_test_caro) <- gsub("PropT_v", "S. v", rownames(corr_test_caro))
-rownames(corr_test_caro) <- gsub("PropT_marten", "M. martes", rownames(corr_test_caro))
+rownames(corr_test_caro) <- gsub("PropM_v", "S. v", rownames(corr_test_caro))
+rownames(corr_test_caro) <- gsub("PropM_marten", "M. martes", rownames(corr_test_caro))
 rownames(corr_test_caro) <- gsub("PropL_", "", rownames(corr_test_caro))
 
-colnames(corr_test_caro) <- gsub("PropT_v", "S. v", colnames(corr_test_caro))
-colnames(corr_test_caro) <- gsub("PropT_marten", "M. martes", colnames(corr_test_caro))
+colnames(corr_test_caro) <- gsub("PropM_v", "S. v", colnames(corr_test_caro))
+colnames(corr_test_caro) <- gsub("PropM_marten", "M. martes", colnames(corr_test_caro))
 colnames(corr_test_caro) <- gsub("PropL_", "", colnames(corr_test_caro))
 
 fixCorPlot_caro <- ggcorrplot(corr_test_caro, hc.order = TRUE,
@@ -264,11 +283,11 @@ cbind(pval_table_vulgaris, pval_table_carolinensis) |>
     ) |>
     text_replace(
         locations = cells_body(columns = c(Predictor...1, Predictor...8)),
-        pattern = "PropT_(v\\w*|c\\w*)",
+        pattern = "PropM_(v\\w*|c\\w*)",
         replacement = "<br><em>S. \\1</em>") |>
     text_replace(
         locations = cells_body(columns = c(Predictor...1, Predictor...8)),
-        pattern = "PropT_marten",
+        pattern = "PropM_marten",
         replacement = "<br><em>M. martes\\1</em>") |>
     text_replace(
         locations = cells_body(columns = c(Predictor...1, Predictor...8)),
