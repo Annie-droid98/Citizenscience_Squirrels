@@ -25,6 +25,7 @@ if (redoDataPrep) {
 
 Taxa_GB_count_10km |>
   as_tibble() |>
+  mutate(Focus_Mam = Focus%in%"withinMammals") %>%
   ## to drop the few observations with NA, in taxon focus
   summarize(Sum_Mammalia = sum(CountT_mammalia),
             Sum_S.vulgaris = sum(CountT_vulgaris),
@@ -58,6 +59,7 @@ Taxa_GB_count_10km |>
 
 Taxa_GB_count_10km |>
   as_tibble() |>
+  mutate(Focus_Mam = Focus%in%"withinMammals") |>
   group_by(Observer, Focus_Mam, year) |>
   summarize(Sum_Mammalia = sum(CountT_mammalia),
             Sum_S.vulgaris = sum(CountT_vulgaris),
@@ -130,7 +132,7 @@ clc_2018_landcover$landcover_cat <-
 
 ## Mammal counts for each grid overall for years
 Ma_counts <- Taxa_GB_count_10km |>
-  filter(Observer == "Citizen" & !Focus_Mam) |>
+  filter(Observer == "Citizen" & Focus!="withinMammals") |>
   summarise(All_mammalia = sum(CountT_mammalia),
             .by = "geometry") |>
   st_transform(crs=st_crs(clc_2018_landcover)) 
@@ -282,12 +284,12 @@ map_UK <- All_UK +
 
 Proportions_lu <- Taxa_GB_count_10km |>
   as_tibble()|> ## to get rid of the geometry
-  filter(Observer == "Citizen" & !Focus_Mam) |>
+  filter(Observer == "Citizen" & Focus!="withinMammals") |>
   summarise(across(starts_with("PropL_"), ~ mean(.x, na.rm = TRUE)))
 
 Proportions_co <- Taxa_GB_count_10km |>
   as_tibble()|> ## to get rid of the geometry
-  filter(Observer == "Citizen" & !Focus_Mam) |>
+  filter(Observer == "Citizen" & Focus!="withinMammals") |>
   summarise(across(starts_with("PropL_"),
                    ~ weighted.mean(.x, CountT_mammalia, na.rm = TRUE)))
 
@@ -350,7 +352,7 @@ ggsave("figures/Fig2.png", complex_map, width = 600,
 ## an observation was made
 
 ## Mammalia_relevant <- Taxa_GB_Pub |>
-##     filter(Observer == "Citizen" & Focus_Mam)
+##     filter(Observer == "Citizen" & Focus!="withinMammals")
 
 ## landcover_relevant <- clc_2018_landcover %>%
 ##     st_as_sf() %>%

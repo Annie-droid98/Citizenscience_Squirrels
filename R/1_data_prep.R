@@ -118,10 +118,20 @@ Taxa_GB %>% filter(species%in%"Sciurus vulgaris") %>%
 
 Publishers <- vroom("input_data/Focus_categories.csv")
 
+table(Vert=Publishers$Focus_Vert, Mam=Publishers$Focus_Mam)
+
+Publishers$Focus <- ifelse(Publishers$Focus_Mam, "withinMammals",
+                    ifelse(Publishers$Focus_Vert, "withinVertebrates",
+                           FALSE))
+
+table(Vert=Publishers$Focus_Vert, Mam=Publishers$Focus_Mam,
+      Unified=Publishers$Focus)
+
 ### Merge the two datasets
 full_join(Taxa_GB, Publishers, by = "datasetKey", relationship = "many-to-many") |> 
   ## keep only records with species
   filter(!is.na(species)) -> Taxa_GB_Pub
+
 
 if(rm_intermediate) rm(Taxa_GB) 
 
@@ -132,9 +142,9 @@ Landuse_10k_sfc |> ## used to retain the geometry
             CountT_vulgaris = sum(species == "Sciurus vulgaris"),
             CountT_carolinensis = sum(species == "Sciurus carolinensis"),
             CountT_marten = sum(species == "Martes martes"),
-            .by = c("geometry", "year", "Observer", "Focus_Vert", "Focus_Mam",)) |>
+            .by = c("geometry", "year", "Observer", "Focus",)) |>
   filter(!is.na(year)) |>
-  complete(geometry, year, Observer, Focus_Vert, Focus_Mam,
+  complete(geometry, year, Observer, Focus,
            fill = list(CountT_vertebrata = 0,
                        CountT_mammalia = 0,
                        CountT_vulgaris = 0,
@@ -164,7 +174,7 @@ if(rm_intermediate) rm(Taxa_GB_Pub, Landuse_10k_sfc)
 
 if(draw_plot){
 Taxa_GB_count_10km |>
-  filter(year==2020 & Observer == "Citizen" & !Focus_Mam) |>
+  filter(year==2020 & Observer == "Citizen" & !Focus) |>
   ggplot() + geom_sf(aes(fill = log(CountT_mammalia+1)))
 }
 
