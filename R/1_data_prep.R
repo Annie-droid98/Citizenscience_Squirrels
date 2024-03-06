@@ -79,8 +79,6 @@ if (draw_plot) {
 
 if(rm_intermediate) rm(clc_2018_landcover) 
 
-
-
 ## download the GBIF data FOR ALL VERTEBRATA csv = download from Gbif,
 ## GBIF.org (21 February 2024) GBIF Occurrence Download
 ## https://doi.org/10.15468/dl.7h9n3a this needs 32GB in the tmp
@@ -120,12 +118,19 @@ Publishers <- vroom("input_data/Focus_categories.csv")
 
 table(Vert=Publishers$Focus_Vert, Mam=Publishers$Focus_Mam)
 
+## This is overwritten below, just to demonstrate!
 Publishers$Focus <- ifelse(Publishers$Focus_Mam, "withinMammals",
                     ifelse(Publishers$Focus_Vert, "withinVertebrates",
                            FALSE))
 
 table(Vert=Publishers$Focus_Vert, Mam=Publishers$Focus_Mam,
       Unified=Publishers$Focus)
+## this would produce problems, as we'd need to track all the numbers
+## for Verterate or Mammalia focus seperately. Let's just use the
+## Mammalia focus!
+Publishers$Focus <- Publishers$Focus_Mam
+## arguably a focus on mammalia within the vertebrate doesn't matter
+## much if we normalise with the latter.
 
 ### Merge the two datasets
 full_join(Taxa_GB, Publishers, by = "datasetKey", relationship = "many-to-many") |> 
@@ -183,5 +188,4 @@ Taxa_GB_count_10km |>
 if(!rm_intermediate) sum(Taxa_GB_count_10km$CountT_mammalia) - nrow(Taxa_GB_Pub)
 
 saveRDS(Taxa_GB_count_10km, "intermediate_data/Counts.rds")
-
 

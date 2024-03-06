@@ -7,7 +7,6 @@ library(ggcorrplot)
 library(patchwork)
 library(gt)
 
-
 redoDataPrep <- FALSE
 
 ## read in the data you need to reproduce the models
@@ -21,15 +20,30 @@ if (redoDataPrep) {
 ## mammalia
 d <- as_tibble(Taxa_GB_count_10km) |>
    filter(Observer%in%"Citizen" &
-          !FocusTaxaTorF &
+          Focus!="withinMammals" &
           ## also need to remove grid cells which didn't have mammalia
           ## counted
-          CountT_mammalia_log > 0
+          CountT_mammalia_log >= 0
           )
+
+## Aha so many with a fucus on Mammalia (but without in it)
+tapply(d$CountT_mammalia, d$Focus, sum)
+
+## Same for squirrels
+tapply(d$CountT_vulgaris, d$Focus, sum)
+
+Taxa_GB_count_10km %>% 
+    filter(Observer%in%"Citizen") %>%
+    select(Focus, year, CountT_mammalia) %>%
+    group_by(Focus, year) %>%
+    summarize(Cells=n(),
+              Counts=sum(CountT_mammalia)) -> foo
+
+foo %>% dplyr::filter(year==2020)
 
 ## We now have uneven numbers of grid cells per year. But it has to be
 ## like that...  Otherwise we'd not be able to normalize by log
-## (higher level taxa) numbers.  
+## (higher level taxa) numbers.
 
 ## if(!all(table(d$year)==3787)){ ## previously this was ##
 ## !all(table(d$year)==4409) stop("Each year should have 3787 grid
@@ -301,3 +315,51 @@ cbind(pval_table_vulgaris, pval_table_carolinensis) |>
 
 gtsave(out, "tables/Table_ModelsLRT.html")
 #
+
+
+## Alternative Vertebrata models
+
+formulas_init_vulgaris_Vert <- lapply(formulas_init_vulgaris, function(x){ 
+    pred <- replace_formula("PropM_",
+                            "PropV_", x)
+    replace_formula("mammalia",
+                    "vertebrata", pred)
+})
+
+
+formulas_fixed_vulgaris_Vert <- lapply(formulas_fixed_vulgaris, function(x){ 
+    pred <- replace_formula("PropM_",
+                            "PropV_", x)
+    replace_formula("mammalia",
+                    "vertebrata", pred)
+})
+
+
+formulas_init_carolinensis_Vert <- lapply(formulas_init_carolinensis, function(x){ 
+    pred <- replace_formula("PropM_",
+                            "PropV_", x)
+    replace_formula("mammalia",
+                    "vertebrata", pred)
+})
+
+
+formulas_fixed_carolinensis_Vert <- lapply(formulas_fixed_carolinensis, function(x){ 
+    pred <- replace_formula("PropM_",
+                            "PropV_", x)
+    replace_formula("mammalia",
+                    "vertebrata", pred)
+})
+
+## The data is slightly different as focus taxa are different
+## (esp. when mammalia are a foucs within vertebrates; mention this in
+## the manuscipt!) and additional normalisation counts are available
+## for some grids in some years (list in the manuscript how many).
+
+v <- as_tibble(Taxa_GB_count_10km) |>
+  filter(Observer%in%"Citizen" &
+          !Focus_Vert &
+          ## also need to remove grid cells which didn't have mammalia
+          ## counted
+          CountT_vertebrata_log >= 0
+          )
+##
