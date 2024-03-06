@@ -5,8 +5,12 @@ library(ggplot2)
 library(vroom)
 library(tidyr)
 
+## do we want to repeat the download from GBIF
+new_dl <- FALSE
+
 ## do we want to plot things as we got (for checking purposes)
 draw_plot <- FALSE
+
 ## do we want to remove intermediate objects to save memory or keep
 ## them for inspection (trouble shooting)?
 rm_intermediate <- FALSE
@@ -82,9 +86,11 @@ if(rm_intermediate) rm(clc_2018_landcover)
 ## https://doi.org/10.15468/dl.7h9n3a this needs 32GB in the tmp
 ## directory... chose wisely (hard code to something on your system
 ## with the necessary space)!
-temp <- tempfile(tmpdir="/SAN/Annies_BA/")
+temp <- "intermediate_data/gh_ignore/GBIF_dl.zip"
 
-download.file("https://api.gbif.org/v1/occurrence/download/request/0008421-240216155721649.zip", temp)
+if(new_dl) {
+    download.file("https://api.gbif.org/v1/occurrence/download/request/0008421-240216155721649.zip", temp)
+}
 
 ## select columns already during import in vroom
 data_GB <- vroom(temp, quote = "",
@@ -110,7 +116,7 @@ Taxa_GB %>% filter(species%in%"Sciurus vulgaris") %>%
     ggplot() + geom_sf()
 }
 
-Publishers <- read.csv("input_data/SquirrelPublisherBelow1000obs.csv", sep = " ")
+Publishers <- vroom("input_data/Focus_categories.csv")
 
 ### Merge the two datasets
 full_join(Taxa_GB, Publishers, by = "datasetKey", relationship = "many-to-many") |> 
@@ -126,9 +132,9 @@ Landuse_10k_sfc |> ## used to retain the geometry
             CountT_vulgaris = sum(species == "Sciurus vulgaris"),
             CountT_carolinensis = sum(species == "Sciurus carolinensis"),
             CountT_marten = sum(species == "Martes martes"),
-            .by = c("geometry", "year", "Observer", "FocusTaxaTorF")) |>
+            .by = c("geometry", "year", "Observer", "Focus_Vert", "Focus_Mam",)) |>
   filter(!is.na(year)) |>
-  complete(geometry, year, Observer, FocusTaxaTorF, 
+  complete(geometry, year, Observer, Focus_Vert, Focus_Mam,
            fill = list(CountT_vertebrata = 0,
                        CountT_mammalia = 0,
                        CountT_vulgaris = 0,
@@ -158,14 +164,13 @@ if(rm_intermediate) rm(Taxa_GB_Pub, Landuse_10k_sfc)
 
 if(draw_plot){
 Taxa_GB_count_10km |>
-  filter(year==2020 & Observer == "Citizen" & FocusTaxaTorF) |>
+  filter(year==2020 & Observer == "Citizen" & !Focus_Mam) |>
   ggplot() + geom_sf(aes(fill = log(CountT_mammalia+1)))
 }
 
 ## FIXME? We are losing 22418 observations when joining them on the grid
 ## see Landuse_10k_sfc |> st_join(Taxa_GB_Pub) ## in l 117
 if(!rm_intermediate) sum(Taxa_GB_count_10km$CountT_mammalia) - nrow(Taxa_GB_Pub)
-}
 
 saveRDS(Taxa_GB_count_10km, "intermediate_data/Counts.rds")
 
