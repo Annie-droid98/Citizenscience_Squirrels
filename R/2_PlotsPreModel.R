@@ -10,7 +10,7 @@ library(RColorBrewer)
 
 
 ## prepare the data from scratch
-redoDataPrep <- TRUE
+redoDataPrep <- FALSE
 
 if (redoDataPrep) {
     source("R/1_data_prep.R")
@@ -34,9 +34,9 @@ Taxa_GB_count_10km |>
             Cells_S.vulgaris = sum(CountT_vulgaris > 0),
             Cells_S.carolinensis = sum(CountT_carolinensis > 0),
             Cells_M.martes = sum(CountT_marten > 0),
-            .by = c("Observer", "FocusTaxaTorF")) |>
+            .by = c("Observer", "Focus_Mam")) |>
   drop_na()|> 
-  ggplot(aes(fill = FocusTaxaTorF, y = Sum_Mammalia, x = Observer)) + 
+  ggplot(aes(fill = Focus_Mam, y = Sum_Mammalia, x = Observer)) + 
   geom_bar(position = "stack", stat = "identity", width = 0.5) +
   scale_fill_viridis(discrete = TRUE,
                      labels= c("W/O focus taxon", "With focus taxon")) +
@@ -45,9 +45,9 @@ Taxa_GB_count_10km |>
   xlab("") +
   ylab("Number of Observations") +
   guides(fill = guide_legend(title = "")) +
-  annotate("rect", xmin = 0.5, xmax = 1.5, ymin = 1.695e+05, ymax = 6.8e+05,
+  annotate("rect", xmin = 0.5, xmax = 1.5, ymin = 1.71e+05, ymax = 7.5e+05,
            alpha = 0, color = "red") +
-  annotate("text", x = 1.54, y = 2.4e+05, color = "black",
+  annotate("text", x = 1.54, y = 2.5e+05, color = "black",
             label = "Used in this study", size=5) +
   theme(legend.position = c(0.8, 0.8),  #  position within the plot
         legend.background = element_rect(color = NA, fill = "white"),
@@ -58,7 +58,7 @@ Taxa_GB_count_10km |>
 
 Taxa_GB_count_10km |>
   as_tibble() |>
-  group_by(Observer, FocusTaxaTorF, year) |>
+  group_by(Observer, Focus_Mam, year) |>
   summarize(Sum_Mammalia = sum(CountT_mammalia),
             Sum_S.vulgaris = sum(CountT_vulgaris),
             Sum_S.carolinensis = sum(CountT_carolinensis),
@@ -82,7 +82,7 @@ Taxa_GB_count_10km |>
   filter(measure %in% "Sum") |>
   drop_na()|> 
   ggplot(aes(x = year, y = Observations, color = Observer,
-             linetype = FocusTaxaTorF)) +
+             linetype = Focus_Mam)) +
   geom_line() +
   ## scale_y_log10(labels = comma_format(big.mark = ".",
   ##                                     decimal.mark = ",")) +
@@ -130,7 +130,7 @@ clc_2018_landcover$landcover_cat <-
 
 ## Mammal counts for each grid overall for years
 Ma_counts <- Taxa_GB_count_10km |>
-  filter(Observer == "Citizen" & FocusTaxaTorF) |>
+  filter(Observer == "Citizen" & !Focus_Mam) |>
   summarise(All_mammalia = sum(CountT_mammalia),
             .by = "geometry") |>
   st_transform(crs=st_crs(clc_2018_landcover)) 
@@ -282,12 +282,12 @@ map_UK <- All_UK +
 
 Proportions_lu <- Taxa_GB_count_10km |>
   as_tibble()|> ## to get rid of the geometry
-  filter(Observer == "Citizen" & FocusTaxaTorF) |>
+  filter(Observer == "Citizen" & !Focus_Mam) |>
   summarise(across(starts_with("PropL_"), ~ mean(.x, na.rm = TRUE)))
 
 Proportions_co <- Taxa_GB_count_10km |>
   as_tibble()|> ## to get rid of the geometry
-  filter(Observer == "Citizen" & FocusTaxaTorF) |>
+  filter(Observer == "Citizen" & !Focus_Mam) |>
   summarise(across(starts_with("PropL_"),
                    ~ weighted.mean(.x, CountT_mammalia, na.rm = TRUE)))
 
@@ -350,7 +350,7 @@ ggsave("figures/Fig2.png", complex_map, width = 600,
 ## an observation was made
 
 ## Mammalia_relevant <- Taxa_GB_Pub |>
-##     filter(Observer == "Citizen" & FocusTaxaTorF)
+##     filter(Observer == "Citizen" & Focus_Mam)
 
 ## landcover_relevant <- clc_2018_landcover %>%
 ##     st_as_sf() %>%
