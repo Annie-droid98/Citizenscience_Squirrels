@@ -1,140 +1,140 @@
-datasetKey,Publisher,Dataset,Observer,Focus_Vert,Focus_Mam
-0284b82d-cdd1-4d67-83bd-c8e42e988adb,Merseyside BioBank (unverified),Merseyside BioBank (unverified),Mixed,FALSE,FALSE
-02d1e772-54ee-4767-b4b8-c35f0c7270ba,NBIS Records to December 2016,NBIS Records to December 2016,Mixed,FALSE,FALSE
-0d9accc4-309d-44ad-901e-f221e1d0ec80,Isle of Man wildlife records from 01/01/2000 to 13/02/2017,Isle of Man wildlife records from 01/01/2000 to 13/02/2017,Mixed,FALSE,FALSE
-13dba6c4-e112-473d-a827-850256bf53c6,HBRG Vertebrates (not Badger) Dataset,HBRG Vertebrates (not Badger) Dataset,Citizen,FALSE,FALSE
-1c736f5f-18d4-40d3-b25a-ec9d3c3500c7,Argyll Biological Records Dataset,Argyll Biological Records Dataset,Mixed,FALSE,FALSE
-25d4f82b-b2bc-4197-bc11-27c8e9a25439,Shropshire Ecological Data Network database,Shropshire Ecological Data Network database,Mixed,FALSE,FALSE
-3965d122-ad7d-463e-90be-7eaa006bea18,Leicestershire and Rutland Environmental Records Centre records 2000-2009,Leicestershire and Rutland Environmental Records Centre records 2000-2009,Mixed,FALSE,FALSE
-3dc2a7f6-8d3a-4228-a69c-ec795028fe2f,Miscellaneous records held on the Cofnod database,Miscellaneous records held on the Cofnod database,Mixed,FALSE,FALSE
-50c9509d-22c7-4a22-a47d-8c48425ef4a7,iNaturalist Research-grade Observations,iNaturalist Research-grade Observations,Citizen,FALSE,FALSE
-594e1181-c38a-4f44-b78c-ceab50351cca,National Trust Species Records,National Trust Species Records,Mixed,FALSE,FALSE
-5a1b62b2-4a1f-4404-b481-87836564d4a5,Miscellaneous records held by BIS,Miscellaneous records held by BIS,Mixed,FALSE,FALSE
-5e43a220-a91d-485b-b608-58fd22693be7,All taxa records for Leicestershire and Rutland,All taxa records for Leicestershire and Rutland,Citizen,FALSE,FALSE
-68ad7ec2-0f89-4d32-9ad2-650c88899eb8,Yorkshire Wildlife Trust - Non-sensitive records from all taxonomic groups,Yorkshire Wildlife Trust - Non-sensitive records from all taxonomic groups,Mixed,FALSE,FALSE
-7d17a2b2-8751-41b5-ac9b-48effc1ea236,BRERC species records from all years at full resolution excluding Notable Species within the last 10 years,BRERC species records from all years at full resolution excluding Notable Species within the last 10 years,Mixed,FALSE,FALSE
-84f58d09-add5-469b-af6e-f3522a8dac7d,CEDaR Online Recording,CEDaR Online Recording,Citizen,FALSE,FALSE
-84fc98d0-972c-42c1-817f-038bf5e35c0f,CPERC Combined Dataset,CPERC Combined Dataset,Mixed,FALSE,FALSE
-887e6209-ea70-46a7-9652-fc94ca97ae0a,Commissioned surveys and staff surveys and reports for Scottish Wildlife Trust reserves - Verified data,Commissioned surveys and staff surveys and reports for Scottish Wildlife Trust reserves - Verified data,Scientific,FALSE,FALSE
-8a863029-f435-446a-821e-275f4f641165,"Observation.org, Nature data from around the World",Observation.org,Citizen,FALSE,FALSE
-90eae6b8-57d2-4d24-8eb3-1dbde00f1669,NRW Regional Data: North Wales,NRW Regional Data: North Wales,Mixed,FALSE,FALSE
-a99ca3c9-7448-4bf6-aba5-0ef61b01232c,Rotherham Biological Records Centre - Non-sensitive Records from all taxonomic groups,Rotherham Biological Records Centre - Non-sensitive Records from all taxonomic groups,Mixed,FALSE,FALSE
-b7cd5ad0-f65a-4de1-a1bb-318cf5ae12f8,LERN Records,LERN Records,Mixed,FALSE,FALSE
-b8866a8d-adc7-4a3a-887b-e59f830bb988,INNS records held by BIS in Powys and Brecon Beacons National Park,INNS records held by BIS in Powys and Brecon Beacons National Park,Mixed,FALSE,FALSE
-bbee118c-a50e-4f7f-bca1-d5bfefc5360b,SER Species-based Surveys,SER Species-based Surveys,Citizen,FALSE,FALSE
-c358edb6-9b46-45eb-a173-b854910500a9,Fife Nature Records Centre combined dataset,Fife Nature Records Centre combined dataset,Mixed,FALSE,FALSE
-c3c56ab1-706c-4e7f-85f8-f6f860e203f2,Merseyside BioBank (verified),Merseyside BioBank (verified),Mixed,FALSE,FALSE
-c665b271-454b-4844-a039-426dac634908,Leicestershire and Rutland Environmental Records Centre records 2015-2019,Leicestershire and Rutland Environmental Records Centre records 2015-2019,Mixed,FALSE,FALSE
-cef450df-7155-4c9d-9eb3-7b9b4d868bfa,Sheffield and Rotherham Wildlife Trust - Records,Sheffield and Rotherham Wildlife Trust - Records,Mixed,FALSE,FALSE
-e351951e-32da-46d6-b61c-e9816d39e0d4,North Merseyside Local Species Data (DEFRA Grant 23169),North Merseyside Local Species Data (DEFRA Grant 23169),Mixed,FALSE,FALSE
-e707e6da-e143-445d-b41d-529c4a777e8b,Suffolk Biodiversity Information Service (SBIS) Dataset,Suffolk Biodiversity Information Service (SBIS) Dataset,Citizen,FALSE,FALSE
-efb3f1a0-43d5-4ae6-a58f-4fd61043756a,National Trust for Scotland Species Records,National Trust for Scotland Species Records,Mixed,FALSE,FALSE
-f14f3ec9-c54a-477d-82c8-f7ba6925534a,UK Roadkill Records,UK Roadkill Records,Citizen,FALSE,FALSE
-f7fd7255-5be6-48cf-b76a-821cb84aa93f,BRERC Notable Species records within the last 10 years,BRERC Notable Species records within the last 10 years,Mixed,FALSE,FALSE
-fd7cda6d-0bdb-44ed-9319-010c286d4633,Leicestershire and Rutland Environmental Records Centre records 2010-2014,Leicestershire and Rutland Environmental Records Centre records 2010-2014,Mixed,FALSE,FALSE
-04e0550a-e142-4658-9575-3e46fb6675b7,Survey of distribution of beavers in Tayside in 2012,NA,Scientific,TRUE,TRUE
-07609307-26f9-490f-89ea-4e74497e3c0d,Brecknock Wildlife Trust (Now WTSWW Brecknockhire) records held by BIS,NA,Mixed,FALSE,FALSE
-5520dc44-3ed6-4825-8a69-9e93c3829371,Mammal records captured from Licence Returns submitted to Natural Resources Wales,NA,Scientific,TRUE,FALSE
-942c4e36-624d-4054-a6cd-b7db0b24926a,Ty Canol National Nature Reserve (NNR) Species Inventory,NA,Mixed,FALSE,FALSE
-abd3521c-f459-468e-9039-f989786147d4,Natural Resources Wales Regional Data : Mid-Wales,NA,Scientific,FALSE,FALSE
-c0dd4990-1803-4d6b-bc06-2f7eeaba100d,HBRG Badger Dataset,NA,Citizen,TRUE,TRUE
-daae5a66-7bb4-4431-ac3c-a1bf70ca3407,Stackpole National Nature Reserve Species Inventory and Ad-hoc Sightings from Across Pembrokeshire,NA,Mixed,FALSE,FALSE
-db1abc39-7b60-4103-815d-820fa37cb62b,Environment Agency Rare and Protected Species Records,NA,Scientific,TRUE,TRUE
-e19276e7-0698-4145-ab85-c32c6c76b098,NRW Regional Data: South East Wales Sensitive species,NA,Scientific,TRUE,TRUE
-e6d9a4a4-dbf0-4a3e-87c2-91b6af1f9771,"Mammal records from Britain from the Atlas of Mammals (1993), with some subsequent records",NA,Citizen,FALSE,FALSE
-f38773f9-2255-408e-9d17-44fa8ca4b962,Natural Resources Wales (NRW) Licence Return Dataset,NA,Scientific,FALSE,FALSE
-08360455-914e-4d02-809a-13e3cd8a8d21,Living with Mammals survey,Living with Mammals survey,Citizen,TRUE,FALSE
-67c45ca3-0c6c-4da2-a1e8-621ef52bd559,Mammal Records (West Wales),Mammal Records (West Wales),Mixed,TRUE,FALSE
-67e2335c-4303-4ee3-9bfe-ecfe65662629,"National Mammal Atlas Project, online recording",National Mammal Atlas Project,Citizen,TRUE,FALSE
-710ad05a-25cf-4129-80ce-c2702cdfa33f,SEWBReC Mammals (South East Wales),SEWBReC Mammals (South East Wales),Mixed,TRUE,FALSE
-8898e990-9d39-4871-9e6e-d1031c19e24b,Mammal Mapper App Sighting Records,Mammal Mapper App Sighting Records,Citizen,TRUE,FALSE
-94c821bd-28bf-4571-a97e-e696ba2f3425,Atlas of Mammals in Ireland 2010-2015,Atlas of Mammals in Ireland 2010-2015,Citizen,TRUE,FALSE
-9a829fb0-427c-4699-812d-9cff5ba8b607,Mammal records for Dumfries and Galloway,Mammal records for Dumfries and Galloway,Mixed,TRUE,FALSE
-100a9054-e46c-4302-b059-3a8836df1cf7,NA,1921 Onwards Swift Screaming Parties,Mixed,TRUE,TRUE
-115f45ed-4334-4144-b5c5-669027e9b191,NA,Bird Atlas 2007 - 2011,Scientific,TRUE,TRUE
-1a7546cc-da20-44e0-a5b3-448e41ffd9c8,NA,South East Scotland Tetrad Atlas 2007 - 2013 - non-sensitive winter species,Scientific,TRUE,TRUE
-1b11a5e3-6991-44fd-848b-6fd9c1368c58,NA,Casual records for Scottish Wildlife Trust reserves - Verified data,Citizen,FALSE,FALSE
-230071a6-1388-4fb7-a399-695932faec71,NA,North East Scotland Breeding Bird Atlas 2002-06,Scientific,TRUE,TRUE
-233ba471-91a2-47a4-9946-b7e844f2124c,NA,Montgomeryshire Wildlife Trust records held by BIS,Mixed,FALSE,FALSE
-2a101f26-35e1-4197-94ec-bd25033292a7,NA,Staffordshire Wildlife Trust Nature Reserves Inventory,Citizen,TRUE,TRUE
-3a0e9440-0a97-4a04-8089-7398c77da0be,NA,SEWBReC Birds (South East Wales),Mixed,TRUE,TRUE
-3a1bf23b-9951-4e6a-bade-5383e1ba6efe,NA,City of Edinburgh Natural Heritage Service - Bavelaw Marsh Bird Hide Records,Citizen,TRUE,TRUE
-3bd7b984-6bbd-4194-95aa-114271d9ee68,NA,Sheffield Bird Study Group (Yorkshire records),Mixed,TRUE,TRUE
-3d6c8883-c29b-48f6-9fbf-9a5ad6ecbee4,NA,Bird Conservation Targeting Project (BCTP) in the UK,Mixed,TRUE,TRUE
-415f27b8-65e5-4cb3-878d-649ac43350d1,NA,RSPB Reserves breeding bird surveys,Scientific,TRUE,TRUE
-44c73c0b-662e-41e7-8eee-4754a8592a27,NA,Bird Conservation Targeting Project (BCTP) in the UK,Scientific,TRUE,TRUE
-4575bf91-0c65-47a8-84cb-0b36111f8956,NA,Record Pool,Mixed,FALSE,FALSE
-48cd7d66-191b-4896-a2bf-f0665dad7a89,NA,1921 Onwards Occupied Swift Nests,Mixed,TRUE,TRUE
-4ac5f415-6f44-43d0-a19b-2d91e5dcbe2b,NA,Bird Conservation Targeting Project (BCTP) in the UK,Mixed,TRUE,TRUE
-4fa7b334-ce0d-4e88-aaae-2e0c138d049e,NA,EOD eBird Observation Dataset,Citizen,TRUE,TRUE
-523590f0-f87d-4fed-acd2-6873bdce0a8c,NA,RECORD Aves Data,Mixed,TRUE,TRUE
-547f2b71-ba25-4254-aaf1-4823600e7784,NA,Merseyside BioBank Active Naturalists (unverified),Mixed,FALSE,FALSE
-58a18d87-e572-4191-96a7-9b960a8df7e0,NA,Corncrake national surveys - territory centres,Scientific,TRUE,TRUE
-5accf920-492e-4641-9ba2-11481c116419,NA,Highland bird data 2002 - 2003 - non-breeding records,Mixed,TRUE,TRUE
-60773d5b-30e5-48ac-9d63-a2b81ffe5cfa,NA,Bird records for Argyll for the years 2002 and 2003,Mixed,TRUE,TRUE
-62af450d-0b71-4469-93c1-fc0999aa9807,NA,Great crested newt presence records determined from Class Licence return documents (2013-2018),Scientific,TRUE,TRUE
-669ecb52-bfbe-4220-99c7-bafc643df32e,NA,Kingfisher Survey 2010,Scientific,TRUE,TRUE
-699a09d4-951c-4a10-9cd6-7bddbbb92546,NA,Corncrake national surveys - raw data,Scientific,TRUE,TRUE
-6ac3f774-d9fb-4796-b3e9-92bf6c81c084,NA,naturgucker,Citizen,FALSE,FALSE
-71577ce3-32ea-4cf7-8046-b8ed4e098ffc,NA,North East Scotland Birds (1883-2010),Mixed,TRUE,TRUE
-80576d53-992a-41f3-a3e3-dfd0fa0242ee,NA,Ireland's BioBlitz,Scientific,FALSE,FALSE
-8821e36f-2d25-44c8-a95e-fb978f38ecde,NA,SER Site-based Surveys,Scientific,FALSE,FALSE
-912ac7b3-f473-435b-97d1-20b6ed0a6208,NA,RSPB Big Garden Birdwatch winter sightings in the UK in 2009,Citizen,TRUE,TRUE
-93c8cc03-30cf-474e-8173-dbe5a22a5d28,NA,JNCC seabird distribution and abundance data (all trips) from ESAS database,Scientific,TRUE,TRUE
-a8c8144a-3693-4d92-8bc4-49e00dd8defc,NA,Survey and monitoring records for Scottish Wildlife Trust reserves from reserve convenors and Trust volunteers - Verified data,Mixed,FALSE,FALSE
-b1047888-ae52-4179-9dd5-5448ea342a24,NA,Xeno-canto - Bird sounds from around the world,Citizen,TRUE,TRUE
-b480871a-6c2f-4c35-ab94-6de203c4ff28,NA,Merseyside BioBank Active Naturalists (verified),Mixed,FALSE,FALSE
-d135ba77-9d68-466b-bff9-8d1a0c53b7d7,NA,Observatoire Pelagis boat surveys 2003-2021,Scientific,TRUE,TRUE
-d2a0dd22-9d39-4de2-99fb-5dde3ee3f49e,NA,South East Scotland Tetrad Atlas 2008 - 2013 - non-sensitive breeding species,Scientific,TRUE,TRUE
-ddcc85ee-cb47-47a6-8789-711d6852145a,NA,1994-2021 Capercaillie Cold Searches Data,Scientific,TRUE,TRUE
-eaaabe3b-e64a-4819-a007-2c3529eb4bf7,NA,NPWS Seal Database,Mixed,TRUE,TRUE
-f32a222c-9b32-47d2-8d29-b48be4a78128,NA,Wader survey on Uist in 2007,Scientific,TRUE,TRUE
-f84902b2-ef45-4e89-83e7-5d1f190f0562,NA,RECORD Amphibian Data,Mixed,TRUE,TRUE
-039ece6c-1e6d-4441-8392-43ab8bb29c47,Ad-hoc Bat Records from Across Wales,NA,Mixed,TRUE,TRUE
-046fedf4-29ee-45e9-a421-a4b82c229f1d,"Marine mammal monitoring from coastal sites in Cardigan Bay, UK, 2004-2009",NA,Mixed,TRUE,TRUE
-07d54123-75b8-4660-9482-e4c665e6f069,Mid Ulster Hare Surveys 2012-2015,NA,Scientific,TRUE,TRUE
-11a24c97-653b-4e4c-a524-a4c06ffab25f,"Scottish Beaver Trial observations, Knapdale, 2009-2014",NA,Scientific,TRUE,TRUE
-2150bbfa-51d0-4557-ab15-fb9459881eb7,INNS Data: All Taxa (South East Wales),INNS Data: All Taxa (South East Wales),Mixed,TRUE,TRUE
-2790adc5-c709-427c-8d04-804590d98272,Roost Count,Field Survey,Scientific,TRUE,TRUE
-2e3454ce-5b2d-4bf4-bc23-ca5769f58137,The Scottish Squirrel Database,The Scottish Squirrel Database,Mixed,TRUE,TRUE
-2f17fba4-4915-47cc-9045-f8c7c8ea181e,Bechstein's Bat Survey Project,NA,Scientific,TRUE,TRUE
-2f79cc6e-6b14-4162-a4b5-e7415f0716ea,RECORD Mammal Data,RECORD Mammal Data,Mixed,TRUE,TRUE
-3c2fb76f-ed3f-40dc-bb40-21adbbd857d5,Isle of Wight Notable Species,Isle of Wight Notable Species,Mixed,TRUE,TRUE
-3cc1bf3e-e503-4d2a-9b23-a54b9269ebbe,DBRC Lutra lutra records 1952 - 2016,NA,Scientific,TRUE,TRUE
-3fa8e2b7-43c0-490e-b30e-b1902caa9bf0,England Otter Survey Database,NA,Scientific,TRUE,TRUE
-4273f8ff-73c6-4791-89dc-b64f47b7416a,Natural England bat roost visit records from 2013 onwards,Natural England bat roost visit records from 2013 onwards,Scientific,TRUE,TRUE
-4cb30996-cc6a-44b9-b0c6-fce6f109d41f,"Water vole distribution within Broadland (2003-2006): based upon field signs, sightings and trapping data.",NA,Scientific,TRUE,TRUE
-4e19e2b8-9934-4b5a-a51f-62df5a9802e7,Hibernation Survey,Hibernation Survey,Scientific,TRUE,TRUE
-4f03bd51-a00c-4060-9eb6-b8db70c8a07b,Tayside Beaver Survey 2017-18,Tayside Beaver Survey 2017-18,Scientific,TRUE,TRUE
-52922205-6477-4999-9d4a-d38999aa32eb,TWIC Hedgehog Public Survey,NA,Citizen,TRUE,TRUE
-52e809ec-8487-4e88-8c8d-1c7c14cf11c2,RECORD Chiroptera Data,RECORD Chiroptera Data,Mixed,TRUE,TRUE
-56a946bf-bd42-4a54-8543-4380d92f9762,INNS Data: All Taxa (West Wales),NA,Mixed,TRUE,TRUE
-5b580625-29f0-4911-be29-cf5b6496e538,Hedgehog Hibernation Survey records,Hedgehog Hibernation Survey records,Citizen,TRUE,TRUE
-5d030f0a-968a-43dd-8a94-931702f56f57,Batsites inventory for England (1949-2011),NA,Scientific,TRUE,TRUE
-5d06e33b-e884-4369-9a1a-fdc8bfa9471c,Seatrust Cetacean Records West Wales,NA,Mixed,TRUE,TRUE
-73846baa-cba6-48e0-94e0-9308dae5c6bb,Hedgehog records 2005-2006: Hogwatch and Rural Landowner surveys,Hedgehog records 2005-2006: Hogwatch and Rural Landowner surveys,Citizen,TRUE,TRUE
-7445a910-faa2-4f43-b650-d2f055bfb0d7,Waterway Survey,Waterway Survey,Scientific,TRUE,TRUE
-7940f474-4cb3-4a49-b4f6-58f8c363dba1,"North East Scotland Terrestrial Mammals 1900-2017 (excluding squirrels, wild cats and marine mammals)",North East Scotland Terrestrial Mammals 1900-2017 (excluding squirrels,Mixed,TRUE,TRUE
-7ba44a6f-e031-4c43-9c7c-d8de11263558,United Kingdom National Whale Stranding Database 1913-2008,United Kingdom National Whale Stranding Database 1913-2008,Scientific,TRUE,TRUE
-852348b9-453f-4aa2-a9db-69f9cda6fc77,Borders Backyard Biodiversity,Borders Backyard Biodiversity,Scientific,TRUE,TRUE
-8578e332-e4b6-4050-ae19-8ac9d0c49c96,Leicestershire and Rutland Protected and Conservation Priority/BAP Specie,NA,Mixed,TRUE,TRUE
-91b8e6ed-6771-4c39-a681-516fefd6d072,Derbyshire & Peak District Protected Species Database (Summary of available records 1970- 2008),Derbyshire & Peak District Protected Species Database (Summary of available records 1970- 2008),Mixed,TRUE,TRUE
-95c79da4-a323-474d-92ae-6c252701db1e,SNH Bat Casework records 1970-2007,NA,Mixed,TRUE,TRUE
-9fad752d-4bf9-4adf-9535-3cf6339a70fb,Department of Agriculture Environment and Rural Affairs (DAERA) Marine and Fisheries Division Marine Survey Data,Department of Agriculture Environment and Rural Affairs (DAERA) Marine and Fisheries Division Marine Survey Data,Scientific,TRUE,TRUE
-ae1c0f69-c920-4a94-94d5-4a0b08966a86,Manx Bat Group records 1848 to 2016,NA,Scientific,TRUE,TRUE
-b5209d78-638b-4af9-942e-76fcf1f17bd9,"National Water Vole Database & Mapping Project (Scotland data), 2008",NA,Mixed,TRUE,TRUE
-bc3f2018-2924-4fe8-86d4-261c9b9fa71f,Copeland Island Bird Observatory SeaWatch Survey,NA,Citizen,TRUE,TRUE
-bd552593-f9c8-4b54-8887-fb00b647c6f9,NBMP Sunset-Sunrise Survey,NA,Scientific,TRUE,TRUE
-bde5b63d-8664-4632-bc8b-d06653b09b22,DBRC Arvicola amphibius records 1925 - 2016,NA,Scientific,TRUE,TRUE
-cb4c3a5c-3b28-41a3-ace9-9fa7c60e0b31,Cumbria Non Native Invasive Species,Cumbria Non Native Invasive Species,Mixed,TRUE,TRUE
-cbde2a70-7a85-4370-b240-09e0738f76f9,Big Hedgehog Map records,Big Hedgehog Map records,Citizen,TRUE,TRUE
-cddb8a18-c755-4ca6-9561-8dcbb8af82d7,Other Mammal Data from National Dormouse Monitoring Programme (NDMP),Other Mammal Data from National Dormouse Monitoring Programme (NDMP),Scientific,TRUE,TRUE
-cf5142d2-bde7-4733-b07a-68bf370d52aa,Glasgow Museums BRC: Mammals,Glasgow Museums BRC: Mammals,Mixed,TRUE,TRUE
-d0cee8f6-dbf9-4355-a9c2-62ab51fe36fd,Invasive Species and Pests,Invasive Species and Pests,Citizen,TRUE,TRUE
-e21033eb-b5b1-4043-a035-abf57e65efe7,National Dormouse Database (NDD),National Dormouse Database (NDD),Mixed,TRUE,TRUE
-e8ce41f4-a58a-4ce9-90b7-93694071afcd,WDC Shorewatch Sightings,WDC Shorewatch Sightings,Citizen,TRUE,TRUE
-edf03db8-68cf-48ac-a545-15f89c88e113,The BCT/MTUK Bats & Roadside Mammals Survey,The BCT/MTUK Bats & Roadside Mammals Survey,Scientific,TRUE,TRUE
-ee0321a6-9e6d-4501-94aa-f12cef9c5680,David Dodds Associates Ltd - Species Records,NA,Scientific,TRUE,TRUE
-efde0b80-02d6-4e50-9e6a-4b4329bfeec6,Records of Invasive Non Native Species held on the Cofnod database,NA,Mixed,TRUE,TRUE
-f5815965-adce-4f6a-a56c-af93032b7e3f,Irish Whale and Dolphin Group,Irish Whale and Dolphin Group,Scientific,TRUE,TRUE
-fae37d1f-5b7a-4fe2-8cfa-8948aefbcac2,Natural England Marine Monitoring surveys,NA,Mixed,TRUE,TRUE
+datasetKey,Observer,Focus_Vert,Focus_Mam
+0284b82d-cdd1-4d67-83bd-c8e42e988adb,Mixed,FALSE,FALSE
+02d1e772-54ee-4767-b4b8-c35f0c7270ba,Mixed,FALSE,FALSE
+0d9accc4-309d-44ad-901e-f221e1d0ec80,Mixed,FALSE,FALSE
+13dba6c4-e112-473d-a827-850256bf53c6,Citizen,FALSE,FALSE
+1c736f5f-18d4-40d3-b25a-ec9d3c3500c7,Mixed,FALSE,FALSE
+25d4f82b-b2bc-4197-bc11-27c8e9a25439,Mixed,FALSE,FALSE
+3965d122-ad7d-463e-90be-7eaa006bea18,Mixed,FALSE,FALSE
+3dc2a7f6-8d3a-4228-a69c-ec795028fe2f,Mixed,FALSE,FALSE
+50c9509d-22c7-4a22-a47d-8c48425ef4a7,Citizen,FALSE,FALSE
+594e1181-c38a-4f44-b78c-ceab50351cca,Mixed,FALSE,FALSE
+5a1b62b2-4a1f-4404-b481-87836564d4a5,Mixed,FALSE,FALSE
+5e43a220-a91d-485b-b608-58fd22693be7,Citizen,FALSE,FALSE
+68ad7ec2-0f89-4d32-9ad2-650c88899eb8,Mixed,FALSE,FALSE
+7d17a2b2-8751-41b5-ac9b-48effc1ea236,Mixed,FALSE,FALSE
+84f58d09-add5-469b-af6e-f3522a8dac7d,Citizen,FALSE,FALSE
+84fc98d0-972c-42c1-817f-038bf5e35c0f,Mixed,FALSE,FALSE
+887e6209-ea70-46a7-9652-fc94ca97ae0a,Scientific,FALSE,FALSE
+8a863029-f435-446a-821e-275f4f641165,Citizen,FALSE,FALSE
+90eae6b8-57d2-4d24-8eb3-1dbde00f1669,Mixed,FALSE,FALSE
+a99ca3c9-7448-4bf6-aba5-0ef61b01232c,Mixed,FALSE,FALSE
+b7cd5ad0-f65a-4de1-a1bb-318cf5ae12f8,Mixed,FALSE,FALSE
+b8866a8d-adc7-4a3a-887b-e59f830bb988,Mixed,FALSE,FALSE
+bbee118c-a50e-4f7f-bca1-d5bfefc5360b,Citizen,FALSE,FALSE
+c358edb6-9b46-45eb-a173-b854910500a9,Mixed,FALSE,FALSE
+c3c56ab1-706c-4e7f-85f8-f6f860e203f2,Mixed,FALSE,FALSE
+c665b271-454b-4844-a039-426dac634908,Mixed,FALSE,FALSE
+cef450df-7155-4c9d-9eb3-7b9b4d868bfa,Mixed,FALSE,FALSE
+e351951e-32da-46d6-b61c-e9816d39e0d4,Mixed,FALSE,FALSE
+e707e6da-e143-445d-b41d-529c4a777e8b,Citizen,FALSE,FALSE
+efb3f1a0-43d5-4ae6-a58f-4fd61043756a,Mixed,FALSE,FALSE
+f14f3ec9-c54a-477d-82c8-f7ba6925534a,Citizen,FALSE,FALSE
+f7fd7255-5be6-48cf-b76a-821cb84aa93f,Mixed,FALSE,FALSE
+fd7cda6d-0bdb-44ed-9319-010c286d4633,Mixed,FALSE,FALSE
+04e0550a-e142-4658-9575-3e46fb6675b7,Scientific,TRUE,TRUE
+07609307-26f9-490f-89ea-4e74497e3c0d,Mixed,FALSE,FALSE
+5520dc44-3ed6-4825-8a69-9e93c3829371,Scientific,TRUE,FALSE
+942c4e36-624d-4054-a6cd-b7db0b24926a,Mixed,FALSE,FALSE
+abd3521c-f459-468e-9039-f989786147d4,Scientific,FALSE,FALSE
+c0dd4990-1803-4d6b-bc06-2f7eeaba100d,Citizen,TRUE,TRUE
+daae5a66-7bb4-4431-ac3c-a1bf70ca3407,Mixed,FALSE,FALSE
+db1abc39-7b60-4103-815d-820fa37cb62b,Scientific,TRUE,TRUE
+e19276e7-0698-4145-ab85-c32c6c76b098,Scientific,TRUE,TRUE
+e6d9a4a4-dbf0-4a3e-87c2-91b6af1f9771,Citizen,FALSE,FALSE
+f38773f9-2255-408e-9d17-44fa8ca4b962,Scientific,FALSE,FALSE
+08360455-914e-4d02-809a-13e3cd8a8d21,Citizen,TRUE,FALSE
+67c45ca3-0c6c-4da2-a1e8-621ef52bd559,Mixed,TRUE,FALSE
+67e2335c-4303-4ee3-9bfe-ecfe65662629,Citizen,TRUE,FALSE
+710ad05a-25cf-4129-80ce-c2702cdfa33f,Mixed,TRUE,FALSE
+8898e990-9d39-4871-9e6e-d1031c19e24b,Citizen,TRUE,FALSE
+94c821bd-28bf-4571-a97e-e696ba2f3425,Citizen,TRUE,FALSE
+9a829fb0-427c-4699-812d-9cff5ba8b607,Mixed,TRUE,FALSE
+100a9054-e46c-4302-b059-3a8836df1cf7,Mixed,TRUE,TRUE
+115f45ed-4334-4144-b5c5-669027e9b191,Scientific,TRUE,TRUE
+1a7546cc-da20-44e0-a5b3-448e41ffd9c8,Scientific,TRUE,TRUE
+1b11a5e3-6991-44fd-848b-6fd9c1368c58,Citizen,FALSE,FALSE
+230071a6-1388-4fb7-a399-695932faec71,Scientific,TRUE,TRUE
+233ba471-91a2-47a4-9946-b7e844f2124c,Mixed,FALSE,FALSE
+2a101f26-35e1-4197-94ec-bd25033292a7,Citizen,TRUE,TRUE
+3a0e9440-0a97-4a04-8089-7398c77da0be,Mixed,TRUE,TRUE
+3a1bf23b-9951-4e6a-bade-5383e1ba6efe,Citizen,TRUE,TRUE
+3bd7b984-6bbd-4194-95aa-114271d9ee68,Mixed,TRUE,TRUE
+3d6c8883-c29b-48f6-9fbf-9a5ad6ecbee4,Mixed,TRUE,TRUE
+415f27b8-65e5-4cb3-878d-649ac43350d1,Scientific,TRUE,TRUE
+44c73c0b-662e-41e7-8eee-4754a8592a27,Scientific,TRUE,TRUE
+4575bf91-0c65-47a8-84cb-0b36111f8956,Mixed,FALSE,FALSE
+48cd7d66-191b-4896-a2bf-f0665dad7a89,Mixed,TRUE,TRUE
+4ac5f415-6f44-43d0-a19b-2d91e5dcbe2b,Mixed,TRUE,TRUE
+4fa7b334-ce0d-4e88-aaae-2e0c138d049e,Citizen,TRUE,TRUE
+523590f0-f87d-4fed-acd2-6873bdce0a8c,Mixed,TRUE,TRUE
+547f2b71-ba25-4254-aaf1-4823600e7784,Mixed,FALSE,FALSE
+58a18d87-e572-4191-96a7-9b960a8df7e0,Scientific,TRUE,TRUE
+5accf920-492e-4641-9ba2-11481c116419,Mixed,TRUE,TRUE
+60773d5b-30e5-48ac-9d63-a2b81ffe5cfa,Mixed,TRUE,TRUE
+62af450d-0b71-4469-93c1-fc0999aa9807,Scientific,TRUE,TRUE
+669ecb52-bfbe-4220-99c7-bafc643df32e,Scientific,TRUE,TRUE
+699a09d4-951c-4a10-9cd6-7bddbbb92546,Scientific,TRUE,TRUE
+6ac3f774-d9fb-4796-b3e9-92bf6c81c084,Citizen,FALSE,FALSE
+71577ce3-32ea-4cf7-8046-b8ed4e098ffc,Mixed,TRUE,TRUE
+80576d53-992a-41f3-a3e3-dfd0fa0242ee,Scientific,FALSE,FALSE
+8821e36f-2d25-44c8-a95e-fb978f38ecde,Scientific,FALSE,FALSE
+912ac7b3-f473-435b-97d1-20b6ed0a6208,Citizen,TRUE,TRUE
+93c8cc03-30cf-474e-8173-dbe5a22a5d28,Scientific,TRUE,TRUE
+a8c8144a-3693-4d92-8bc4-49e00dd8defc,Mixed,FALSE,FALSE
+b1047888-ae52-4179-9dd5-5448ea342a24,Citizen,TRUE,TRUE
+b480871a-6c2f-4c35-ab94-6de203c4ff28,Mixed,FALSE,FALSE
+d135ba77-9d68-466b-bff9-8d1a0c53b7d7,Scientific,TRUE,TRUE
+d2a0dd22-9d39-4de2-99fb-5dde3ee3f49e,Scientific,TRUE,TRUE
+ddcc85ee-cb47-47a6-8789-711d6852145a,Scientific,TRUE,TRUE
+eaaabe3b-e64a-4819-a007-2c3529eb4bf7,Mixed,TRUE,TRUE
+f32a222c-9b32-47d2-8d29-b48be4a78128,Scientific,TRUE,TRUE
+f84902b2-ef45-4e89-83e7-5d1f190f0562,Mixed,TRUE,TRUE
+039ece6c-1e6d-4441-8392-43ab8bb29c47,Mixed,TRUE,TRUE
+046fedf4-29ee-45e9-a421-a4b82c229f1d,Mixed,TRUE,TRUE
+07d54123-75b8-4660-9482-e4c665e6f069,Scientific,TRUE,TRUE
+11a24c97-653b-4e4c-a524-a4c06ffab25f,Scientific,TRUE,TRUE
+2150bbfa-51d0-4557-ab15-fb9459881eb7,Mixed,TRUE,TRUE
+2790adc5-c709-427c-8d04-804590d98272,Scientific,TRUE,TRUE
+2e3454ce-5b2d-4bf4-bc23-ca5769f58137,Mixed,TRUE,TRUE
+2f17fba4-4915-47cc-9045-f8c7c8ea181e,Scientific,TRUE,TRUE
+2f79cc6e-6b14-4162-a4b5-e7415f0716ea,Mixed,TRUE,TRUE
+3c2fb76f-ed3f-40dc-bb40-21adbbd857d5,Mixed,TRUE,TRUE
+3cc1bf3e-e503-4d2a-9b23-a54b9269ebbe,Scientific,TRUE,TRUE
+3fa8e2b7-43c0-490e-b30e-b1902caa9bf0,Scientific,TRUE,TRUE
+4273f8ff-73c6-4791-89dc-b64f47b7416a,Scientific,TRUE,TRUE
+4cb30996-cc6a-44b9-b0c6-fce6f109d41f,Scientific,TRUE,TRUE
+4e19e2b8-9934-4b5a-a51f-62df5a9802e7,Scientific,TRUE,TRUE
+4f03bd51-a00c-4060-9eb6-b8db70c8a07b,Scientific,TRUE,TRUE
+52922205-6477-4999-9d4a-d38999aa32eb,Citizen,TRUE,TRUE
+52e809ec-8487-4e88-8c8d-1c7c14cf11c2,Mixed,TRUE,TRUE
+56a946bf-bd42-4a54-8543-4380d92f9762,Mixed,TRUE,TRUE
+5b580625-29f0-4911-be29-cf5b6496e538,Citizen,TRUE,TRUE
+5d030f0a-968a-43dd-8a94-931702f56f57,Scientific,TRUE,TRUE
+5d06e33b-e884-4369-9a1a-fdc8bfa9471c,Mixed,TRUE,TRUE
+73846baa-cba6-48e0-94e0-9308dae5c6bb,Citizen,TRUE,TRUE
+7445a910-faa2-4f43-b650-d2f055bfb0d7,Scientific,TRUE,TRUE
+7940f474-4cb3-4a49-b4f6-58f8c363dba1,Mixed,TRUE,TRUE
+7ba44a6f-e031-4c43-9c7c-d8de11263558,Scientific,TRUE,TRUE
+852348b9-453f-4aa2-a9db-69f9cda6fc77,Scientific,TRUE,TRUE
+8578e332-e4b6-4050-ae19-8ac9d0c49c96,Mixed,TRUE,TRUE
+91b8e6ed-6771-4c39-a681-516fefd6d072,Mixed,TRUE,TRUE
+95c79da4-a323-474d-92ae-6c252701db1e,Mixed,TRUE,TRUE
+9fad752d-4bf9-4adf-9535-3cf6339a70fb,Scientific,TRUE,TRUE
+ae1c0f69-c920-4a94-94d5-4a0b08966a86,Scientific,TRUE,TRUE
+b5209d78-638b-4af9-942e-76fcf1f17bd9,Mixed,TRUE,TRUE
+bc3f2018-2924-4fe8-86d4-261c9b9fa71f,Citizen,TRUE,TRUE
+bd552593-f9c8-4b54-8887-fb00b647c6f9,Scientific,TRUE,TRUE
+bde5b63d-8664-4632-bc8b-d06653b09b22,Scientific,TRUE,TRUE
+cb4c3a5c-3b28-41a3-ace9-9fa7c60e0b31,Mixed,TRUE,TRUE
+cbde2a70-7a85-4370-b240-09e0738f76f9,Citizen,TRUE,TRUE
+cddb8a18-c755-4ca6-9561-8dcbb8af82d7,Scientific,TRUE,TRUE
+cf5142d2-bde7-4733-b07a-68bf370d52aa,Mixed,TRUE,TRUE
+d0cee8f6-dbf9-4355-a9c2-62ab51fe36fd,Citizen,TRUE,TRUE
+e21033eb-b5b1-4043-a035-abf57e65efe7,Mixed,TRUE,TRUE
+e8ce41f4-a58a-4ce9-90b7-93694071afcd,Citizen,TRUE,TRUE
+edf03db8-68cf-48ac-a545-15f89c88e113,Scientific,TRUE,TRUE
+ee0321a6-9e6d-4501-94aa-f12cef9c5680,Scientific,TRUE,TRUE
+efde0b80-02d6-4e50-9e6a-4b4329bfeec6,Mixed,TRUE,TRUE
+f5815965-adce-4f6a-a56c-af93032b7e3f,Scientific,TRUE,TRUE
+fae37d1f-5b7a-4fe2-8cfa-8948aefbcac2,Mixed,TRUE,TRUE
