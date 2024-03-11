@@ -7,7 +7,7 @@ library(ggcorrplot)
 library(patchwork)
 library(gt)
 
-redoDataPrep <- FALSE
+redoDataPrep <- TRUE
 
 ## read in the data you need to reproduce the models
 if (redoDataPrep) {

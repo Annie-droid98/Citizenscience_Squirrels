@@ -116,7 +116,6 @@ Taxa_GB %>% filter(species%in%"Sciurus vulgaris") %>%
 
 Publishers <- vroom("input_data/Focus_categories.csv")
 
-table(Vert=Publishers$Focus_Vert, Mam=Publishers$Focus_Mam)
 
 ## This is overwritten below, just to demonstrate!
 Publishers$Focus <- ifelse(Publishers$Focus_Mam, "withinMammals",
@@ -148,7 +147,6 @@ Landuse_10k_sfc |> ## used to retain the geometry
             CountT_carolinensis = sum(species == "Sciurus carolinensis"),
             CountT_marten = sum(species == "Martes martes"),
             .by = c("geometry", "year", "Observer", "Focus",)) |>
-  filter(!is.na(year)) |>
   complete(geometry, year, Observer, Focus,
            fill = list(CountT_vertebrata = 0,
                        CountT_mammalia = 0,
@@ -170,9 +168,7 @@ Landuse_10k_sfc |> ## used to retain the geometry
       year_from_2000 = year - 2000,
       Centergrid = st_centroid(geometry), ## middlepoint of each grid cell 
       lon = st_coordinates(Centergrid)[,"X"]/1e+05, ## coordinates of these middlepoints, and make them smaller to avoid problems with the model
-         lat = st_coordinates(Centergrid)[,"Y"]/1e+05) |>
-  mutate(
-      across(starts_with("Prop"), ~replace_na(.x, 0))) ->
+         lat = st_coordinates(Centergrid)[,"Y"]/1e+05) ->
       Taxa_GB_count_10km
 
 if(rm_intermediate) rm(Taxa_GB_Pub, Landuse_10k_sfc)
