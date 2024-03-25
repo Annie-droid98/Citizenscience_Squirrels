@@ -10,7 +10,7 @@ library(RColorBrewer)
 
 
 ## prepare the data from scratch
-redoDataPrep <- FALSE
+redoDataPrep <- TRUE
 
 if (redoDataPrep) {
     source("R/1_data_prep.R")
@@ -129,7 +129,7 @@ clc_2018_landcover$landcover_cat <-
 
 ## Mammal counts for each grid overall for years
 Ma_counts <- Taxa_GB_count_10km |>
-  filter(!Focus) |>
+  filter(Focus == "without") |>
   summarise(All_mammalia = sum(CountT_mammalia),
             .by = "geometry") |>
   st_transform(crs=st_crs(clc_2018_landcover)) 
@@ -281,12 +281,12 @@ map_UK <- All_UK +
 
 Proportions_lu <- Taxa_GB_count_10km |>
   as_tibble()|> ## to get rid of the geometry
-  filter(!Focus) |>
+  filter(Focus == "without") |>
   summarise(across(starts_with("PropL_"), ~ mean(.x, na.rm = TRUE)))
 
 Proportions_co <- Taxa_GB_count_10km |>
   as_tibble()|> ## to get rid of the geometry
-  filter(!Focus) |>
+  filter(Focus == "without") |>
   summarise(across(starts_with("PropL_"),
                    ~ weighted.mean(.x, CountT_mammalia, na.rm = TRUE)))
 
@@ -349,7 +349,7 @@ ggsave("figures/Fig2.png", complex_map, width = 600,
 ## an observation was made
 
 ## Mammalia_relevant <- Taxa_GB_Pub |>
-##     filter(Observer == "Citizen" & !Focus)
+##     filter(Observer == "Citizen" & Focus == "without")
 
 ## landcover_relevant <- clc_2018_landcover %>%
 ##     st_as_sf() %>%

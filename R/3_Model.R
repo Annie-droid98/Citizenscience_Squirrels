@@ -16,15 +16,35 @@ if (redoDataPrep) {
     Taxa_GB_count_10km <- readRDS("intermediate_data/Counts.rds")
 }
 
+
+## how many grids per year with non-zero data
+tapply(Taxa_GB_count_10km$CountT_mammalia,
+       list(Taxa_GB_count_10km$year, Taxa_GB_count_10km$Observer, Taxa_GB_count_10km$Focus),
+       function(x)length(x[x>0]))
+
+## how counts per year
+tapply(Taxa_GB_count_10km$CountT_mammalia,
+       list(Taxa_GB_count_10km$year, Taxa_GB_count_10km$Observer, Taxa_GB_count_10km$Focus),
+       function(x) sum(x))
+
+tapply(Taxa_GB_count_10km$CountT_mammalia,
+       list(Taxa_GB_count_10km$year, Taxa_GB_count_10km$Observer, Taxa_GB_count_10km$Focus),
+       function(x)length(x))
+
+
+
 ## subset it to only citizen-science data without focus taxon within
 ## mammalia
 d <- as_tibble(Taxa_GB_count_10km) |>
    filter(Observer%in%"Citizen" &
-          !Focus &
-          ## also need to remove grid cells which didn't have mammalia
-          ## counted
-          CountT_mammalia_log >= 0
-          )
+          Focus == "without" &
+          CountT_mammalia_log >= 0,
+          !is.na(year))
+
+apply(d, 2, function (x) any(is.infinite(unlist(x))))
+
+apply(d, 2, function (x) any(is.na(unlist(x))))
+
 
 mesh <- INLA::inla.mesh.2d(loc = d[, c("lon", "lat")], max.n = 100, max.edge = c(3, 20))
 
@@ -333,12 +353,11 @@ formulas_fixed_carolinensis_Vert <- lapply(formulas_fixed_carolinensis, function
 ## for some grids in some years (list in the manuscript how many).
 
 v <- as_tibble(Taxa_GB_count_10km) |>
-  filter(Observer%in%"Citizen" &
-          !Focus &
-          ## also need to remove grid cells which didn't have vertebrats
-          ## counted
-          CountT_vertebrata_log >= 0
-          )
+   filter(Observer%in%"Citizen" &
+          Focus == "without" &
+          ##  remove grid cells which didn't have vertebrata counted
+          CountT_vertebrata_log >= 0 &
+          !is.na(year))
 
 result_vulgaris_Vert <- mapply(get_init_and_fit,
                                x = formulas_fixed_vulgaris_Vert,

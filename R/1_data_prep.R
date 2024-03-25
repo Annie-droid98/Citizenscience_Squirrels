@@ -13,7 +13,7 @@ draw_plot <- FALSE
 
 ## do we want to remove intermediate objects to save memory or keep
 ## them for inspection (trouble shooting)?
-rm_intermediate <- FALSE
+rm_intermediate <- TRUE
 
 ### LANDCOVER 
 
@@ -114,8 +114,7 @@ Taxa_GB %>% filter(species%in%"Sciurus vulgaris") %>%
     ggplot() + geom_sf()
 }
 
-Publishers <- vroom("input_data/Focus_categories.csv")
-
+Publishers <- read.csv("input_data/Focus_categories.csv")
 
 ## This is overwritten below, just to demonstrate!
 Publishers$Focus <- ifelse(Publishers$Focus_Mam, "withinMammals",
@@ -127,14 +126,17 @@ table(Vert=Publishers$Focus_Vert, Mam=Publishers$Focus_Mam,
 ## this would produce problems, as we'd need to track all the numbers
 ## for Verterate or Mammalia focus seperately. Let's just use the
 ## Mammalia focus!
-Publishers$Focus <- Publishers$Focus_Mam
+Publishers$Focus <- ifelse(Publishers$Focus_Mam, "withXFocus", "without")
 ## arguably a focus on mammalia within the vertebrate doesn't matter
 ## much if we normalise with the latter.
 
 ### Merge the two datasets
 full_join(Taxa_GB, Publishers, by = "datasetKey", relationship = "many-to-many") |> 
   ## keep only records with species
-  filter(!is.na(species)) -> Taxa_GB_Pub
+filter(!is.na(species)|
+       !is.na(class)|
+       !is.na(Observer)|
+       !is.na(Focus)) -> Taxa_GB_Pub
 
 
 if(rm_intermediate) rm(Taxa_GB) 
@@ -142,11 +144,11 @@ if(rm_intermediate) rm(Taxa_GB)
 Landuse_10k_sfc |> ## used to retain the geometry
   st_join(Taxa_GB_Pub) |> 
   summarise(CountT_vertebrata = n(), 
-            CountT_mammalia = sum(class == "Mammalia"),
-            CountT_vulgaris = sum(species == "Sciurus vulgaris"),
-            CountT_carolinensis = sum(species == "Sciurus carolinensis"),
-            CountT_marten = sum(species == "Martes martes"),
-            .by = c("geometry", "year", "Observer", "Focus",)) |>
+            CountT_mammalia = sum(class %in% "Mammalia"),
+            CountT_vulgaris = sum(species %in% "Sciurus vulgaris"),
+            CountT_carolinensis = sum(species %in% "Sciurus carolinensis"),
+            CountT_marten = sum(species %in% "Martes martes"),
+            .by = c("geometry", "year", "Observer", "Focus")) |>
   complete(geometry, year, Observer, Focus,
            fill = list(CountT_vertebrata = 0,
                        CountT_mammalia = 0,
@@ -175,7 +177,7 @@ if(rm_intermediate) rm(Taxa_GB_Pub, Landuse_10k_sfc)
 
 if(draw_plot){
 Taxa_GB_count_10km |>
-  filter(year==2020 & Observer == "Citizen" & !Focus) |>
+  filter(year==2020 & Observer == "Citizen" & Focus == "without") |>
   ggplot() + geom_sf(aes(fill = log(CountT_mammalia+1)))
 }
 
