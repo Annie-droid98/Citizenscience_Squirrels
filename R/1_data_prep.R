@@ -6,14 +6,14 @@ library(vroom)
 library(tidyr)
 
 ## do we want to repeat the download from GBIF
-new_dl <- FALSE
+new_dl <- TRUE
 
 ## do we want to plot things as we got (for checking purposes)
 draw_plot <- FALSE
 
 ## do we want to remove intermediate objects to save memory or keep
 ## them for inspection (trouble shooting)?
-rm_intermediate <- TRUE
+rm_intermediate <- FALSE
 
 ### LANDCOVER 
 
@@ -84,10 +84,13 @@ if(rm_intermediate) rm(clc_2018_landcover)
 ## https://doi.org/10.15468/dl.7h9n3a this needs 32GB in the tmp
 ## directory... chose wisely (hard code to something on your system
 ## with the necessary space)!
-temp <- "intermediate_data/gh_ignore/GBIF_dl.zip"
+temp <- "intermediate_data/gh_ignore/GBIF_mam_dl.zip"
 
 if(new_dl) {
-    download.file("https://api.gbif.org/v1/occurrence/download/request/0008421-240216155721649.zip", temp)
+    ## ## Vertebrates screwed?!?
+    ##  download.file("https://api.gbif.org/v1/occurrence/download/request/0008421-240216155721649.zip",
+    ##     temp)
+    download.file("https://api.gbif.org/v1/occurrence/download/request/0169558-210914110416597.zip", temp)
 }
 
 ## select columns already during import in vroom
@@ -101,8 +104,8 @@ probs <- problems(data_GB)
 
 ## format GBIF data
 data_GB |>
-  filter(!is.na(species)) |>
-  st_as_sf(coords = c(3, 4)) |>
+  filter(!is.na(species) & !is.na(decimalLongitude) &!is.na(decimalLatitude)) |>
+  st_as_sf(coords = c("decimalLongitude","decimalLatitude")) |>
   st_set_crs(4326) |> ## set the coordinate system as it is
   ## project into the coordinate system needed (that of the landuse data)
   st_transform(3035) -> Taxa_GB

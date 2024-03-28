@@ -7,7 +7,7 @@ library(ggcorrplot)
 library(patchwork)
 library(gt)
 
-redoDataPrep <- TRUE
+redoDataPrep <- FALSE
 
 ## read in the data you need to reproduce the models
 if (redoDataPrep) {
@@ -30,8 +30,6 @@ tapply(Taxa_GB_count_10km$CountT_mammalia,
 tapply(Taxa_GB_count_10km$CountT_mammalia,
        list(Taxa_GB_count_10km$year, Taxa_GB_count_10km$Observer, Taxa_GB_count_10km$Focus),
        function(x)length(x))
-
-
 
 ## subset it to only citizen-science data without focus taxon within
 ## mammalia
