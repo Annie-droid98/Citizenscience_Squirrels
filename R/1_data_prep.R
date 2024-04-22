@@ -6,7 +6,7 @@ library(vroom)
 library(tidyr)
 
 ## do we want to repeat the download from GBIF
-new_dl <- TRUE
+new_dl <- FALSE
 
 ## do we want to plot things as we got (for checking purposes)
 draw_plot <- FALSE
@@ -84,17 +84,17 @@ if(rm_intermediate) rm(clc_2018_landcover)
 ## https://doi.org/10.15468/dl.7h9n3a this needs 32GB in the tmp
 ## directory... chose wisely (hard code to something on your system
 ## with the necessary space)!
-temp <- "intermediate_data/gh_ignore/GBIF_mam_dl.zip"
+temp_Mam <- "intermediate_data/gh_ignore/GBIF_mam_dl.zip"
+temp_Vert <- "intermediate_data/gh_ignore/GBIF_dl.zip"
 
 if(new_dl) {
-    ## ## Vertebrates screwed?!?
-    ##  download.file("https://api.gbif.org/v1/occurrence/download/request/0008421-240216155721649.zip",
-    ##     temp)
-    download.file("https://api.gbif.org/v1/occurrence/download/request/0169558-210914110416597.zip", temp)
+    download.file("https://api.gbif.org/v1/occurrence/download/request/0008421-240216155721649.zip",
+                   temp_Vert)
+    download.file("https://api.gbif.org/v1/occurrence/download/request/0169558-210914110416597.zip", temp_Mam)
 }
 
 ## select columns already during import in vroom
-data_GB <- vroom(temp, quote = "",
+data_GB <- vroom(temp_Vert, quote = "",
                  col_select = c(species, class, decimalLongitude,
                                  decimalLatitude, year, datasetKey),
                  show_col_types = FALSE)
@@ -117,19 +117,12 @@ Taxa_GB %>% filter(species%in%"Sciurus vulgaris") %>%
     ggplot() + geom_sf()
 }
 
-Publishers <- read.csv("input_data/Focus_categories.csv")
+Publishers <- read.csv("input_data/SquirrelPublisherBelow1000obs.csv", sep=" ")
+## Publishers <- read.csv("input_data/Focus_categories.csv", sep=" ")
 
-## This is overwritten below, just to demonstrate!
-Publishers$Focus <- ifelse(Publishers$Focus_Mam, "withinMammals",
-                    ifelse(Publishers$Focus_Vert, "withinVertebrates",
-                           FALSE))
+table(Publishers$Observer, Publishers$FocusTaxaTorF, useNA="ifany")
 
-table(Vert=Publishers$Focus_Vert, Mam=Publishers$Focus_Mam,
-      Unified=Publishers$Focus)
-## this would produce problems, as we'd need to track all the numbers
-## for Verterate or Mammalia focus seperately. Let's just use the
-## Mammalia focus!
-Publishers$Focus <- ifelse(Publishers$Focus_Mam, "withXFocus", "without")
+Publishers$Focus <- ifelse(Publishers$FocusTaxaTorF, "withXFocus", "without")
 ## arguably a focus on mammalia within the vertebrate doesn't matter
 ## much if we normalise with the latter.
 
