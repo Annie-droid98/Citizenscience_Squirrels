@@ -7,7 +7,7 @@ library(ggcorrplot)
 library(patchwork)
 library(gt)
 
-redoDataPrep <- TRUE
+redoDataPrep <- FALSE
 
 ## read in the data you need to reproduce the models
 if (redoDataPrep) {
@@ -36,8 +36,9 @@ tapply(Taxa_GB_count_10km$CountT_mammalia,
 d <- as_tibble(Taxa_GB_count_10km) |>
    filter(Observer%in%"Citizen" &
           Focus == "without" &
-          CountT_mammalia_log >= 0,
-          !is.na(year))
+          CountT_mammalia_log >= 0 &
+          !is.na(year) &
+          year_from_2000 < 22)
 
 apply(d, 2, function (x) any(is.infinite(unlist(x))))
 
@@ -149,14 +150,22 @@ get_init_and_fit <-function(x, y, data_df) {
 ## get_init_and_fit(formulas_fixed_vulgaris[[1]],
 ##  formulas_init_vulgaris[[1]], data_df = d)
 
-result_vulgaris <- mapply(get_init_and_fit,
-                          x = formulas_fixed_vulgaris,
-                          y = formulas_init_vulgaris,
-                          MoreArgs = list(data_df = d), 
-                          SIMPLIFY = FALSE )
+## result_vulgaris <- mapply(get_init_and_fit,
+##                           x = formulas_fixed_vulgaris,
+##                           y = formulas_init_vulgaris,
+##                           MoreArgs = list(data_df = d), 
+##                           SIMPLIFY = FALSE )
 
-## our local save (not reproducible but saving work in re-computation)
-saveRDS(result_vulgaris, "intermediate_data/gh_ignore/Modelle_vulgaris.rds")
+One_result_vulgaris <- get_init_and_fit(
+    x = formulas_fixed_vulgaris[[1]],
+    y = formulas_init_vulgaris[[1]],
+    data_df = d)
+
+
+## ## our local save (not reproducible but saving work in re-computation)
+
+## ## Not saving (overwriting for no, just comaring models)
+## saveRDS(result_vulgaris, "intermediate_data/gh_ignore/Modelle_vulgaris.rds")
 
 ############################################ same models for S. carolinensis 
 replace_formula <- function(from, to, my_formula){
@@ -179,14 +188,22 @@ formulas_init_carolinensis <- lapply(formulas_init_vulgaris, function(x) {
 names(formulas_init_carolinensis) <- sub("caro", "vulgaris",
                                           names(formulas_init_carolinensis))
 
-result_carolinensis <- mapply(get_init_and_fit,
-                              x = formulas_fixed_carolinensis,
-                              y = formulas_init_carolinensis,
-                              MoreArgs = list(data_df = d), 
-                              SIMPLIFY = FALSE )
+## result_carolinensis <- mapply(get_init_and_fit,
+##                               x = formulas_fixed_carolinensis,
+##                               y = formulas_init_carolinensis,
+##                               MoreArgs = list(data_df = d), 
+##                               SIMPLIFY = FALSE )
 
 ## our local save (not reproducible but saving work in re-computation)
-saveRDS(result_carolinensis, "intermediate_data/gh_ignore/Modelle_carolinensis.rds")
+
+## ## Not saving (overwriting for no, just comaring models)
+## saveRDS(result_carolinensis, "intermediate_data/gh_ignore/Modelle_carolinensis.rds")
+
+One_result_carolinensis <- get_init_and_fit(
+    x = formulas_fixed_carolinensis[[1]],
+    y = formulas_init_carolinensis[[1]],
+    data_df = d)
+
 
 
 ## ###### Corrplot and Likelyhoodratio testing
@@ -213,8 +230,12 @@ get_cor_nice_plot <- function(model.fit) {
 }
 
 
-fixCorPlot_vulgaris <- get_cor_nice_plot(result_carolinensis[[1]])
-fixCorPlot_carolinensis <- get_cor_nice_plot(result_carolinensis[[1]])
+## fixCorPlot_vulgaris <- get_cor_nice_plot(result_carolinensis[[1]])
+
+fixCorPlot_vulgaris <- get_cor_nice_plot(One_result_carolinensis)
+
+## fixCorPlot_carolinensis <- get_cor_nice_plot(result_carolinensis[[1]])
+fixCorPlot_carolinensis <- get_cor_nice_plot(One_result_carolinensis)
 
 fixed_effects_corr_plot <- wrap_plots(fixCorPlot_vulgaris,
                                          fixCorPlot_carolinensis, 
@@ -226,90 +247,90 @@ fixed_effects_corr_plot <- wrap_plots(fixCorPlot_vulgaris,
 ggsave("figures/FixedEffectCorrsBoth.pdf", fixed_effects_corr_plot,
        width = 10, height = 20, device = cairo_pdf)
 
-lapply((2:17), function(i){
-    anova(result_vulgaris[[1]], result_vulgaris[[i]])[["basicLRT"]]
-}) %>% 
-    do.call(rbind, .) %>%
-    add_row(chi2_LR = NA, df =NA , p_value =NA, .before = 1) %>%
-    cbind(as.data.frame(summary(result_vulgaris[[1]])$beta_table), .) %>%
-    round(digits = 3) %>%
-    ## mutate(p_val_scientific = format(p_value,
-    ##                                  scientific = FALSE, big.mark = ","))
-    tibble::rownames_to_column("Predictor") -> pval_table_vulgaris
+## lapply((2:17), function(i){
+##     anova(result_vulgaris[[1]], result_vulgaris[[i]])[["basicLRT"]]
+## }) %>% 
+##     do.call(rbind, .) %>%
+##     add_row(chi2_LR = NA, df =NA , p_value =NA, .before = 1) %>%
+##     cbind(as.data.frame(summary(result_vulgaris[[1]])$beta_table), .) %>%
+##     round(digits = 3) %>%
+##     ## mutate(p_val_scientific = format(p_value,
+##     ##                                  scientific = FALSE, big.mark = ","))
+##     tibble::rownames_to_column("Predictor") -> pval_table_vulgaris
 
-lapply((2:17), function(i){
-    anova(result_carolinensis[[1]], result_carolinensis[[i]])[["basicLRT"]]
-}) %>% 
-    do.call(rbind, .) %>%
-    add_row(chi2_LR = NA, df =NA , p_value =NA, .before = 1) %>%
-    cbind(as.data.frame(summary(result_carolinensis[[1]])$beta_table), .) %>%
-    round(digits = 3) %>%
-    ## mutate(p_val_scientific = format(p_value,
-    ##                                  scientific = FALSE, big.mark = ","))
-    tibble::rownames_to_column("Predictor") -> pval_table_carolinensis
+## lapply((2:17), function(i){
+##     anova(result_carolinensis[[1]], result_carolinensis[[i]])[["basicLRT"]]
+## }) %>% 
+##     do.call(rbind, .) %>%
+##     add_row(chi2_LR = NA, df =NA , p_value =NA, .before = 1) %>%
+##     cbind(as.data.frame(summary(result_carolinensis[[1]])$beta_table), .) %>%
+##     round(digits = 3) %>%
+##     ## mutate(p_val_scientific = format(p_value,
+##     ##                                  scientific = FALSE, big.mark = ","))
+##     tibble::rownames_to_column("Predictor") -> pval_table_carolinensis
 
-cbind(pval_table_vulgaris, pval_table_carolinensis) |>
-    as_tibble(.name_repair="universal")|>
-    gt()  |>
-    tab_spanner(label = md("<br><em>S. vulgaris</em>"),
-                columns = c("Estimate...2",
-                            "Cond..SE...3","t.value...4", "chi2_LR...5",
-                            "df...6","p_value...7"))|>
-    tab_spanner(label = md("<br><em>S. carolinensis</em>"),
-                columns = c("Estimate...9","Cond..SE...10","t.value...11",
-                            "chi2_LR...12", "df...13","p_value...14")) |>
-    tab_style(
-        style = list(
-            cell_text(weight = "bold")
-        ),
-        locations = cells_body(
-            columns = `p_value...7`,
-            rows = `p_value...7`<= 0.05
-    ))|>
-    tab_style(
-        style = list(
-            cell_text(weight = "bold")
-        ),
-        locations = cells_body(
-            columns = `p_value...14`,
-            rows = `p_value...14`<= 0.05
-        )) |>
-    cols_label(
-              Predictor...1 = "Predictor",
-              Estimate...2 = "Estimate",
-              Cond..SE...3 =  "Cond SE",
-              t.value...4 = "t value",
-              chi2_LR...5 = "chi^2 LR",
-              df...6 = "DF",
-              p_value...7 = "p value",
-              Predictor...8 = "Predictor",
-              Estimate...9 = "Estimate",
-              Cond..SE...10 = "Cond SE",
-              t.value...11 = "t value",
-              chi2_LR...12 = "chi^2 LR",
-              df...13 = "DF",
-              p_value...14 = "p value"
-    ) |>
-    text_replace(
-        locations = cells_body(columns = c(Predictor...1, Predictor...8)),
-        pattern = "PropM_(v\\w*|c\\w*)",
-        replacement = "<br><em>S. \\1</em>") |>
-    text_replace(
-        locations = cells_body(columns = c(Predictor...1, Predictor...8)),
-        pattern = "PropM_marten",
-        replacement = "<br><em>M. martes\\1</em>") |>
-    text_replace(
-        locations = cells_body(columns = c(Predictor...1, Predictor...8)),
-        pattern = "PropL_",
-        replacement = "") |>
-    text_replace(
-        locations = cells_body(columns = c(Predictor...1, Predictor...8)),
-        pattern = "_",
-        replacement = " ") |>
-    sub_zero(zero_text="<0.001") -> Nice_table
+## cbind(pval_table_vulgaris, pval_table_carolinensis) |>
+##     as_tibble(.name_repair="universal")|>
+##     gt()  |>
+##     tab_spanner(label = md("<br><em>S. vulgaris</em>"),
+##                 columns = c("Estimate...2",
+##                             "Cond..SE...3","t.value...4", "chi2_LR...5",
+##                             "df...6","p_value...7"))|>
+##     tab_spanner(label = md("<br><em>S. carolinensis</em>"),
+##                 columns = c("Estimate...9","Cond..SE...10","t.value...11",
+##                             "chi2_LR...12", "df...13","p_value...14")) |>
+##     tab_style(
+##         style = list(
+##             cell_text(weight = "bold")
+##         ),
+##         locations = cells_body(
+##             columns = `p_value...7`,
+##             rows = `p_value...7`<= 0.05
+##     ))|>
+##     tab_style(
+##         style = list(
+##             cell_text(weight = "bold")
+##         ),
+##         locations = cells_body(
+##             columns = `p_value...14`,
+##             rows = `p_value...14`<= 0.05
+##         )) |>
+##     cols_label(
+##               Predictor...1 = "Predictor",
+##               Estimate...2 = "Estimate",
+##               Cond..SE...3 =  "Cond SE",
+##               t.value...4 = "t value",
+##               chi2_LR...5 = "chi^2 LR",
+##               df...6 = "DF",
+##               p_value...7 = "p value",
+##               Predictor...8 = "Predictor",
+##               Estimate...9 = "Estimate",
+##               Cond..SE...10 = "Cond SE",
+##               t.value...11 = "t value",
+##               chi2_LR...12 = "chi^2 LR",
+##               df...13 = "DF",
+##               p_value...14 = "p value"
+##     ) |>
+##     text_replace(
+##         locations = cells_body(columns = c(Predictor...1, Predictor...8)),
+##         pattern = "PropM_(v\\w*|c\\w*)",
+##         replacement = "<br><em>S. \\1</em>") |>
+##     text_replace(
+##         locations = cells_body(columns = c(Predictor...1, Predictor...8)),
+##         pattern = "PropM_marten",
+##         replacement = "<br><em>M. martes\\1</em>") |>
+##     text_replace(
+##         locations = cells_body(columns = c(Predictor...1, Predictor...8)),
+##         pattern = "PropL_",
+##         replacement = "") |>
+##     text_replace(
+##         locations = cells_body(columns = c(Predictor...1, Predictor...8)),
+##         pattern = "_",
+##         replacement = " ") |>
+##     sub_zero(zero_text="<0.001") -> Nice_table
 
-gtsave(Nice_table, "tables/Table_ModelsLRT.html")
-#
+## gtsave(Nice_table, "tables/Table_ModelsLRT.html")
+## #
 
 
 ## Alternative Vertebrata models
@@ -355,32 +376,50 @@ v <- as_tibble(Taxa_GB_count_10km) |>
           Focus == "without" &
           ##  remove grid cells which didn't have vertebrata counted
           CountT_vertebrata_log >= 0 &
-          !is.na(year))
+          !is.na(year) &
+          year_from_2000 < 22)
 
-result_vulgaris_Vert <- mapply(get_init_and_fit,
-                               x = formulas_fixed_vulgaris_Vert,
-                               y = formulas_init_vulgaris_Vert,
-                               MoreArgs = list(data_df = v), 
-                               SIMPLIFY = FALSE )
+## result_vulgaris_Vert <- mapply(get_init_and_fit,
+##                                x = formulas_fixed_vulgaris_Vert,
+##                                y = formulas_init_vulgaris_Vert,
+##                                MoreArgs = list(data_df = v), 
+##                                SIMPLIFY = FALSE )
 
-## our local save (not reproducible but saving work in re-computation)
-saveRDS(result_vulgaris_Vert, "intermediate_data/gh_ignore/Modelle_vulgaris_Vert.rds")
+One_result_vulgaris_Vert <- get_init_and_fit(
+    x = formulas_fixed_vulgaris_Vert[[1]],
+    y = formulas_init_vulgaris_Vert[[1]],
+    data_df = v)
+
+## ## Not saving (overwriting for no, just comaring models)
+## ## our local save (not reproducible but saving work in re-computation)
+## saveRDS(result_vulgaris_Vert, "intermediate_data/gh_ignore/Modelle_vulgaris_Vert.rds")
 
 
-result_carolinensis_Vert <- mapply(get_init_and_fit,
-                                   x = formulas_fixed_carolinensis_Vert,
-                                   y = formulas_init_carolinensis_Vert,
-                                   MoreArgs = list(data_df = v), 
-                                   SIMPLIFY = FALSE)
+## result_carolinensis_Vert <- mapply(get_init_and_fit,
+##                                    x = formulas_fixed_carolinensis_Vert,
+##                                    y = formulas_init_carolinensis_Vert,
+##                                    MoreArgs = list(data_df = v), 
+##                                    SIMPLIFY = FALSE)
 
-## our local save (not reproducible but saving work in re-computation)
-saveRDS(result_carolinensis_Vert, "intermediate_data/gh_ignore/Modelle_carolinensis_Vert.rds")
+
+One_result_carolinensis_Vert <- get_init_and_fit(
+    x = formulas_fixed_carolinensis_Vert[[1]],
+    y = formulas_init_carolinensis_Vert[[1]],
+    data_df = v)
+
+## ## Not saving (overwriting for no, just comaring models)
+## ## our local save (not reproducible but saving work in re-computation)
+## saveRDS(result_carolinensis_Vert, "intermediate_data/gh_ignore/Modelle_carolinensis_Vert.rds")
 
 ## Corr plots and LRT for VERTEBRATA normalisation 
 
-fixCorPlot_vulgaris_Vert <- get_cor_nice_plot(result_vulgaris_Vert[[1]])
+## fixCorPlot_vulgaris_Vert <- get_cor_nice_plot(result_vulgaris_Vert[[1]])
+fixCorPlot_vulgaris_Vert <- get_cor_nice_plot(One_result_vulgaris_Vert)
 
-fixCorPlot_carolinensis_Vert <- get_cor_nice_plot(result_carolinensis_Vert[[1]])
+
+## fixCorPlot_carolinensis_Vert <- get_cor_nice_plot(result_carolinensis_Vert[[1]])
+fixCorPlot_carolinensis_Vert <- get_cor_nice_plot(One_result_carolinensis_Vert)
+
 
 fixed_effects_corr_plot_Vert <- wrap_plots(fixCorPlot_vulgaris_Vert,
                                          fixCorPlot_carolinensis_Vert, 
@@ -392,87 +431,87 @@ fixed_effects_corr_plot_Vert <- wrap_plots(fixCorPlot_vulgaris_Vert,
 ggsave("figures/FixedEffectCorrsBoth_Vert.pdf", fixed_effects_corr_plot_Vert,
        width = 10, height = 20, device = cairo_pdf)
 
-lapply((2:17), function(i){
-    anova(result_vulgaris_Vert[[1]], result_vulgaris_Vert[[i]])[["basicLRT"]]
-}) %>% 
-    do.call(rbind, .) %>%
-    add_row(chi2_LR = NA, df =NA , p_value =NA, .before = 1) %>%
-    cbind(as.data.frame(summary(result_vulgaris_Vert[[1]])$beta_table), .) %>%
-    round(digits = 3) %>%
-    ## mutate(p_val_scientific = format(p_value,
-    ##                                  scientific = FALSE, big.mark = ","))
-    tibble::rownames_to_column("Predictor") -> pval_table_vulgaris_Vert
+## lapply((2:17), function(i){
+##     anova(result_vulgaris_Vert[[1]], result_vulgaris_Vert[[i]])[["basicLRT"]]
+## }) %>% 
+##     do.call(rbind, .) %>%
+##     add_row(chi2_LR = NA, df =NA , p_value =NA, .before = 1) %>%
+##     cbind(as.data.frame(summary(result_vulgaris_Vert[[1]])$beta_table), .) %>%
+##     round(digits = 3) %>%
+##     ## mutate(p_val_scientific = format(p_value,
+##     ##                                  scientific = FALSE, big.mark = ","))
+##     tibble::rownames_to_column("Predictor") -> pval_table_vulgaris_Vert
 
-lapply((2:17), function(i){
-    anova(result_carolinensis_Vert[[1]], result_carolinensis_Vert[[i]])[["basicLRT"]]
-}) %>% 
-    do.call(rbind, .) %>%
-    add_row(chi2_LR = NA, df =NA , p_value =NA, .before = 1) %>%
-    cbind(as.data.frame(summary(result_carolinensis_Vert[[1]])$beta_table), .) %>%
-    round(digits = 3) %>%
-    ## mutate(p_val_scientific = format(p_value,
-    ##                                  scientific = FALSE, big.mark = ","))
-    tibble::rownames_to_column("Predictor") -> pval_table_carolinensis_Vert
+## lapply((2:17), function(i){
+##     anova(result_carolinensis_Vert[[1]], result_carolinensis_Vert[[i]])[["basicLRT"]]
+## }) %>% 
+##     do.call(rbind, .) %>%
+##     add_row(chi2_LR = NA, df =NA , p_value =NA, .before = 1) %>%
+##     cbind(as.data.frame(summary(result_carolinensis_Vert[[1]])$beta_table), .) %>%
+##     round(digits = 3) %>%
+##     ## mutate(p_val_scientific = format(p_value,
+##     ##                                  scientific = FALSE, big.mark = ","))
+##     tibble::rownames_to_column("Predictor") -> pval_table_carolinensis_Vert
 
-cbind(pval_table_vulgaris_Vert, pval_table_carolinensis_Vert) |>
-    as_tibble(.name_repair="universal")|>
-    gt()  |>
-    tab_spanner(label = md("<br><em>S. vulgaris</em>"),
-                columns = c("Estimate...2",
-                            "Cond..SE...3","t.value...4", "chi2_LR...5",
-                            "df...6","p_value...7"))|>
-    tab_spanner(label = md("<br><em>S. carolinensis</em>"),
-                columns = c("Estimate...9","Cond..SE...10","t.value...11",
-                            "chi2_LR...12", "df...13","p_value...14")) |>
-    tab_style(
-        style = list(
-            cell_text(weight = "bold")
-        ),
-        locations = cells_body(
-            columns = `p_value...7`,
-            rows = `p_value...7`<= 0.05
-    ))|>
-    tab_style(
-        style = list(
-            cell_text(weight = "bold")
-        ),
-        locations = cells_body(
-            columns = `p_value...14`,
-            rows = `p_value...14`<= 0.05
-        )) |>
-    cols_label(
-              Predictor...1 = "Predictor",
-              Estimate...2 = "Estimate",
-              Cond..SE...3 =  "Cond SE",
-              t.value...4 = "t value",
-              chi2_LR...5 = "chi^2 LR",
-              df...6 = "DF",
-              p_value...7 = "p value",
-              Predictor...8 = "Predictor",
-              Estimate...9 = "Estimate",
-              Cond..SE...10 = "Cond SE",
-              t.value...11 = "t value",
-              chi2_LR...12 = "chi^2 LR",
-              df...13 = "DF",
-              p_value...14 = "p value"
-    ) |>
-    text_replace(
-        locations = cells_body(columns = c(Predictor...1, Predictor...8)),
-        pattern = "PropM_(v\\w*|c\\w*)",
-        replacement = "<br><em>S. \\1</em>") |>
-    text_replace(
-        locations = cells_body(columns = c(Predictor...1, Predictor...8)),
-        pattern = "PropM_marten",
-        replacement = "<br><em>M. martes\\1</em>") |>
-    text_replace(
-        locations = cells_body(columns = c(Predictor...1, Predictor...8)),
-        pattern = "PropL_",
-        replacement = "") |>
-    text_replace(
-        locations = cells_body(columns = c(Predictor...1, Predictor...8)),
-        pattern = "_",
-        replacement = " ") |>
-    sub_zero(zero_text="<0.001") -> Nice_table_Vert
+## cbind(pval_table_vulgaris_Vert, pval_table_carolinensis_Vert) |>
+##     as_tibble(.name_repair="universal")|>
+##     gt()  |>
+##     tab_spanner(label = md("<br><em>S. vulgaris</em>"),
+##                 columns = c("Estimate...2",
+##                             "Cond..SE...3","t.value...4", "chi2_LR...5",
+##                             "df...6","p_value...7"))|>
+##     tab_spanner(label = md("<br><em>S. carolinensis</em>"),
+##                 columns = c("Estimate...9","Cond..SE...10","t.value...11",
+##                             "chi2_LR...12", "df...13","p_value...14")) |>
+##     tab_style(
+##         style = list(
+##             cell_text(weight = "bold")
+##         ),
+##         locations = cells_body(
+##             columns = `p_value...7`,
+##             rows = `p_value...7`<= 0.05
+##     ))|>
+##     tab_style(
+##         style = list(
+##             cell_text(weight = "bold")
+##         ),
+##         locations = cells_body(
+##             columns = `p_value...14`,
+##             rows = `p_value...14`<= 0.05
+##         )) |>
+##     cols_label(
+##               Predictor...1 = "Predictor",
+##               Estimate...2 = "Estimate",
+##               Cond..SE...3 =  "Cond SE",
+##               t.value...4 = "t value",
+##               chi2_LR...5 = "chi^2 LR",
+##               df...6 = "DF",
+##               p_value...7 = "p value",
+##               Predictor...8 = "Predictor",
+##               Estimate...9 = "Estimate",
+##               Cond..SE...10 = "Cond SE",
+##               t.value...11 = "t value",
+##               chi2_LR...12 = "chi^2 LR",
+##               df...13 = "DF",
+##               p_value...14 = "p value"
+##     ) |>
+##     text_replace(
+##         locations = cells_body(columns = c(Predictor...1, Predictor...8)),
+##         pattern = "PropM_(v\\w*|c\\w*)",
+##         replacement = "<br><em>S. \\1</em>") |>
+##     text_replace(
+##         locations = cells_body(columns = c(Predictor...1, Predictor...8)),
+##         pattern = "PropM_marten",
+##         replacement = "<br><em>M. martes\\1</em>") |>
+##     text_replace(
+##         locations = cells_body(columns = c(Predictor...1, Predictor...8)),
+##         pattern = "PropL_",
+##         replacement = "") |>
+##     text_replace(
+##         locations = cells_body(columns = c(Predictor...1, Predictor...8)),
+##         pattern = "_",
+##         replacement = " ") |>
+##     sub_zero(zero_text="<0.001") -> Nice_table_Vert
 
-gtsave(Nice_table_Vert, "tables/Table_ModelsLRT_Vert.html")
-#
+## gtsave(Nice_table_Vert, "tables/Table_ModelsLRT_Vert.html")
+## #
