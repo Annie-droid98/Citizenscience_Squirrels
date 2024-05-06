@@ -85,18 +85,18 @@ if(rm_intermediate) rm(clc_2018_landcover)
 ## directory... chose wisely (hard code to something on your system
 ## with the necessary space)!
 temp_Mam <- "intermediate_data/gh_ignore/GBIF_mam_dl.zip"
-temp_Vert <- "intermediate_data/gh_ignore/GBIF_dl.zip"
+### temp_Vert <- "intermediate_data/gh_ignore/GBIF_dl.zip"
 
 if(new_dl) {
-    download.file("https://api.gbif.org/v1/occurrence/download/request/0008421-240216155721649.zip",
-                   temp_Vert)
+##    download.file("https://api.gbif.org/v1/occurrence/download/request/0008421-240216155721649.zip",
+##                   temp_Vert)
     download.file("https://api.gbif.org/v1/occurrence/download/request/0169558-210914110416597.zip", temp_Mam)
 }
 
 ## select columns already during import in vroom
-data_GB <- vroom(temp_Vert, quote = "",
+data_GB <- vroom(temp_Mam, quote = "",
                  col_select = c(species, class, decimalLongitude,
-                                 decimalLatitude, year, datasetKey),
+                                decimalLatitude, year, datasetKey),
                  show_col_types = FALSE)
 
 probs <- problems(data_GB)
@@ -117,12 +117,12 @@ Taxa_GB %>% filter(species%in%"Sciurus vulgaris") %>%
     ggplot() + geom_sf()
 }
 
-Publishers <- read.csv("input_data/SquirrelPublisherBelow1000obs.csv", sep=" ")
-## Publishers <- read.csv("input_data/Focus_categories.csv", sep=" ")
+## Publishers <- read.csv("input_data/SquirrelPublisherBelow1000obs.csv", sep=" ")
+Publishers <- read.csv("input_data/Focus_categories.csv", sep=",")
 
-table(Publishers$Observer, Publishers$FocusTaxaTorF, useNA="ifany")
+table(Publishers$Observer, Publishers$Focus_Mam, useNA="ifany")
 
-Publishers$Focus <- ifelse(Publishers$FocusTaxaTorF, "withXFocus", "without")
+Publishers$Focus <- ifelse(Publishers$Focus_Mam, "withXFocus", "without")
 ## arguably a focus on mammalia within the vertebrate doesn't matter
 ## much if we normalise with the latter.
 

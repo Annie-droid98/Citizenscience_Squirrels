@@ -137,35 +137,25 @@ get_init_and_fit <-function(x, y, data_df) {
     adapted_fit
 }
 
-## ## try the first fit in case of problmes
-## foo_fit <- fitme(formulas_fixed_vulgaris[[1]],
-##                  family = negbin(link = "log"),
-##                  init=list(corrPars=list("1"=c(kappa=0.26)),NB_shape=2.9,
-##                            lambda=10),
-##                  ## control.HLfit=list(LevenbergM=TRUE), # maybe
-##                  verbose = c(TRACE = TRUE), method="PQL/L", 
-##                  data = d)
+result_vulgaris <- mapply(get_init_and_fit,
+                          x = formulas_fixed_vulgaris,
+                          y = formulas_init_vulgaris,
+                          MoreArgs = list(data_df = d), 
+                          SIMPLIFY = FALSE )
 
-## ## try the first fit optimization in case of problems bar_fit <-
-## get_init_and_fit(formulas_fixed_vulgaris[[1]],
-##  formulas_init_vulgaris[[1]], data_df = d)
+## ## try the first fit in case of problems
 
-## result_vulgaris <- mapply(get_init_and_fit,
-##                           x = formulas_fixed_vulgaris,
-##                           y = formulas_init_vulgaris,
-##                           MoreArgs = list(data_df = d), 
-##                           SIMPLIFY = FALSE )
-
-One_result_vulgaris <- get_init_and_fit(
-    x = formulas_fixed_vulgaris[[1]],
-    y = formulas_init_vulgaris[[1]],
-    data_df = d)
+## One_result_vulgaris <- get_init_and_fit(
+##     x = formulas_fixed_vulgaris[[1]],
+##     y = formulas_init_vulgaris[[1]],
+##     data_df = d)
 
 
-## ## our local save (not reproducible but saving work in re-computation)
+## our local save (not reproducible by just cloning the repo, but
+## saving work in re-computation)
 
-## ## Not saving (overwriting for no, just comaring models)
-## saveRDS(result_vulgaris, "intermediate_data/gh_ignore/Modelle_vulgaris.rds")
+## Not saving (overwriting for no, just comaring models)
+saveRDS(result_vulgaris, "intermediate_data/gh_ignore/Modelle_vulgaris.rds")
 
 ############################################ same models for S. carolinensis 
 replace_formula <- function(from, to, my_formula){
@@ -188,21 +178,21 @@ formulas_init_carolinensis <- lapply(formulas_init_vulgaris, function(x) {
 names(formulas_init_carolinensis) <- sub("caro", "vulgaris",
                                           names(formulas_init_carolinensis))
 
-## result_carolinensis <- mapply(get_init_and_fit,
-##                               x = formulas_fixed_carolinensis,
-##                               y = formulas_init_carolinensis,
-##                               MoreArgs = list(data_df = d), 
-##                               SIMPLIFY = FALSE )
+result_carolinensis <- mapply(get_init_and_fit,
+                              x = formulas_fixed_carolinensis,
+                              y = formulas_init_carolinensis,
+                              MoreArgs = list(data_df = d), 
+                              SIMPLIFY = FALSE )
 
 ## our local save (not reproducible but saving work in re-computation)
 
-## ## Not saving (overwriting for no, just comaring models)
-## saveRDS(result_carolinensis, "intermediate_data/gh_ignore/Modelle_carolinensis.rds")
+## Not saving (overwriting for no, just comaring models)
+saveRDS(result_carolinensis, "intermediate_data/gh_ignore/Modelle_carolinensis.rds")
 
-One_result_carolinensis <- get_init_and_fit(
-    x = formulas_fixed_carolinensis[[1]],
-    y = formulas_init_carolinensis[[1]],
-    data_df = d)
+## One_result_carolinensis <- get_init_and_fit(
+##     x = formulas_fixed_carolinensis[[1]],
+##     y = formulas_init_carolinensis[[1]],
+##     data_df = d)
 
 
 
@@ -230,12 +220,12 @@ get_cor_nice_plot <- function(model.fit) {
 }
 
 
-## fixCorPlot_vulgaris <- get_cor_nice_plot(result_carolinensis[[1]])
+fixCorPlot_vulgaris <- get_cor_nice_plot(result_carolinensis[[1]])
 
-fixCorPlot_vulgaris <- get_cor_nice_plot(One_result_carolinensis)
+## fixCorPlot_vulgaris <- get_cor_nice_plot(One_result_carolinensis)
 
-## fixCorPlot_carolinensis <- get_cor_nice_plot(result_carolinensis[[1]])
-fixCorPlot_carolinensis <- get_cor_nice_plot(One_result_carolinensis)
+fixCorPlot_carolinensis <- get_cor_nice_plot(result_carolinensis[[1]])
+## fixCorPlot_carolinensis <- get_cor_nice_plot(One_result_carolinensis)
 
 fixed_effects_corr_plot <- wrap_plots(fixCorPlot_vulgaris,
                                          fixCorPlot_carolinensis, 
@@ -335,60 +325,60 @@ ggsave("figures/FixedEffectCorrsBoth.pdf", fixed_effects_corr_plot,
 
 ## Alternative Vertebrata models
 
-formulas_init_vulgaris_Vert <- lapply(formulas_init_vulgaris, function(x){ 
-    pred <- replace_formula("PropM_",
-                            "PropV_", x)
-    replace_formula("mammalia",
-                    "vertebrata", pred)
-})
+## formulas_init_vulgaris_Vert <- lapply(formulas_init_vulgaris, function(x){ 
+##     pred <- replace_formula("PropM_",
+##                             "PropV_", x)
+##     replace_formula("mammalia",
+##                     "vertebrata", pred)
+## })
 
 
-formulas_fixed_vulgaris_Vert <- lapply(formulas_fixed_vulgaris, function(x){ 
-    pred <- replace_formula("PropM_",
-                            "PropV_", x)
-    replace_formula("mammalia",
-                    "vertebrata", pred)
-})
+## formulas_fixed_vulgaris_Vert <- lapply(formulas_fixed_vulgaris, function(x){ 
+##     pred <- replace_formula("PropM_",
+##                             "PropV_", x)
+##     replace_formula("mammalia",
+##                     "vertebrata", pred)
+## })
 
 
-formulas_init_carolinensis_Vert <- lapply(formulas_init_carolinensis, function(x){ 
-    pred <- replace_formula("PropM_",
-                            "PropV_", x)
-    replace_formula("mammalia",
-                    "vertebrata", pred)
-})
+## formulas_init_carolinensis_Vert <- lapply(formulas_init_carolinensis, function(x){ 
+##     pred <- replace_formula("PropM_",
+##                             "PropV_", x)
+##     replace_formula("mammalia",
+##                     "vertebrata", pred)
+## })
 
 
-formulas_fixed_carolinensis_Vert <- lapply(formulas_fixed_carolinensis, function(x){ 
-    pred <- replace_formula("PropM_",
-                            "PropV_", x)
-    replace_formula("mammalia",
-                    "vertebrata", pred)
-})
+## formulas_fixed_carolinensis_Vert <- lapply(formulas_fixed_carolinensis, function(x){ 
+##     pred <- replace_formula("PropM_",
+##                             "PropV_", x)
+##     replace_formula("mammalia",
+##                     "vertebrata", pred)
+## })
 
-## The data is slightly different as focus taxa are different
-## (esp. when mammalia are a foucs within vertebrates; mention this in
-## the manuscipt!) and additional normalisation counts are available
-## for some grids in some years (list in the manuscript how many).
+## ## The data is slightly different as focus taxa are different
+## ## (esp. when mammalia are a foucs within vertebrates; mention this in
+## ## the manuscipt!) and additional normalisation counts are available
+## ## for some grids in some years (list in the manuscript how many).
 
-v <- as_tibble(Taxa_GB_count_10km) |>
-   filter(Observer%in%"Citizen" &
-          Focus == "without" &
-          ##  remove grid cells which didn't have vertebrata counted
-          CountT_vertebrata_log >= 0 &
-          !is.na(year) &
-          year_from_2000 < 22)
+## v <- as_tibble(Taxa_GB_count_10km) |>
+##    filter(Observer%in%"Citizen" &
+##           Focus == "without" &
+##           ##  remove grid cells which didn't have vertebrata counted
+##           CountT_vertebrata_log >= 0 &
+##           !is.na(year) &
+##           year_from_2000 < 22)
 
-## result_vulgaris_Vert <- mapply(get_init_and_fit,
-##                                x = formulas_fixed_vulgaris_Vert,
-##                                y = formulas_init_vulgaris_Vert,
-##                                MoreArgs = list(data_df = v), 
-##                                SIMPLIFY = FALSE )
+## ## result_vulgaris_Vert <- mapply(get_init_and_fit,
+## ##                                x = formulas_fixed_vulgaris_Vert,
+## ##                                y = formulas_init_vulgaris_Vert,
+## ##                                MoreArgs = list(data_df = v), 
+## ##                                SIMPLIFY = FALSE )
 
-One_result_vulgaris_Vert <- get_init_and_fit(
-    x = formulas_fixed_vulgaris_Vert[[1]],
-    y = formulas_init_vulgaris_Vert[[1]],
-    data_df = v)
+## One_result_vulgaris_Vert <- get_init_and_fit(
+##     x = formulas_fixed_vulgaris_Vert[[1]],
+##     y = formulas_init_vulgaris_Vert[[1]],
+##     data_df = v)
 
 ## ## Not saving (overwriting for no, just comaring models)
 ## ## our local save (not reproducible but saving work in re-computation)
@@ -402,10 +392,10 @@ One_result_vulgaris_Vert <- get_init_and_fit(
 ##                                    SIMPLIFY = FALSE)
 
 
-One_result_carolinensis_Vert <- get_init_and_fit(
-    x = formulas_fixed_carolinensis_Vert[[1]],
-    y = formulas_init_carolinensis_Vert[[1]],
-    data_df = v)
+## One_result_carolinensis_Vert <- get_init_and_fit(
+##     x = formulas_fixed_carolinensis_Vert[[1]],
+##     y = formulas_init_carolinensis_Vert[[1]],
+##     data_df = v)
 
 ## ## Not saving (overwriting for no, just comaring models)
 ## ## our local save (not reproducible but saving work in re-computation)
@@ -413,23 +403,23 @@ One_result_carolinensis_Vert <- get_init_and_fit(
 
 ## Corr plots and LRT for VERTEBRATA normalisation 
 
-## fixCorPlot_vulgaris_Vert <- get_cor_nice_plot(result_vulgaris_Vert[[1]])
-fixCorPlot_vulgaris_Vert <- get_cor_nice_plot(One_result_vulgaris_Vert)
+## ## fixCorPlot_vulgaris_Vert <- get_cor_nice_plot(result_vulgaris_Vert[[1]])
+## fixCorPlot_vulgaris_Vert <- get_cor_nice_plot(One_result_vulgaris_Vert)
 
 
-## fixCorPlot_carolinensis_Vert <- get_cor_nice_plot(result_carolinensis_Vert[[1]])
-fixCorPlot_carolinensis_Vert <- get_cor_nice_plot(One_result_carolinensis_Vert)
+## ## fixCorPlot_carolinensis_Vert <- get_cor_nice_plot(result_carolinensis_Vert[[1]])
+## fixCorPlot_carolinensis_Vert <- get_cor_nice_plot(One_result_carolinensis_Vert)
 
 
-fixed_effects_corr_plot_Vert <- wrap_plots(fixCorPlot_vulgaris_Vert,
-                                         fixCorPlot_carolinensis_Vert, 
-                                         nrow=2,
-                                         guides = "collect") +
-    plot_annotation(tag_levels = 'a',
-                    theme = theme(legend.title = element_text(hjust = .5)))
+## fixed_effects_corr_plot_Vert <- wrap_plots(fixCorPlot_vulgaris_Vert,
+##                                          fixCorPlot_carolinensis_Vert, 
+##                                          nrow=2,
+##                                          guides = "collect") +
+##     plot_annotation(tag_levels = 'a',
+##                     theme = theme(legend.title = element_text(hjust = .5)))
 
-ggsave("figures/FixedEffectCorrsBoth_Vert.pdf", fixed_effects_corr_plot_Vert,
-       width = 10, height = 20, device = cairo_pdf)
+## ggsave("figures/FixedEffectCorrsBoth_Vert.pdf", fixed_effects_corr_plot_Vert,
+##        width = 10, height = 20, device = cairo_pdf)
 
 ## lapply((2:17), function(i){
 ##     anova(result_vulgaris_Vert[[1]], result_vulgaris_Vert[[i]])[["basicLRT"]]
