@@ -237,90 +237,90 @@ fixed_effects_corr_plot <- wrap_plots(fixCorPlot_vulgaris,
 ggsave("figures/FixedEffectCorrsBoth.pdf", fixed_effects_corr_plot,
        width = 10, height = 20, device = cairo_pdf)
 
-## lapply((2:17), function(i){
-##     anova(result_vulgaris[[1]], result_vulgaris[[i]])[["basicLRT"]]
-## }) %>% 
-##     do.call(rbind, .) %>%
-##     add_row(chi2_LR = NA, df =NA , p_value =NA, .before = 1) %>%
-##     cbind(as.data.frame(summary(result_vulgaris[[1]])$beta_table), .) %>%
-##     round(digits = 3) %>%
-##     ## mutate(p_val_scientific = format(p_value,
-##     ##                                  scientific = FALSE, big.mark = ","))
-##     tibble::rownames_to_column("Predictor") -> pval_table_vulgaris
+lapply((2:17), function(i){
+    anova(result_vulgaris[[1]], result_vulgaris[[i]])[["basicLRT"]]
+}) %>% 
+    do.call(rbind, .) %>%
+    add_row(chi2_LR = NA, df =NA , p_value =NA, .before = 1) %>%
+    cbind(as.data.frame(summary(result_vulgaris[[1]])$beta_table), .) %>%
+    round(digits = 3) %>%
+    ## mutate(p_val_scientific = format(p_value,
+    ##                                  scientific = FALSE, big.mark = ","))
+    tibble::rownames_to_column("Predictor") -> pval_table_vulgaris
 
-## lapply((2:17), function(i){
-##     anova(result_carolinensis[[1]], result_carolinensis[[i]])[["basicLRT"]]
-## }) %>% 
-##     do.call(rbind, .) %>%
-##     add_row(chi2_LR = NA, df =NA , p_value =NA, .before = 1) %>%
-##     cbind(as.data.frame(summary(result_carolinensis[[1]])$beta_table), .) %>%
-##     round(digits = 3) %>%
-##     ## mutate(p_val_scientific = format(p_value,
-##     ##                                  scientific = FALSE, big.mark = ","))
-##     tibble::rownames_to_column("Predictor") -> pval_table_carolinensis
+lapply((2:17), function(i){
+    anova(result_carolinensis[[1]], result_carolinensis[[i]])[["basicLRT"]]
+}) %>% 
+    do.call(rbind, .) %>%
+    add_row(chi2_LR = NA, df =NA , p_value =NA, .before = 1) %>%
+    cbind(as.data.frame(summary(result_carolinensis[[1]])$beta_table), .) %>%
+    round(digits = 3) %>%
+    ## mutate(p_val_scientific = format(p_value,
+    ##                                  scientific = FALSE, big.mark = ","))
+    tibble::rownames_to_column("Predictor") -> pval_table_carolinensis
 
-## cbind(pval_table_vulgaris, pval_table_carolinensis) |>
-##     as_tibble(.name_repair="universal")|>
-##     gt()  |>
-##     tab_spanner(label = md("<br><em>S. vulgaris</em>"),
-##                 columns = c("Estimate...2",
-##                             "Cond..SE...3","t.value...4", "chi2_LR...5",
-##                             "df...6","p_value...7"))|>
-##     tab_spanner(label = md("<br><em>S. carolinensis</em>"),
-##                 columns = c("Estimate...9","Cond..SE...10","t.value...11",
-##                             "chi2_LR...12", "df...13","p_value...14")) |>
-##     tab_style(
-##         style = list(
-##             cell_text(weight = "bold")
-##         ),
-##         locations = cells_body(
-##             columns = `p_value...7`,
-##             rows = `p_value...7`<= 0.05
-##     ))|>
-##     tab_style(
-##         style = list(
-##             cell_text(weight = "bold")
-##         ),
-##         locations = cells_body(
-##             columns = `p_value...14`,
-##             rows = `p_value...14`<= 0.05
-##         )) |>
-##     cols_label(
-##               Predictor...1 = "Predictor",
-##               Estimate...2 = "Estimate",
-##               Cond..SE...3 =  "Cond SE",
-##               t.value...4 = "t value",
-##               chi2_LR...5 = "chi^2 LR",
-##               df...6 = "DF",
-##               p_value...7 = "p value",
-##               Predictor...8 = "Predictor",
-##               Estimate...9 = "Estimate",
-##               Cond..SE...10 = "Cond SE",
-##               t.value...11 = "t value",
-##               chi2_LR...12 = "chi^2 LR",
-##               df...13 = "DF",
-##               p_value...14 = "p value"
-##     ) |>
-##     text_replace(
-##         locations = cells_body(columns = c(Predictor...1, Predictor...8)),
-##         pattern = "PropM_(v\\w*|c\\w*)",
-##         replacement = "<br><em>S. \\1</em>") |>
-##     text_replace(
-##         locations = cells_body(columns = c(Predictor...1, Predictor...8)),
-##         pattern = "PropM_marten",
-##         replacement = "<br><em>M. martes\\1</em>") |>
-##     text_replace(
-##         locations = cells_body(columns = c(Predictor...1, Predictor...8)),
-##         pattern = "PropL_",
-##         replacement = "") |>
-##     text_replace(
-##         locations = cells_body(columns = c(Predictor...1, Predictor...8)),
-##         pattern = "_",
-##         replacement = " ") |>
-##     sub_zero(zero_text="<0.001") -> Nice_table
+cbind(pval_table_vulgaris, pval_table_carolinensis) |>
+    as_tibble(.name_repair="universal")|>
+    gt()  |>
+    tab_spanner(label = md("<br><em>S. vulgaris</em>"),
+                columns = c("Estimate...2",
+                            "Cond..SE...3","t.value...4", "chi2_LR...5",
+                            "df...6","p_value...7"))|>
+    tab_spanner(label = md("<br><em>S. carolinensis</em>"),
+                columns = c("Estimate...9","Cond..SE...10","t.value...11",
+                            "chi2_LR...12", "df...13","p_value...14")) |>
+    tab_style(
+        style = list(
+            cell_text(weight = "bold")
+        ),
+        locations = cells_body(
+            columns = `p_value...7`,
+            rows = `p_value...7`<= 0.05
+    ))|>
+    tab_style(
+        style = list(
+            cell_text(weight = "bold")
+        ),
+        locations = cells_body(
+            columns = `p_value...14`,
+            rows = `p_value...14`<= 0.05
+        )) |>
+    cols_label(
+              Predictor...1 = "Predictor",
+              Estimate...2 = "Estimate",
+              Cond..SE...3 =  "Cond SE",
+              t.value...4 = "t value",
+              chi2_LR...5 = "chi^2 LR",
+              df...6 = "DF",
+              p_value...7 = "p value",
+              Predictor...8 = "Predictor",
+              Estimate...9 = "Estimate",
+              Cond..SE...10 = "Cond SE",
+              t.value...11 = "t value",
+              chi2_LR...12 = "chi^2 LR",
+              df...13 = "DF",
+              p_value...14 = "p value"
+    ) |>
+    text_replace(
+        locations = cells_body(columns = c(Predictor...1, Predictor...8)),
+        pattern = "PropM_(v\\w*|c\\w*)",
+        replacement = "<br><em>S. \\1</em>") |>
+    text_replace(
+        locations = cells_body(columns = c(Predictor...1, Predictor...8)),
+        pattern = "PropM_marten",
+        replacement = "<br><em>M. martes\\1</em>") |>
+    text_replace(
+        locations = cells_body(columns = c(Predictor...1, Predictor...8)),
+        pattern = "PropL_",
+        replacement = "") |>
+    text_replace(
+        locations = cells_body(columns = c(Predictor...1, Predictor...8)),
+        pattern = "_",
+        replacement = " ") |>
+    sub_zero(zero_text="<0.001") -> Nice_table
 
-## gtsave(Nice_table, "tables/Table_ModelsLRT.html")
-## #
+gtsave(Nice_table, "tables/Table_ModelsLRT.html")
+#
 
 
 ## Alternative Vertebrata models
