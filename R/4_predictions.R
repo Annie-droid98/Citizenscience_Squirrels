@@ -8,9 +8,9 @@ library(ggmap)
 reCount <- FALSE
 
 if(reCount) {
-    source("R/2b_CountGbif.R")
+    source("R/1_data_prep.R")
 } else {
-    CountALL_10km <- readRDS("intermediate_data/CountALL_10km.rds")
+    CountALL_10km <- readRDS("intermediate_data/Counts.rds")
 }
 
 
@@ -40,7 +40,7 @@ if(!reRunModels) {
 } else {
     message("Re-running models, this will take some time")
     message("They'll be saved in ", modelFile, " and ", modelFileCaro)
-    source("R/4_Model.R")
+    source("R/2_Model.R")
 }
 
 Predictiondf <- data.frame(
