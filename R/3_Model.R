@@ -1,6 +1,5 @@
 library(spaMM)
 library(INLA)
-## library(sf)
 library(tidyr)
 library(dplyr)
 library(ggcorrplot)
@@ -17,20 +16,6 @@ if (redoDataPrep) {
 }
 
 
-## how many grids per year with non-zero data
-tapply(Taxa_GB_count_10km$CountT_mammalia,
-       list(Taxa_GB_count_10km$year, Taxa_GB_count_10km$Observer, Taxa_GB_count_10km$Focus),
-       function(x)length(x[x>0]))
-
-## how counts per year
-tapply(Taxa_GB_count_10km$CountT_mammalia,
-       list(Taxa_GB_count_10km$year, Taxa_GB_count_10km$Observer, Taxa_GB_count_10km$Focus),
-       function(x) sum(x))
-
-tapply(Taxa_GB_count_10km$CountT_mammalia,
-       list(Taxa_GB_count_10km$year, Taxa_GB_count_10km$Observer, Taxa_GB_count_10km$Focus),
-       function(x)length(x))
-
 ## subset it to only citizen-science data without focus taxon within
 ## mammalia
 d <- as_tibble(Taxa_GB_count_10km) |>
@@ -39,11 +24,6 @@ d <- as_tibble(Taxa_GB_count_10km) |>
           CountT_mammalia_log >= 0 &
           !is.na(year) &
           year_from_2000 < 22)
-
-apply(d, 2, function (x) any(is.infinite(unlist(x))))
-
-apply(d, 2, function (x) any(is.na(unlist(x))))
-
 
 mesh <- INLA::inla.mesh.2d(loc = d[, c("lon", "lat")], max.n = 100, max.edge = c(3, 20))
 
@@ -154,7 +134,9 @@ result_vulgaris <- mapply(get_init_and_fit,
 ## our local save (not reproducible by just cloning the repo, but
 ## saving work in re-computation)
 
-## Not saving (overwriting for no, just comaring models)
+## Saving, but make sure to ignore this folder for github. See
+## 4_predictions on where to download the models in case you don't
+## want to reproduce them by running the present script
 saveRDS(result_vulgaris, "intermediate_data/gh_ignore/Modelle_vulgaris.rds")
 
 ############################################ same models for S. carolinensis 
@@ -184,10 +166,12 @@ result_carolinensis <- mapply(get_init_and_fit,
                               MoreArgs = list(data_df = d), 
                               SIMPLIFY = FALSE )
 
-## our local save (not reproducible but saving work in re-computation)
-
-## Not saving (overwriting for no, just comaring models)
+## Saving, but make sure to ignore this folder for github. See
+## 4_predictions on where to download the models in case you don't
+## want to reproduce them by running the present script
 saveRDS(result_carolinensis, "intermediate_data/gh_ignore/Modelle_carolinensis.rds")
+
+## ## try the first fit in case of problems
 
 ## One_result_carolinensis <- get_init_and_fit(
 ##     x = formulas_fixed_carolinensis[[1]],
@@ -320,188 +304,6 @@ cbind(pval_table_vulgaris, pval_table_carolinensis) |>
     sub_zero(zero_text="<0.001") -> Nice_table
 
 gtsave(Nice_table, "tables/Table_ModelsLRT.html")
-#
 
 
-## Alternative Vertebrata models
 
-## formulas_init_vulgaris_Vert <- lapply(formulas_init_vulgaris, function(x){ 
-##     pred <- replace_formula("PropM_",
-##                             "PropV_", x)
-##     replace_formula("mammalia",
-##                     "vertebrata", pred)
-## })
-
-
-## formulas_fixed_vulgaris_Vert <- lapply(formulas_fixed_vulgaris, function(x){ 
-##     pred <- replace_formula("PropM_",
-##                             "PropV_", x)
-##     replace_formula("mammalia",
-##                     "vertebrata", pred)
-## })
-
-
-## formulas_init_carolinensis_Vert <- lapply(formulas_init_carolinensis, function(x){ 
-##     pred <- replace_formula("PropM_",
-##                             "PropV_", x)
-##     replace_formula("mammalia",
-##                     "vertebrata", pred)
-## })
-
-
-## formulas_fixed_carolinensis_Vert <- lapply(formulas_fixed_carolinensis, function(x){ 
-##     pred <- replace_formula("PropM_",
-##                             "PropV_", x)
-##     replace_formula("mammalia",
-##                     "vertebrata", pred)
-## })
-
-## ## The data is slightly different as focus taxa are different
-## ## (esp. when mammalia are a foucs within vertebrates; mention this in
-## ## the manuscipt!) and additional normalisation counts are available
-## ## for some grids in some years (list in the manuscript how many).
-
-## v <- as_tibble(Taxa_GB_count_10km) |>
-##    filter(Observer%in%"Citizen" &
-##           Focus == "without" &
-##           ##  remove grid cells which didn't have vertebrata counted
-##           CountT_vertebrata_log >= 0 &
-##           !is.na(year) &
-##           year_from_2000 < 22)
-
-## ## result_vulgaris_Vert <- mapply(get_init_and_fit,
-## ##                                x = formulas_fixed_vulgaris_Vert,
-## ##                                y = formulas_init_vulgaris_Vert,
-## ##                                MoreArgs = list(data_df = v), 
-## ##                                SIMPLIFY = FALSE )
-
-## One_result_vulgaris_Vert <- get_init_and_fit(
-##     x = formulas_fixed_vulgaris_Vert[[1]],
-##     y = formulas_init_vulgaris_Vert[[1]],
-##     data_df = v)
-
-## ## Not saving (overwriting for no, just comaring models)
-## ## our local save (not reproducible but saving work in re-computation)
-## saveRDS(result_vulgaris_Vert, "intermediate_data/gh_ignore/Modelle_vulgaris_Vert.rds")
-
-
-## result_carolinensis_Vert <- mapply(get_init_and_fit,
-##                                    x = formulas_fixed_carolinensis_Vert,
-##                                    y = formulas_init_carolinensis_Vert,
-##                                    MoreArgs = list(data_df = v), 
-##                                    SIMPLIFY = FALSE)
-
-
-## One_result_carolinensis_Vert <- get_init_and_fit(
-##     x = formulas_fixed_carolinensis_Vert[[1]],
-##     y = formulas_init_carolinensis_Vert[[1]],
-##     data_df = v)
-
-## ## Not saving (overwriting for no, just comaring models)
-## ## our local save (not reproducible but saving work in re-computation)
-## saveRDS(result_carolinensis_Vert, "intermediate_data/gh_ignore/Modelle_carolinensis_Vert.rds")
-
-## Corr plots and LRT for VERTEBRATA normalisation 
-
-## ## fixCorPlot_vulgaris_Vert <- get_cor_nice_plot(result_vulgaris_Vert[[1]])
-## fixCorPlot_vulgaris_Vert <- get_cor_nice_plot(One_result_vulgaris_Vert)
-
-
-## ## fixCorPlot_carolinensis_Vert <- get_cor_nice_plot(result_carolinensis_Vert[[1]])
-## fixCorPlot_carolinensis_Vert <- get_cor_nice_plot(One_result_carolinensis_Vert)
-
-
-## fixed_effects_corr_plot_Vert <- wrap_plots(fixCorPlot_vulgaris_Vert,
-##                                          fixCorPlot_carolinensis_Vert, 
-##                                          nrow=2,
-##                                          guides = "collect") +
-##     plot_annotation(tag_levels = 'a',
-##                     theme = theme(legend.title = element_text(hjust = .5)))
-
-## ggsave("figures/FixedEffectCorrsBoth_Vert.pdf", fixed_effects_corr_plot_Vert,
-##        width = 10, height = 20, device = cairo_pdf)
-
-## lapply((2:17), function(i){
-##     anova(result_vulgaris_Vert[[1]], result_vulgaris_Vert[[i]])[["basicLRT"]]
-## }) %>% 
-##     do.call(rbind, .) %>%
-##     add_row(chi2_LR = NA, df =NA , p_value =NA, .before = 1) %>%
-##     cbind(as.data.frame(summary(result_vulgaris_Vert[[1]])$beta_table), .) %>%
-##     round(digits = 3) %>%
-##     ## mutate(p_val_scientific = format(p_value,
-##     ##                                  scientific = FALSE, big.mark = ","))
-##     tibble::rownames_to_column("Predictor") -> pval_table_vulgaris_Vert
-
-## lapply((2:17), function(i){
-##     anova(result_carolinensis_Vert[[1]], result_carolinensis_Vert[[i]])[["basicLRT"]]
-## }) %>% 
-##     do.call(rbind, .) %>%
-##     add_row(chi2_LR = NA, df =NA , p_value =NA, .before = 1) %>%
-##     cbind(as.data.frame(summary(result_carolinensis_Vert[[1]])$beta_table), .) %>%
-##     round(digits = 3) %>%
-##     ## mutate(p_val_scientific = format(p_value,
-##     ##                                  scientific = FALSE, big.mark = ","))
-##     tibble::rownames_to_column("Predictor") -> pval_table_carolinensis_Vert
-
-## cbind(pval_table_vulgaris_Vert, pval_table_carolinensis_Vert) |>
-##     as_tibble(.name_repair="universal")|>
-##     gt()  |>
-##     tab_spanner(label = md("<br><em>S. vulgaris</em>"),
-##                 columns = c("Estimate...2",
-##                             "Cond..SE...3","t.value...4", "chi2_LR...5",
-##                             "df...6","p_value...7"))|>
-##     tab_spanner(label = md("<br><em>S. carolinensis</em>"),
-##                 columns = c("Estimate...9","Cond..SE...10","t.value...11",
-##                             "chi2_LR...12", "df...13","p_value...14")) |>
-##     tab_style(
-##         style = list(
-##             cell_text(weight = "bold")
-##         ),
-##         locations = cells_body(
-##             columns = `p_value...7`,
-##             rows = `p_value...7`<= 0.05
-##     ))|>
-##     tab_style(
-##         style = list(
-##             cell_text(weight = "bold")
-##         ),
-##         locations = cells_body(
-##             columns = `p_value...14`,
-##             rows = `p_value...14`<= 0.05
-##         )) |>
-##     cols_label(
-##               Predictor...1 = "Predictor",
-##               Estimate...2 = "Estimate",
-##               Cond..SE...3 =  "Cond SE",
-##               t.value...4 = "t value",
-##               chi2_LR...5 = "chi^2 LR",
-##               df...6 = "DF",
-##               p_value...7 = "p value",
-##               Predictor...8 = "Predictor",
-##               Estimate...9 = "Estimate",
-##               Cond..SE...10 = "Cond SE",
-##               t.value...11 = "t value",
-##               chi2_LR...12 = "chi^2 LR",
-##               df...13 = "DF",
-##               p_value...14 = "p value"
-##     ) |>
-##     text_replace(
-##         locations = cells_body(columns = c(Predictor...1, Predictor...8)),
-##         pattern = "PropM_(v\\w*|c\\w*)",
-##         replacement = "<br><em>S. \\1</em>") |>
-##     text_replace(
-##         locations = cells_body(columns = c(Predictor...1, Predictor...8)),
-##         pattern = "PropM_marten",
-##         replacement = "<br><em>M. martes\\1</em>") |>
-##     text_replace(
-##         locations = cells_body(columns = c(Predictor...1, Predictor...8)),
-##         pattern = "PropL_",
-##         replacement = "") |>
-##     text_replace(
-##         locations = cells_body(columns = c(Predictor...1, Predictor...8)),
-##         pattern = "_",
-##         replacement = " ") |>
-##     sub_zero(zero_text="<0.001") -> Nice_table_Vert
-
-## gtsave(Nice_table_Vert, "tables/Table_ModelsLRT_Vert.html")
-## #
