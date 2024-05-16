@@ -50,7 +50,7 @@ if(!reRunModels) {
 
 Predictiondf <- data.frame(
     ## predict for variable proportions of invasive squirrels
-    PropT_carolinensis = rep(seq(0, 1, 0.1), each = 4)) |>
+    PropM_carolinensis = rep(seq(0, 1, 0.1), each = 4)) |>
     ## predict for variable proportions of grey urban land use
     mutate(PropL_Grey_urban = rep(c(0.0, 0.3, 0.6, 0.9), times=11),
            ## balance this variation with agricultural area
@@ -58,31 +58,30 @@ Predictiondf <- data.frame(
            year_from_2000 = 18, ## predict for 2018
            ## all otehr proportions zero
            PropL_Green_urban = 0.00, 
-           PropL_Broadleafed_Forest = 0.00, 
-           PropL_Coniferous_Forest = 0.00, 
-           PropL_Mixed_Forest = 0.00, 
-           PropL_Other_seminatural = 0.00, 
-           PropL_Waterbodies = 0.00, 
-           PropT_marten = 0.00, 
+           PropL_Broadleaf_forest = 0.00, 
+           PropL_Coniferous_forest = 0.00, 
+           PropL_Mixed_forest = 0.00, 
+           PropL_Semi_natural_areas = 0.00, 
+           PropM_marten = 0.00, 
            ## pick a cell in Northern England for the random effects
            lat = 3615,
            lon = 3185,
            ## and 100 mammalia counted (to have percent output
            ## basically)
-           CountT_mammalia_log = log(100)) |>
-    mutate(Grey_urban_plot = factor(PropL_Grey_urban, 
-                                    labels = c("0% Grey urban", "30% Grey urban", 
-                                               "60% Grey urban","90% Grey urban")),
+           CountT_mammalia_log = log(100)) %>%
+           mutate(Grey_urban_plot = factor(PropL_Grey_urban, 
+                                           labels = c("0% Grey urban", "30% Grey urban", 
+                                                      "60% Grey urban","90% Grey urban")), 
            ## We predict using the first element in the results list
            ## of models! This is the main model (the following models
            ## are for/from likelihood ratio testing)
            predictions = as.vector(predict(result_vulgaris[[1]],
-                                           newdata=_,
+                                           newdata=.,
                                            type = "response")))
 
 
-Predictiondf |>
-    ggplot(aes(PropT_carolinensis, predictions,
+PredictionPlot <- Predictiondf |>
+   ggplot(aes(PropM_carolinensis, predictions,
                colour = Grey_urban_plot,
                group = Grey_urban_plot)) +
     geom_line() +
@@ -105,7 +104,8 @@ Predictiondf |>
           panel.background = element_blank(),legend.key.size = unit(2, 'cm'))
 ## plotpseudonew +  facet_wrap(. ~ Grey_urban_z2,ncol=2)
 
-ggsave("figures/Predictiondifferentcarolinensisgreyurban.pdf", width=9, height=5)
+ggsave("figures/Predictiondifferentcarolinensisgreyurban.pdf", PredictionPlot,
+       width=9, height=5)
 
 
 ### Prediction map
