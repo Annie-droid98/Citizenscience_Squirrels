@@ -16,6 +16,10 @@ if (redoDataPrep) {
 }
 
 
+## this is where we will save the output models
+modelFile <- "intermediate_data/gh_ignore/Citizenscience_modelle.rds"
+modelFileCaro <- "intermediate_data/gh_ignore/Citizensciencemodelle_caro.rds"
+
 ## subset it to only citizen-science data without focus taxon within
 ## mammalia
 d <- as_tibble(Taxa_GB_count_10km) |>
@@ -137,7 +141,7 @@ result_vulgaris <- mapply(get_init_and_fit,
 ## Saving, but make sure to ignore this folder for github. See
 ## 4_predictions on where to download the models in case you don't
 ## want to reproduce them by running the present script
-saveRDS(result_vulgaris, "intermediate_data/gh_ignore/Modelle_vulgaris.rds")
+saveRDS(result_vulgaris, modelFile)
 
 ############################################ same models for S. carolinensis 
 replace_formula <- function(from, to, my_formula){
@@ -169,7 +173,7 @@ result_carolinensis <- mapply(get_init_and_fit,
 ## Saving, but make sure to ignore this folder for github. See
 ## 4_predictions on where to download the models in case you don't
 ## want to reproduce them by running the present script
-saveRDS(result_carolinensis, "intermediate_data/gh_ignore/Modelle_carolinensis.rds")
+saveRDS(result_carolinensis, modelFileCaro)
 
 ## ## try the first fit in case of problems
 

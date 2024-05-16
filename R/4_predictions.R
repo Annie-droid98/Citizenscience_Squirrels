@@ -33,7 +33,7 @@ if(!reRunModels) {
             result_caro <- readRDS(modelFileCaro)
         } else {
             stop("Download the models from Zenodo ",
-                 "using this link: https://zenodo.org/records/10141957  ",
+                 "using this link: https://doi.org/10.5281/zenodo.11202706",
                  "to intermediate_data/gh_ignore/ and re-run this code")
         }
     }
