@@ -1,5 +1,6 @@
-library(dplyr)
 library(sf)
+library(spaMM)
+library(dplyr)
 library(ggmap)
 
 
@@ -13,24 +14,28 @@ if(reCount) {
     CountALL_10km <- readRDS("intermediate_data/Counts.rds")
 }
 
-
-## We need the models! These are too large for github storage Do you
+## We need the models! These are too large for github storage! Do you
 ## want to rerun them?
 reRunModels <- FALSE
+
+if (reCount & ! reRunModels) {
+    stop("If you recompile the input-data you should re-run the models!")
+}
 
 ## If you want to read them from files, that's where they should be:
 modelFile <- "intermediate_data/gh_ignore/Citizenscience_modelle.rds"
 modelFileCaro <- "intermediate_data/gh_ignore/Citizensciencemodelle_caro.rds"
 
 if(!reRunModels) {
-    if(exists("result") & exists("result_caro")) {
+    if(exists("result_vulgaris") & exists("result_carolinensis")) {
         message("Using models in your current environment")
     } else {
         if(file.exists(modelFile) &
            file.exists(modelFileCaro)){
-            message("Reading models from local files")
-            result <- readRDS(modelFile)
-            result_caro <- readRDS(modelFileCaro)
+            message("Reading models from local files ", modelFile, " and ",
+                    modelFileCaro)
+            result_vulgaris <- readRDS(modelFile)
+            result_carolinensis <- readRDS(modelFileCaro)
         } else {
             stop("Download the models from Zenodo ",
                  "using this link: https://doi.org/10.5281/zenodo.11202706",
@@ -71,7 +76,7 @@ Predictiondf <- data.frame(
            ## We predict using the first element in the results list
            ## of models! This is the main model (the following models
            ## are for/from likelihood ratio testing)
-           predictions = as.vector(predict(result[[1]],
+           predictions = as.vector(predict(result_vulgaris[[1]],
                                            newdata=_,
                                            type = "response")))
 
@@ -116,10 +121,10 @@ Predictions_map <- CountALL_10km |>
     ## We predict using the first element in the results list
     ## of models! This is the main model (the following models
     ## are for/from likelihood ratio testing)
-    mutate(predictions_vulgaris =predict(result[[1]],
+    mutate(predictions_vulgaris =predict(result_vulgaris[[1]],
                                          newdata =_,
                                          type = "response"), 
-           predictions_caro=predict(result_caro[[1]],
+           predictions_caro=predict(result_carolinensis[[1]],
                                     newdata= _,
                                     type = "response")) # |>
 
