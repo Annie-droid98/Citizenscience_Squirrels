@@ -68,6 +68,7 @@ Predictiondf <- data.frame(
            lon = 3185,
            ## and 100 mammalia counted (to have percent output
            ## basically)
+           ## can't figure out how native pipe works here
            CountT_mammalia_log = log(100)) %>%
            mutate(Grey_urban_plot = factor(PropL_Grey_urban, 
                                            labels = c("0% Grey urban", "30% Grey urban", 
@@ -78,7 +79,6 @@ Predictiondf <- data.frame(
            predictions = as.vector(predict(result_vulgaris[[1]],
                                            newdata=.,
                                            type = "response")))
-
 
 PredictionPlot <- Predictiondf |>
    ggplot(aes(PropM_carolinensis, predictions,
@@ -104,32 +104,34 @@ PredictionPlot <- Predictiondf |>
           panel.background = element_blank(),legend.key.size = unit(2, 'cm'))
 ## plotpseudonew +  facet_wrap(. ~ Grey_urban_z2,ncol=2)
 
-ggsave("figures/Predictiondifferentcarolinensisgreyurban.pdf", PredictionPlot,
+ggsave("figures/Fig3.png", PredictionPlot,
        width=9, height=5)
 
 
 ### Prediction map
 Predictions_map <- CountALL_10km |>
     ## Citizen science and no focus taxon
-    filter(Observer%in%"Citizen"&
-           !FocusTaxaTorF)|>
+   filter(Observer%in%"Citizen"&
+           Focus%in%"without")|>
     ## predict for 2018
     filter(year == 2018)|>
     ## 100 observations
-    mutate(CountT_mammalia_log = log(100)) |>
-    replace(is.na(_), 0) |>
+    mutate(CountT_mammalia_log = log(100)) %>%
+        replace(is.na(.), 0) %>%
+        as_tibble() %>%
     ## We predict using the first element in the results list
     ## of models! This is the main model (the following models
     ## are for/from likelihood ratio testing)
-    mutate(predictions_vulgaris =predict(result_vulgaris[[1]],
-                                         newdata =_,
-                                         type = "response"), 
-           predictions_caro=predict(result_carolinensis[[1]],
-                                    newdata= _,
-                                    type = "response")) # |>
+        mutate(predictions_vulgaris = as.vector(predict(result_vulgaris[[1]],
+                                                        newdata = .,
+                                                        type = "response")), 
+               predictions_caro = as.vector(predict(result_carolinensis[[1]],
+                                                    newdata = .,
+                                                    type = "response"))) # |>
 
-## ## transform the coordinates back to plot the map ??  not doing this
-## ## right now as it likely needs to be changed for plotting anyways.
+## ## transform the coordinates back to plot the map ??  not doing
+## ## this right now as it likely needs to be changed for plotting
+## ## anyways.
 
 ## ## I played around with it a bit maybe som of it is useful... 
 ## mutate(lon10k = lon*1e+05,
@@ -159,9 +161,10 @@ theme(legend.key.size = unit(1.8, 'cm'),text = element_text(size = 12))
                                         #         breaks = c(0,15,30,45,60,75,90,105,120,135,150),
 # labels = c(0,15,30,45,60,75,90,105,120,135,150))
 
+## This should become figure 4 (panels a an b) once finished or be
+## panels b and c of Figure 3
+
 ggsave(filename = "figures/Predictionmap.png", units="in", width=8, height=8)
-
-
 
 #ggmap(myMap_B_toner_2) +
 ggplot()+
