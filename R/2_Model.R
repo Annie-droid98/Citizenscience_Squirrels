@@ -208,9 +208,8 @@ get_cor_nice_plot <- function(model.fit) {
 }
 
 
-fixCorPlot_vulgaris <- get_cor_nice_plot(result_carolinensis[[1]])
-
-## fixCorPlot_vulgaris <- get_cor_nice_plot(One_result_carolinensis)
+fixCorPlot_vulgaris <- get_cor_nice_plot(result_vulgaris[[1]])
+## fixCorPlot_vulgaris <- get_cor_nice_plot(One_result_vulgaris)
 
 fixCorPlot_carolinensis <- get_cor_nice_plot(result_carolinensis[[1]])
 ## fixCorPlot_carolinensis <- get_cor_nice_plot(One_result_carolinensis)
